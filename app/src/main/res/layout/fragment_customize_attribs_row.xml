@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:background="?attr/activatedBackgroundIndicator" >
+
+    <TextView
+        android:id="@+id/rowtextView_attribute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Attribute"
+        android:textSize="24sp"
+        android:textColor="@color/colorListViewRowText"
+        android:clickable="false"
+        android:layout_gravity="left"
+        android:gravity="left"
+        android:layout_toLeftOf="@+id/rowcheckBox_visible"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true" />
+
+    <TextView
+        android:id="@+id/rowtextView_attributeShort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Attribute"
+        android:textSize="16sp"
+        android:textColor="@color/colorListViewRowText"
+        android:clickable="false"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:layout_marginLeft="50dp"
+        android:layout_toLeftOf="@+id/rowcheckBox_visible"
+        android:layout_below="@+id/rowtextView_attribute"
+        android:layout_alignParentLeft="true" />
+
+    <CheckBox
+        android:id="@+id/rowcheckBox_visible"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleX="1.50"
+        android:scaleY="1.50"
+        android:text=""
+        android:textSize="0sp"
+        android:textColor="@color/colorListViewRowText"
+        android:layout_marginLeft="5dp"
+        android:layout_alignParentRight="true" />
+
+</RelativeLayout>

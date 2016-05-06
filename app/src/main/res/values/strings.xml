@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">ZeoCompanion</string>
+    <string name="title_activity_headband">Headband Commander</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_history_detail">History Detail</string>
+    <string name="title_activity_sharing">Sharing</string>
+    <string name="title_activity_maint">Customize</string>
+    <string name="title_activity_outbox">Outbox</string>
+    <string name="title_activity_alerts">Alerts</string>
+
+    <string name="action_share">Share/Export</string>
+    <string name="action_headband">Headband Commander</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_maintAttribs">Customize Attributes</string>
+    <string name="action_maintDoings">Customize Event Doings</string>
+    <string name="action_backupDB">ZeoCompanion DB Backup</string>
+    <string name="action_restoreDB">ZeoCompanion DB Restore</string>
+    <string name="action_about">About</string>
+    <string name="action_delete_journal_entry">Delete Journal Entry</string>
+    <string name="action_factoryDefaults">Reload Factory Defaults</string>
+    <string name="action_email_outbox">View Email Outbox</string>
+    <string name="action_alerts">View Alerts</string>
+
+    <!-- Strings related to Settings -->
+    <string name="pref_header_direct_email">Email</string>
+    <string name="pref_header_journal">Journal</string>
+    <string name="pref_header_journal_amend">Journal Amending</string>
+    <string name="pref_header_profile">Profile</string>
+    <string name="pref_header_export">Export</string>
+    <string name="pref_header_database">Database</string>
+    <string name="pref_header_auto_email">Auto-Email</string>
+    <string name="pref_header_history">History</string>
+
+    <string name="pref_title_journal_enable">Enable Journal</string>
+    <string name="pref_summary_journal_enable">Enable the Sleep Journal feature for nightly use</string>
+    <string name="pref_title_journal_enable_before">Enable Before Sleep tab</string>
+    <string name="pref_title_journal_enable_inbed">Enable In-Bed tab</string>
+    <string name="pref_title_journal_enable_going">Enable Going To Sleep tab</string>
+    <string name="pref_title_journal_enable_during">Enable During Sleep tab</string>
+    <string name="pref_title_journal_enable_after">Enable After Sleep tab</string>
+    <string name="pref_title_export_attribute_useExportNameInColumnHeader">Attribute ExportNames as Column Headers</string>
+    <string name="pref_summary_export_attribute_useExportNameInColumnHeader">Use the entered ExportShortNames as Column headers instead of the original myZeo headers</string>
+    <string name="pref_title_export_value_exportIncludeValueText">Include Value text</string>
+    <string name="pref_summary_export_value_exportIncludeValueText">Include each Value\'s descriptive text with the Likert numeric value (only for pre-defined columns)</string>
+    <string name="pref_title_main_history_showTextView">History: Show Text Details</string>
+    <string name="pref_summary_main_history_showTextView">Show the five textual details on each row of the History Tab</string>
+    <string name="pref_title_database_replicate_zeo">Replicate Zeo Database</string>
+    <string name="pref_summary_database_replicate_zeo">Copies the Zeo App\'s database into the ZeoCompanion database</string>
+    <string name="pref_title_journal_notification_if_norecord">Notify Sound If Not Record</string>
+    <string name="pref_summary_journal_notification_if_norecord">Play the notification sound if the headband is off its charger but fails to enter into recording mode after 5 minutes</string>
+    <string name="pref_title_journal_notification_hb_clock_outsync">Headband clock out-of-sync</string>
+    <string name="pref_summary_journal_notification_hb_clock_outsync">Generate an alert if the Zeo Headband clock appears out-of-sync with the Android device clock</string>
+
+</resources>

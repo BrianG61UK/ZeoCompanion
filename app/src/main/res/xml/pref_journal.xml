@@ -1,0 +1,53 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:key="journal_enable"
+        android:title="@string/pref_title_journal_enable"
+        android:summary="@string/pref_summary_journal_enable"
+        android:defaultValue="true" />
+
+    <SwitchPreference
+        android:key="journal_notification_if_norecord"
+        android:dependency="journal_enable"
+        android:title="@string/pref_title_journal_notification_if_norecord"
+        android:summary="@string/pref_summary_journal_notification_if_norecord"
+        android:defaultValue="true" />
+
+    <SwitchPreference
+        android:key="journal_notification_hb_clock_outsync"
+        android:dependency="journal_enable"
+        android:title="@string/pref_title_journal_notification_hb_clock_outsync"
+        android:summary="@string/pref_summary_journal_notification_hb_clock_outsync"
+        android:defaultValue="true" />
+
+    <SwitchPreference
+        android:key="journal_enable_before"
+        android:dependency="journal_enable"
+        android:title="@string/pref_title_journal_enable_before"
+        android:defaultValue="true" />
+
+    <SwitchPreference
+        android:key="journal_enable_inbed"
+        android:dependency="journal_enable"
+        android:title="@string/pref_title_journal_enable_inbed"
+        android:defaultValue="true" />
+
+    <SwitchPreference
+        android:key="journal_enable_going"
+        android:dependency="journal_enable"
+        android:title="@string/pref_title_journal_enable_going"
+        android:defaultValue="true" />
+
+    <SwitchPreference
+        android:key="journal_enable_during"
+        android:dependency="journal_enable"
+        android:title="@string/pref_title_journal_enable_during"
+        android:defaultValue="true" />
+
+    <SwitchPreference
+        android:key="journal_enable_after"
+        android:dependency="journal_enable"
+        android:title="@string/pref_title_journal_enable_after"
+        android:defaultValue="true" />
+
+</PreferenceScreen>

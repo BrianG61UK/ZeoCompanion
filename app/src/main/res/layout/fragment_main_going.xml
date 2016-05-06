@@ -1,0 +1,39 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="opensource.zeocompanion.fragments.MainGoingFragment">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Press If\nStill Awake"
+        android:textSize="40sp"
+        android:textColor="#000000"
+        android:id="@+id/button_stillAwake"
+        android:background="@color/colorDataEntry"
+        android:clickable="true"
+        android:enabled="true" />
+
+    <ImageView
+        android:id="@+id/imageView_dimout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:alpha=".85"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/textView_dimout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Message"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:background="#FFFFFF"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible" />
+
+</RelativeLayout>

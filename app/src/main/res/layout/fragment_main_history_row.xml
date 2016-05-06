@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context="opensource.zeocompanion.fragments.MainHistoryFragment" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/rowTextViewDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="0dp"
+            android:padding="5dp"
+            android:textSize="14sp"
+            android:gravity="left"
+            android:textStyle="bold"
+            android:textColor="@color/colorWidgetText" />
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/rowTextViewZQ"
+            android:layout_width="wrap_content"
+            android:layout_height="55dp"
+            android:layout_below="@id/rowTextViewDate"
+            android:layout_marginTop="0dp"
+            android:padding="5dp"
+            android:textSize="18sp"
+            android:gravity="left"
+            android:textColor="#58fa58"
+            android:textStyle="bold" />
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/rowTextViewAddtl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@id/rowTextViewDate"
+            android:padding="5dp"
+            android:textSize="12sp"
+            android:textColor="@color/colorWidgetText"
+            android:gravity="left"/>
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/rowTextViewSum"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:paddingRight="5dp"
+            android:textSize="12sp"
+            android:gravity="right"
+            android:textColor="#33691e"
+            android:background="#FFFFFF"/>
+
+        <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/rowImageView_hypnogram"
+            android:layout_width="wrap_content"
+            android:layout_height="55dp"
+            android:layout_marginLeft="10dp"
+            android:padding="0dp"
+            android:layout_toRightOf="@id/rowTextViewZQ"
+            android:layout_toLeftOf="@id/rowTextViewSum"
+            android:layout_alignParentBottom="true" />
+
+    </RelativeLayout>
+</LinearLayout>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="autoExportSecurityValues">
+        <item>TLS</item>
+        <item>SSL</item>
+        <item>None</item>
+    </string-array>
+    <string-array name="mainFirstTabValues">
+        <item>Dashboard Tab</item>
+        <item>History Tab</item>
+        <item>1st Journal Tab</item>
+    </string-array>
+    <string-array name="HypnogramScalingValues">
+        <item>15 min</item>
+        <item>30 min</item>
+        <item>1 hour</item>
+        <item>1.5 hour</item>
+        <item>2 hours</item>
+        <item>2.5 hours</item>
+        <item>3 hours</item>
+        <item>3.5 hours</item>
+        <item>4 hours</item>
+        <item>4.5 hours</item>
+        <item>5 hours</item>
+        <item>5.5 hours</item>
+        <item>6 hours</item>
+    </string-array>
+</resources>

@@ -1,0 +1,44 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- These settings headers are only used on tablets. -->
+    <header
+        android:fragment="opensource.zeocompanion.activities.SettingsActivity$ProfilePreferenceFragment"
+        android:title="@string/pref_header_profile"
+        android:icon="@drawable/ic_account_circle_white_24dp" />
+
+    <header
+        android:fragment="opensource.zeocompanion.activities.SettingsActivity$HistoryPreferenceFragment"
+        android:title="@string/pref_header_history"
+        android:icon="@drawable/ic_library_books_white_24dp" />
+
+    <header
+        android:fragment="opensource.zeocompanion.activities.SettingsActivity$JournalPreferenceFragment"
+        android:title="@string/pref_header_journal"
+        android:icon="@drawable/ic_book_open_variant_white_24dp" />
+
+    <header
+        android:fragment="opensource.zeocompanion.activities.SettingsActivity$JournalAmendPreferenceFragment"
+        android:title="@string/pref_header_journal_amend"
+        android:icon="@drawable/ic_book_open_variant_white_24dp" />
+
+    <header
+        android:fragment="opensource.zeocompanion.activities.SettingsActivity$ExportPreferenceFragment"
+        android:title="@string/pref_header_export"
+        android:icon="@drawable/ic_cloud_upload_white_24dp" />
+
+    <header
+        android:fragment="opensource.zeocompanion.activities.SettingsActivity$DirectEmailPreferenceFragment"
+        android:title="@string/pref_header_direct_email"
+        android:icon="@drawable/ic_mail_white_24dp" />
+
+    <header
+        android:fragment="opensource.zeocompanion.activities.SettingsActivity$AutoEmailPreferenceFragment"
+        android:title="@string/pref_header_auto_email"
+        android:icon="@drawable/ic_sync_white_24dp" />
+
+    <header
+        android:fragment="opensource.zeocompanion.activities.SettingsActivity$DatabasePreferenceFragment"
+        android:title="@string/pref_header_database"
+        android:icon="@drawable/ic_database_white_24dp" />
+
+</preference-headers>

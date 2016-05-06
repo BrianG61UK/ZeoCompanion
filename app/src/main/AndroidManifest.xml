@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="opensource.zeocompanion">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="com.myzeo.permission.READ_SLEEP_RECORDS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <supports-screens
+        android:largeScreens="true"
+        android:normalScreens="false"
+        android:requiresSmallestWidthDp="600"
+        android:smallScreens="false"
+        android:xlargeScreens="true" />
+
+    <application
+        android:name=".ZeoCompanionApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:versionCode="17"
+        android:versionName="1.0.1">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.HeadbandActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_headband"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="opensource.zeocompanion.MainActivity" />
+        </activity>
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/PreferenceScreen">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="opensource.zeocompanion.MainActivity" />
+        </activity>
+        <activity
+            android:name=".activities.HistoryDetailActivity"
+            android:label="@string/title_activity_history_detail"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="opensource.zeocompanion.MainActivity" />
+        </activity>
+        <activity
+            android:name=".activities.SharingActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_sharing"
+            android:theme="@style/Theme.AppCompat.Transparent" />
+        <activity
+            android:name=".activities.CustomizeActivity"
+            android:label="@string/title_activity_maint"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="opensource.zeocompanion.MainActivity" />
+        </activity>
+        <activity
+            android:name=".activities.OutboxActivity"
+            android:label="@string/title_activity_outbox"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="opensource.zeocompanion.MainActivity" />
+        </activity>
+
+        <receiver
+            android:name=".ZeoCompanionApplication$AlarmReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="opensource.zeocompanion.intent.action.RTC_WAKEUP" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".activities.AlertsActivity"
+            android:label="@string/title_activity_alerts"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="opensource.zeocompanion.MainActivity" />
+        </activity>
+    </application>
+
+</manifest>

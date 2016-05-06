@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:key="export_attribute_useExportNameInColumnHeader"
+        android:title="@string/pref_title_export_attribute_useExportNameInColumnHeader"
+        android:summary="@string/pref_summary_export_attribute_useExportNameInColumnHeader"
+        android:defaultValue="true" />
+
+    <SwitchPreference
+        android:key="export_value_exportIncludeValueText"
+        android:title="@string/pref_title_export_value_exportIncludeValueText"
+        android:summary="@string/pref_summary_export_value_exportIncludeValueText"
+        android:defaultValue="true" />
+
+</PreferenceScreen>

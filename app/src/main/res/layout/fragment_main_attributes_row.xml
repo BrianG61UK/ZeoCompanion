@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    tools:context="opensource.zeocompanion.fragments.MainAttributesFragment">
+
+     <TextView
+         android:id="@+id/rowTextViewAttribute"
+         android:layout_width="60dp"
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:padding="5dp"
+         android:textSize="20sp"
+         android:textColor="#FFFFFF"
+         android:gravity="left"
+         android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/rowTextViewValue"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:padding="5dp"
+        android:textSize="20sp"
+        android:textColor="#FFFFFF"
+        android:gravity="left" />
+
+    <com.android.AttrSpinner
+        android:id="@+id/rowSpinnerValues"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:textSize="20sp"
+        android:gravity="left"
+        android:spinnerMode="dropdown" />
+
+</LinearLayout>

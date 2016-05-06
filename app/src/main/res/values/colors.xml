@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#000000</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#000000</color>
+    <color name="colorOffBlack1">#1c1c1c</color>
+    <color name="colorOffBlack2">#424242</color>
+    <color name="colorOffBlack3">#6e6e6e</color>
+    <color name="colorTransparent">#00000000</color>
+    <color name="colorDeepPurple">#3b0b24</color>
+
+    <color name="colorTabText">#FFFFFF</color>
+    <color name="colorTabTextSelected">#FFFF00</color>
+    <color name="colorTabIndicator">#FF0000</color>
+
+    <color name="colorDataEntry">#00BFFF</color>
+    <color name="colorDataEntryInsideText">#000000</color>
+
+    <color name="colorSpinnerDropdown">#6e6e6e</color>
+    <color name="colorListViewRowBackgroundLight">#6e6e6e</color>
+    <color name="colorListViewRowBackgroundSelected">#0000FF</color>
+    <color name="colorListViewRowBackgroundSectionHeader">#610b21</color>
+
+    <color name="colorListViewRowText">#FFFFFF</color>
+    <color name="colorWidgetText">#FFFFFF</color>
+
+    <color name="colorTableColHeaderBackground">#0b173b</color>
+    <color name="colorTableColHeaderText">#FFFFFF</color>
+</resources>

@@ -1,0 +1,120 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="@color/colorOffBlack3"
+    android:orientation="vertical"
+    tools:context="opensource.zeocompanion.fragments.CustomizeActivityAttribsEditDialogFragment">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/button_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel" />
+
+        <Button
+            android:id="@+id/button_change"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Change" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/textView_attribute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Attribute name:"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/editText_attribute"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="@color/colorDataEntry"
+            android:textSize="24sp"
+            android:textColor="@color/colorListViewRowText"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:imeActionId="5"
+            android:imeOptions="actionNext"
+            android:imeActionLabel="Next"
+            android:layout_marginLeft="5dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/textView_shortAttribute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Short export name:"
+            android:textSize="24sp"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:id="@+id/editText_shortAttribute"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorDataEntry"
+            android:layout_marginTop="10dp"
+            android:textSize="24sp"
+            android:textColor="@color/colorListViewRowText"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:imeActionId="5"
+            android:imeOptions="actionNext"
+            android:imeActionLabel="Next"
+            android:layout_marginLeft="5dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radioButton_before"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Before sleep stage"
+                android:textSize="24sp"
+                android:textColor="@color/colorDataEntry" />
+
+            <RadioButton
+                android:id="@+id/radioButton_after"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="After sleep stage"
+                android:textSize="24sp"
+                android:textColor="@color/colorDataEntry"  />
+
+        </RadioGroup>
+    </LinearLayout>
+
+</LinearLayout>

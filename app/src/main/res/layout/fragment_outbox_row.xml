@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/rowtextView_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF" />
+
+    <Button
+        android:id="@+id/rowbutton_change_toaddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ToAddr"
+        android:layout_gravity="right"
+        android:layout_toLeftOf="@+id/rowbutton_resend" />
+
+    <Button
+        android:id="@+id/rowbutton_resend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Resend"
+        android:layout_gravity="right"
+        android:layout_toLeftOf="@+id/rowbutton_delete" />
+
+    <Button
+        android:id="@+id/rowbutton_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        android:layout_gravity="right"
+        android:layout_alignParentRight="true"/>
+</RelativeLayout>

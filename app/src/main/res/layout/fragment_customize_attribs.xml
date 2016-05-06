@@ -1,0 +1,55 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context=".fragments.CustomizeActivityAttribsFragment">
+
+    <RelativeLayout
+        android:id="@+id/relative_main"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="left|top"
+        android:layout_marginLeft="5dp">
+
+        <LinearLayout
+            android:id="@+id/linear_1"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true" >
+
+            <Button
+                android:id="@+id/button_attrib_add"
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:text="+"
+                android:textSize="30sp" />
+
+            <Button
+                android:id="@+id/button_attrib_remove"
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textSize="30sp" />
+
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/listView_attributes"
+            android:layout_width="300dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="left|top"
+            android:choiceMode="singleChoice"
+            android:clickable="true"
+            android:layout_below="@id/linear_1" />
+
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/values_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="right|top" />
+
+</LinearLayout>

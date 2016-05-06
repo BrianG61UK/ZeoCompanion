@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+     <SwitchPreference
+         android:key="database_replicate_zeo"
+         android:title="@string/pref_title_database_replicate_zeo"
+         android:summary="@string/pref_summary_database_replicate_zeo"
+         android:defaultValue="false" />
+
+    <Preference
+        android:key="database_replicate_purge"
+        android:title="Purge"
+        android:summary="Purge all copied Zeo App database data from the ZeoCompanion database"
+        android:widgetLayout="@layout/button_preference_purge" />
+
+</PreferenceScreen>

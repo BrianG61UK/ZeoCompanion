@@ -1,0 +1,27 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:key="main_history_amended_showFirst"
+        android:title="History Tab Show Amended 1st"
+        android:summary="Amended record view is shown by default on the History Tab"
+        android:defaultValue="false" />
+
+    <SwitchPreference
+        android:key="history_detail_amended_showFirst"
+        android:title="History Detail Show Amended 1st"
+        android:summary="Amended record view is shown by default on the History Detail screen"
+        android:defaultValue="false" />
+
+    <SwitchPreference
+        android:key="export_amended_include"
+        android:title="Export Include Amended Section"
+        android:summary="Include additional Amended record columns in a CSV"
+        android:defaultValue="true" />
+
+    <SwitchPreference
+        android:key="export_amended_placeFirst"
+        android:title="Export Place Amended 1st"
+        android:summary="Amended record is placed in the primary export columns of a CSV"
+        android:defaultValue="false" />
+
+</PreferenceScreen>

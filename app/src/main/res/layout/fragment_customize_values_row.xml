@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:descendantFocusability="blocksDescendants"
+    android:background="?attr/activatedBackgroundIndicator_light" >
+
+    <TextView
+        android:id="@+id/rowtextView_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Value"
+        android:background="@color/colorDataEntry"
+        android:textSize="24sp"
+        android:textColor="@color/colorDataEntryInsideText"
+        android:clickable="true" />
+
+    <TextView
+        android:id="@+id/rowtextView_likert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="Likert"
+        android:background="@color/colorDataEntry"
+        android:textSize="24sp"
+        android:textColor="@color/colorDataEntryInsideText"
+        android:clickable="true" />
+
+</RelativeLayout>

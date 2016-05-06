@@ -1,0 +1,33 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="main_first_tab"
+        android:title="Default first tab to show"
+        android:summary="Select the Tab to show when the App is re-entered: %s"
+        android:defaultValue="History Tab"
+        android:entries="@array/mainFirstTabValues"
+        android:entryValues="@array/mainFirstTabValues" />
+
+    <SwitchPreference
+        android:key="main_history_showTextView"
+        android:title="@string/pref_title_main_history_showTextView"
+        android:summary="@string/pref_summary_main_history_showTextView"
+        android:defaultValue="true" />
+
+    <ListPreference
+        android:key="hypno_30sec_initial_window_landscape"
+        android:title="30-sec popup Hypnogram-landscape"
+        android:summary="The initial interval of time to scale the popup 30-second hypnogram while in landscape orientation: %s"
+        android:defaultValue="3 hours"
+        android:entries="@array/HypnogramScalingValues"
+        android:entryValues="@array/HypnogramScalingValues" />
+
+    <ListPreference
+        android:key="hypno_30sec_initial_window_portrait"
+        android:title="30-sec popup Hypnogram-portrait"
+        android:summary="The initial interval of time to scale the popup 30-second hypnogram while in portrait orientation: %s"
+        android:defaultValue="2 hours"
+        android:entries="@array/HypnogramScalingValues"
+        android:entryValues="@array/HypnogramScalingValues" />
+
+</PreferenceScreen>

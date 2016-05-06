@@ -1,0 +1,76 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#000000"
+    tools:context=".fragments.SharingActivityDialogFragment" >
+
+    <com.android.EvtSpinner
+        android:id="@+id/spinner_shareWhat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:popupBackground="@color/colorSpinnerDropdown"
+        android:focusableInTouchMode="true" />
+
+    <CheckBox
+        android:id="@+id/checkBox_exportAll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Export All; else Starting from date chosen below:"
+        android:textColor="@color/colorWidgetText"
+        android:layout_marginTop="21dp" />
+
+    <DatePicker
+        android:id="@+id/datePicker_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:datePickerMode="spinner"
+        android:longClickable="false" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp" >
+
+        <Button
+            android:id="@+id/button_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textColor="@color/colorWidgetText"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Button
+            android:id="@+id/button_leaveInFiles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Leave in files"
+            android:textColor="@color/colorWidgetText"
+            android:layout_toLeftOf="@+id/button_directEmail"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/button_directEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Direct Email"
+            android:textColor="@color/colorWidgetText"
+            android:layout_toLeftOf="@+id/button_share"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/button_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share"
+            android:textColor="@color/colorWidgetText"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+
+</LinearLayout>
+

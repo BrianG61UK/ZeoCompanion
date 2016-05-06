@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.android.EditTextPreferenceEx
+        android:key="profile_name"
+        android:title="Your First Name (optional)"
+        android:summary="Used to name your files and database: %s"
+        android:defaultValue="" />
+
+    <com.android.EditTextPreferenceEncrypt
+        android:key="profile_goal_hours_per_night"
+        android:title="Goal: Number of hours per night"
+        android:summary="Your goal for hours to sleep per night: %s"
+        android:defaultValue="8" />
+
+    <com.android.EditTextPreferenceEncrypt
+        android:key="profile_goal_percent_deep"
+        android:title="Goal: Percent Deep per night"
+        android:summary="Your goal for percentage of sleep in Deep aka SWS per night: %s%%"
+        android:defaultValue="15" />
+
+    <com.android.EditTextPreferenceEncrypt
+        android:key="profile_goal_percent_REM"
+        android:title="Goal: Percent REM per night"
+        android:summary="Your goal for percentage of sleep in REM per night: %s%%"
+        android:defaultValue="20" />
+
+</PreferenceScreen>

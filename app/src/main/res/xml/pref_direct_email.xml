@@ -1,0 +1,74 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:key="email_enable"
+        android:title="*Enable Direct Email"
+        android:summary="Enable the ability to directly email via your email account"
+        android:defaultValue="false" />
+
+    <com.android.EditTextPreferenceEncrypt
+        android:key="email_smtp_a"
+        android:dependency="email_enable"
+        android:title="*Email SMTP Server"
+        android:summary="Required: Your provider's email server IP address or domain name: %s" />
+
+    <com.android.EditTextPreferenceEx
+        android:key="email_smtp_port"
+        android:dependency="email_enable"
+        android:title="*Email SMTP Port"
+        android:summary="Required: Your provider's email server port number: %s" />
+
+    <ListPreference
+        android:key="email_smtp_security"
+        android:dependency="email_enable"
+        android:title="Email transport security"
+        android:summary="Optional: Select the transport security required by provider: %s"
+        android:defaultValue="None"
+        android:entries="@array/autoExportSecurityValues"
+        android:entryValues="@array/autoExportSecurityValues" />
+
+    <SwitchPreference
+        android:key="email_smtp_authNeeded"
+        android:dependency="email_enable"
+        android:title="*Authentication is required"
+        android:summary="Required: Is userid and password required to send emails through the server"
+        android:defaultValue="true" />
+
+    <com.android.EditTextPreferenceEncrypt
+        android:key="email_smtp_b"
+        android:dependency="email_smtp_authNeeded"
+        android:title="*Email SMTP UserID"
+        android:inputType="textPassword"
+        android:summary="Required if Auth: Your userid to the provider's email server: not shown" />
+
+    <com.android.EditTextPreferenceEncrypt
+        android:key="email_smtp_c"
+        android:dependency="email_smtp_authNeeded"
+        android:title="*Email SMTP Password"
+        android:inputType="textPassword"
+        android:summary="Required if Auth: Your password to the provider's email server: not shown" />
+
+    <com.android.EditTextPreferenceEncrypt
+        android:key="email_dest_a"
+        android:dependency="email_enable"
+        android:title="*To email address 1"
+        android:summary="Required: Destination email address 1: %s" />
+
+    <com.android.EditTextPreferenceEncrypt
+        android:key="email_dest_b"
+        android:dependency="email_enable"
+        android:title="To email address 2"
+        android:summary="Optional: Destination email address 2: %s" />
+
+    <com.android.EditTextPreferenceEncrypt
+        android:key="email_dest_c"
+        android:dependency="email_enable"
+        android:title="To email address 3"
+        android:summary="Optional: Destination email address 3: %s" />
+
+    <Preference
+        android:key="email_test"
+        android:title="Test now"
+        android:summary="The results of your test will popup in an alert dialog"
+        android:widgetLayout="@layout/button_preference_testnow" />
+
+</PreferenceScreen>

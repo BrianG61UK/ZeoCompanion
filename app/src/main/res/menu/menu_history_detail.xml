@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="opensource.zeocompanion.activities.HistoryDetailActivity">
+
+    <item
+        android:id="@+id/action_share"
+        android:orderInCategory="100"
+        android:title="@string/action_share"
+        android:icon="@drawable/ic_share_white_24dp"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_delete_journal_entry"
+        android:orderInCategory="100"
+        android:title="@string/action_delete_journal_entry"
+        android:icon="@drawable/ic_delete_forever_white_24dp"
+        app:showAsAction="ifRoom" />
+
+</menu>

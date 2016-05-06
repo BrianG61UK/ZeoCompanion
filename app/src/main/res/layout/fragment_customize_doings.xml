@@ -1,0 +1,45 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.CustomizeActivityDoingsFragment" >
+
+    <RelativeLayout
+        android:layout_width="600dp"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/linear_1"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_alignParentTop="true" >
+
+            <Button
+                android:id="@+id/button_add"
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:text="+"
+                android:textSize="30sp" />
+
+            <Button
+                android:id="@+id/button_remove"
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textSize="30sp" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/listView_doings"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:background="@color/colorOffBlack3"
+            android:choiceMode="singleChoice"
+            android:clickable="true"
+            android:layout_below="@id/linear_1"
+            android:layout_alignParentLeft="true"/>
+
+    </RelativeLayout>
+</RelativeLayout>

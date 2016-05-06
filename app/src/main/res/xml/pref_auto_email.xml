@@ -1,0 +1,29 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:key="email_auto_enable"
+        android:title="Enable Automatic Email"
+        android:summary="Enable automatic emailing of new sleep sessions via Direct Email"
+        android:defaultValue="false" />
+
+    <com.github.TimePreference
+        android:key="email_auto_send_time"
+        android:dependency="email_auto_enable"
+        android:title="Send at Time of Day"
+        android:summary="Time of Day to automatically send export: %s"
+        android:defaultValue="0" />
+
+    <SwitchPreference
+        android:key="email_auto_send_csv"
+        android:dependency="email_auto_enable"
+        android:title="Send CSV"
+        android:summary="Send a CSV file attachment"
+        android:defaultValue="true" />
+
+    <SwitchPreference
+        android:key="email_auto_send_image"
+        android:dependency="email_auto_enable"
+        android:title="Send Image"
+        android:summary="Send an image summary file attachment"
+        android:defaultValue="false" />
+
+</PreferenceScreen>

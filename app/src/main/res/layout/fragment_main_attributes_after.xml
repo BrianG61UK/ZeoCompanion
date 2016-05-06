@@ -1,0 +1,105 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="opensource.zeocompanion.fragments.MainAttributesFragment">
+
+    <Button
+        android:id="@+id/button_doneSleep"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Done Sleeping"
+        android:textSize="30sp"
+        android:textColor="#000000"
+        android:background="@color/colorDataEntry"
+        android:layout_gravity="left"
+        android:clickable="true"
+        android:enabled="true" />
+
+    <LinearLayout
+        android:id="@+id/column_headers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/button_doneSleep"
+        android:background="@color/colorTableColHeaderBackground" >
+
+        <TextView
+            android:id="@+id/column_header1"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:textSize="20sp"
+            android:textColor="@color/colorTableColHeaderText"
+            android:text="Attribute" />
+
+        <TextView
+            android:id="@+id/column_header2"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:textSize="20sp"
+            android:textColor="@color/colorTableColHeaderText"
+            android:text="Curr Value" />
+
+        <TextView
+            android:id="@+id/column_header3"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:padding="5dp"
+            android:textSize="20sp"
+            android:textColor="@color/colorTableColHeaderText"
+            android:text="Pick New Value" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/checkBox_showHidden"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Show hidden"
+            app:buttonTint="#FFFFFF"
+            android:layout_gravity="right" />
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/column_headers"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" >
+
+        <opensource.zeocompanion.views.ListLinearLayout
+            android:id="@+id/list_container_attributes"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+
+        </opensource.zeocompanion.views.ListLinearLayout>
+
+    </ScrollView>
+
+    <ImageView
+        android:id="@+id/imageView_dimout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:alpha=".85"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/textView_dimout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Message"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:background="#FFFFFF"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible" />
+
+</RelativeLayout>
