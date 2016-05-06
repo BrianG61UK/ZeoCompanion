@@ -1,0 +1,604 @@
+Zeo Headband Bluetooth Protocol for Zeo-Mobile
+Document dated: 5 May 2016
+
+
+========
+Contents
+========
+1. Bluetooth Protocol Stack
+2. Headband / Android Interaction Example
+3. Zeo HB BT Record Format
+
+
+
+=====================
+1. Bluetooth Protocol
+=====================
+
+	A. Stack
+
+		Length (bytes)	Protocol layer
+		--------------	--------------
+		1		HCI H4	
+		4		HCI ACL
+		4		L2CAP
+		3 or 4		RFCOMM header
+		variable	Zeo HB BT Record Format (see below)
+		1		RFCOMM trailer
+
+	B. Headband Connection
+		Android Device acts as a Bluetooth Server;
+		When connecting press the headband's button once after Server beings the Accept
+
+	C. UUIDs
+		Used By		UUID					Use
+		----		----					---
+		Android		56b32a76-479b-43d4-99ff-42d79823d0a5	Normal-service UUID used by the Android Bluetooth Server
+		Headband	56b32a76-479b-43d4-99ff-42d79823d0a6	Normal-service UUID used by the Headband
+		Headband	00000000-deca-fade-deca-deafdecacaff	Apple iPhone/iPad/iPod “Wireless iAP” RFCOMM Bluetooth Service
+
+
+=========================================
+2. Headband / Android Interaction Example
+=========================================
+	The following sample was taken during a 1h:27m test interval.  All the interaction messages are shown;
+	where there are gaps in time indeed no messages were transferred.
+
+	Timestamp(sec)	Interaction	Message and selected data
+	--------------	-----------	-------------------------
+	***Headband removed from power cord***
+
+	0000.000000	HB->Tablet	CHANGE_STATE_REPORT: EVENT_UNDOCKED
+	0000.497715	HB->Tablet	CHANGE_STATE_REPORT: EVENT_SLEEP_STATE_CHANGE
+	0000.498958	HB->Tablet	CHANGE_STATE_REPORT: EVENT_SLEEP_MODE_CHANGED
+	0000.500269	Tablet->HB	COMMAND_REQUEST: ZEO_COMMAND_QUERY_STATE
+	0001.033026	HB->Tablet	STATE_REPORT: -Active_Forced, -Bluetooth_Locked, -Demo_Mode, -Docked, -On_Head, -Requires_PIN, -Was_Charged, +Was_Queried, Volts=88, VolState=ZEO_VOLTAGE_ON_BATTERY, lastAlarmReason=0, LastAlgorMode=STARTING
+	0001.033761	Tablet->HB	COMMAND_REQUEST: ZEO_COMMAND_SLEEP_SEND, ZEO_COMMAND_QUERY_STATE, ZEO_COMMAND_SLEEP_SEND
+	0001.068229	HB->Tablet	SLEEP_REPORT: Start=0; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0
+	0001.221854	HB->Tablet	STATE_REPORT: -Active_Forced, -Bluetooth_Locked, -Demo_Mode, -Docked, -On_Head, -Requires_PIN, -Was_Charged, +Was_Queried, Volts=88, VolState=ZEO_VOLTAGE_ON_BATTERY, lastAlarmReason=0, LastAlgorMode=STARTING
+
+	***Headband placed upon head***
+
+	0022.942395	HB->Tablet	CHANGE_STATE_REPORT: EVENT_ON_HEAD
+
+	***Headband readjusted upon head***
+
+	0075.811812	HB->Tablet	CHANGE_STATE_REPORT: EVENT_OFF_HEAD
+	0081.796897	HB->Tablet	CHANGE_STATE_REPORT: EVENT_ON_HEAD
+
+	***Lay down and started reading a book***
+
+	0117.708602	HB->Tablet	SLEEP_REPORT: Start=1456878300; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0
+	0119.702430	HB->Tablet	CHANGE_STATE_REPORT: EVENT_SLEEP_NIGHT_STARTING
+	0119.703742	HB->Tablet	CHANGE_STATE_REPORT: EVENT_SLEEP_MODE_CHANGED
+	0119.705664	Tablet->HB	COMMAND_REQUEST: ZEO_COMMAND_QUERY_STATE
+	0120.237148	Tablet->HB	COMMAND_REQUEST: ZEO_COMMAND_SLEEP_SEND, ZEO_COMMAND_QUERY_STATE, ZEO_COMMAND_SLEEP_SEND
+	0120.237533	HB->Tablet	STATE_REPORT: -Active_Forced, -Bluetooth_Locked, -Demo_Mode, -Docked, +On_Head, -Requires_PIN, -Was_Charged, +Was_Queried, Volts=88, VolState=ZEO_VOLTAGE_ON_BATTERY, lastAlarmReason=0, LastAlgorMode=RECORDING
+	0120.271222	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0
+	0120.429971	HB->Tablet	STATE_REPORT: -Active_Forced, -Bluetooth_Locked, -Demo_Mode, -Docked, +On_Head, -Requires_PIN, -Was_Charged, +Was_Queried, Volts=88, VolState=ZEO_VOLTAGE_ON_BATTERY, lastAlarmReason=0, LastAlgorMode=RECORDING
+	0239.902637	HB->Tablet	CHANGE_STATE_REPORT: EVENT_OFF_HEAD
+	0248.880951	HB->Tablet	CHANGE_STATE_REPORT: EVENT_ON_HEAD
+	0417.959673	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+600; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
+	0717.714543	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+900; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
+	1017.969001	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+1200; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
+	1317.725659	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+1500; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
+	1617.980516	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+1800; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
+	1917.735924	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+2100; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0  
+	2217.989768	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+2400; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
+	2517.743551	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+2700; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
+	2817.996329	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+3000; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0  
+	3117.752738	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+3300; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
+	3159.647171	HB->Tablet	CHANGE_STATE_REPORT: EVENT_OFF_HEAD
+	3164.634827	HB->Tablet	CHANGE_STATE_REPORT: EVENT_ON_HEAD
+	3418.003659	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+3600; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
+
+	***Stopped reading book after about an hour and rested however never fell sleep***
+
+	3717.758354	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+3900; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
+	3837.959363	HB->Tablet	CHANGE_STATE_REPORT: EVENT_SLEEP_ONSET
+	4018.012509	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+4200; TimeIn(z;t={a,r,l,d})=107;26={0,7,19,0}; ZQ=2
+	4317.767796	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+4500; TimeIn(z;t={a,r,l,d})=107;36={0,7,28,1}; ZQ=3
+	4618.023460	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+4800; TimeIn(z;t={a,r,l,d})=107;46={0,7,38,1}; ZQ=4
+	4917.779788	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+5100; TimeIn(z;t={a,r,l,d})=107;56={0,7,48,1}; ZQ=4
+
+	***Got up and removed headband from head***
+
+	5205.067106	HB->Tablet	CHANGE_STATE_REPORT: EVENT_OFF_HEAD
+	5218.034517	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+5400; TimeIn(z;t={a,r,l,d})=107;65={0,7,56,2}; ZQ=5
+
+	***Plugged headband into power cord***
+
+	5227.011880	HB->Tablet	CHANGE_STATE_REPORT: EVENT_DOCKED
+	5227.510689	HB->Tablet	CHANGE_STATE_REPORT: EVENT_SLEEP_MODE_CHANGED
+	5227.513345	Tablet->HB	COMMAND_REQUEST: ZEO_COMMAND_QUERY_STATE
+	5228.045918	HB->Tablet	STATE_REPORT: -Active_Forced, -Bluetooth_Locked, -Demo_Mode, +Docked, -On_Head, -Requires_PIN, -Was_Charged, +Was_Queried, Volts=0, VolState=ZEO_VOLTAGE_CHARGING, lastAlarmReason=0, LastAlgorMode=ENDING
+	5228.046665	Tablet->HB	COMMAND_REQUEST: ZEO_COMMAND_SLEEP_SEND
+	5228.105762	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+5400; TimeIn(z;t={a,r,l,d})=107;65={0,7,56,2}; ZQ=5
+	$END
+
+	The Display Histogram (every 5 min) that resulted from this interaction was:
+		WWrWWWWWWWWWlllllW
+		Total: 0:32
+		Rem:   0:03
+		Light: 0:28
+       		Deep:  0:01
+
+
+==========================
+3. Zeo HB BT Record Format
+==========================
+	Minimum record length = 12 bytes
+	Length (bytes)	Format		FieldName		Notes
+	------		------		---------		-----
+	4		char		Identifier		always "HMSG"
+	2		uint 16 bit	CRC			crc-16 with constant 65535 as the seed; entire record except first 6 bytes
+	1		uint 8 bit	Protocol_Verion		always 2
+	1		enum 8 bit	Message_Type		(see below)
+	1		bool 8 bit	Ack_Request		Requests that the receiver (headband or device) respond with a HB_ACKNOWLEDGE 
+	1		uint 8 bit	Sequence_No		0 to 255 then wraps to zero; headband and device have separate seq#s
+	2		uint 16 bit	Data_Content_Len	length of the remaining record; may be 0
+	varible		variable	Data_Content		may be none
+
+
+	Message_type (each format broken out below)
+	-------------------------------------------
+	Dec	Hex	Message_type			Data_Content_Len
+	---	----	------------			----------------
+	0	0x00	NULL				0
+	1	0x01	COMMAND_REQUEST			4
+	2	0x02	HB_ACKNOWLEDGE			4
+	3	0x03	HB_STARTING			104
+	4	0x04	HB_STATE_CHANGE_REPORT		4
+	5	0x05	REPORT_ACCELEROMETER		72
+	6	0x06	REPORT_ERROR			4
+	7	0x07	SLEEP_REPORT			1144
+	8	0x08	SET_UP_BLUETOOTH		56
+	9	0x09	STATE_REPORT			16
+	10	0x0A	TIME_QUERY			8
+	11	0x0B	TIME_REPORT			12
+	12	0x0C	WAKEUP_NOTIFY			4
+	13	0x0D	WAKEUP_WINDOW			12
+	Note:	the following message types are for "Test mode", and their
+	Data_Content formats and length were not documented; however information 
+	about their likely contents are documented for selected messages in:
+		Zeo Data Decoder Library Documentation; August 4, 2010
+	150	0x96	TEST_FIRST
+	151	0x97	TEST_ACCEL_QUERY
+	152	0x98	TEST_ACCEL_REPORT
+	153	0x99	TEST_ACP_QUERY
+	154	0x9A	TEST_ACP_REPORT
+	155	0x9B	TEST_ANALOG
+	156	0x9C	TEST_BC6_PASSTHROUGH			(note this is the BlueCode6 Baseband chip)
+	157	0x9D	TEST_BT_ADDRESS_SET
+	158	0x9E	TEST_BUTTON_REPORT
+	159	0x9F	TEST_CAL_DATA_QUERY		4
+	160	0xA0	TEST_CAL_DATA_REPORT		28
+	161	0xA1	TEST_FREQ_TRIM_SET
+	162	0xA2	TEST_IMPEDANCE
+	163	0xA3	TEST_LED			4
+	164	0xA4	TEST_PCB_TEST_MODE
+	165	0xA5	TEST_POWER_OFF
+	166	0xA6	TEST_RESET
+	167	0xA7	TEST_SERIAL_ID_SET
+	168	0xA8	TEST_VOLTAGE_QUERY		4
+	169	0xA9	TEST_VOLTAGE_REPORT		4
+	170	0xAA	TEST_WAVEFORM
+	171	0xAB	TEST_WAVEFORM_REPLY
+	173	0xAC	DANGER					(DANGER - this will brick the headband)
+
+
+
+
+NULL (0 aka 0x00) Message_type
+==============================
+	Data_Content_Len = 0
+	Data_Content format:  none
+
+
+COMMAND_REQUEST (1 aka 0x01) Message_type
+=========================================
+	Flow: device -> Headband
+	Use: send a command to the headband; usually there will NOT be a HB_ACKNOWLEDGE
+	Data_Content_Len = 4
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		1		enum 8 bit	Command			see below
+		3		zero					padding; should be 0
+
+	Command						Confirmed Use
+	-------						-------------
+	0	0x00	ZEO_COMMAND_NONE
+	1	0x01	ZEO_COMMAND_BLUETOOTH_LOCK
+	2	0x02	ZEO_COMMAND_BLUETOOTH_UNLOCK
+	3	0x03	ZEO_COMMAND_DEMO_MODE_OFF
+	4	0x04	ZEO_COMMAND_DEMO_MODE_ON
+	5	0x05	ZEO_COMMAND_FACTORY_RESET
+	6	0x06	ZEO_COMMAND_QUERY_STATE		Instruct the headband to send a STATE_REPORT
+	7	0x07	ZEO_COMMAND_RESET_SENSOR_USE
+	8	0x08	ZEO_COMMAND_SLEEP_SEND		Instruct the headband to send a SLEEP_REPORT
+	9	0x09	ZEO_COMMAND_SLEEP_START		Force start the sleep monitoring process
+	10	0x0A	ZEO_COMMAND_SLEEP_STOP		Force stop the sleep monitoring process
+	100	0x64	ZEO_COMMAND_REBOOT
+
+
+HB_ACKNOWLEDGE (2 aka 0x02) Message_type
+========================================
+	Flow:  headband -> device
+	Use: acknowledge certain messages sent to the headband, unless the originating message has a non-zero Ack_Request
+	     certain error conditions may generate two ACKs
+	Data_Content_Len = 4
+	Data_Content format:
+		Length (bytes)	Format		FieldName	Notes
+		------		------		---------	-----
+		1		uint 8 bit	Prev_SeqNo	SeqNo of the device->headband message being acknowledged
+		1		uint 8 bit	MsgType		MessageType# being acknowledged
+		1		bool 8 bit	Error		1=NACK, 0=ACK
+		2		uint 8 bit	Flags		(unknown)
+								Unverified: 0x80 appears to mean "replying because of sent message's Ack_Request"
+								Unverified: 0x20 appears to mean "sent message's DataContentLen too short"
+
+
+HB_STARTING (3 aka 0x03) Message_type
+=====================================
+	Data_Content_Len = 104
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		20		char		Device_Name	
+		6		zero					padding; should be 0
+		2		int 16 bit	FlashCalibrationUpdates
+		2		int 16 bit	FlashSavedDataUpdates
+		2		int 16 bit	FlashSleepBackupUpdates
+		4		int 32 bit	Hardware_Version
+		12		char		Model
+		16		char		Serial_ID
+		4		int 32 bit	Software_Version
+		8		int 64 bit	Headband_Address
+		20		char		Last_Assert_Func
+		4		int 32 bit	Last_Assert_Line
+		1		enum 8 bit	Reset_Cause		see below
+		1		bool 8 bit	Query_Response
+		2		int 16 bit	Reset_Count
+
+	Reset_Cause
+	-----------
+	0	RESET_NONE
+	1	RESET_BROWNOUT
+	2	RESET_EXTERNAL
+	3	RESET_INTERNAL
+	4	RESET_LOCKUP
+	5	RESET_POWERUP
+	6	RESET_WATCHDOG
+	7	RESET_MAX
+
+
+
+HB_STATE_CHANGE_REPORT (4 aka 0x04) Message_type
+================================================
+	Flow:  headband -> device
+	Use: informs the Zeo App of state changes in the headband
+	Data_Content_Len = 4
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		1		enum 8 bit	Event			see below
+		3		zero					padding; should be 0
+
+	Event
+	-----
+	0	0x00	EVENT_NONE
+	1	0x01	EVENT_ALARM
+	2	0x02	EVENT_ALARM_WINDOW_ENDED
+	3	0x03	EVENT_ALARM_WINDOW_STARTED
+	4	0x04	EVENT_DOCKED
+	5	0x05	EVENT_LOW_BATTERY
+	6	0x06	EVENT_OFF_HEAD
+	7	0x07	EVENT_ON_HEAD
+	8	0x08	EVENT_SLEEP_MODE_CHANGED
+	9	0x09	EVENT_SLEEP_NIGHT_ENDED
+	10	0x0A	EVENT_SLEEP_NIGHT_RESTORED
+	11	0x0B	EVENT_SLEEP_NIGHT_SAVED
+	12	0x0C	EVENT_SLEEP_NIGHT_STARTING
+	13	0x0D	EVENT_SLEEP_ONSET
+	14	0x0E	EVENT_SLEEP_RATING_NEEDED
+	15	0x0F	EVENT_SLEEP_STATE_CHANGE
+	16	0x10	EVENT_TIME_JUMP
+	17	0x11	EVENT_UNDOCKED
+	18	0x12	EVENT_USER_SLEEP_LOCKED
+	19	0x13	EVENT_USER_SLEEP_OFF
+	20	0x14	EVENT_USER_SLEEP_ON
+	21	0x15	EVENT_USER_SLEEP_RESTART
+	22	0x16	EVENT_NUM
+
+
+REPORT_ERROR (6 aka 0x06) Message_type
+======================================
+	Flow:  headband -> device
+	Use: informs the Zeo App of errors in the Bluetooth pairing process
+	Data_Content_Len = 4
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		1		enum 8 bit	Error_code		see below
+		3		zero					padding; should be 0
+
+	Error_code
+	----------
+	0	ERROR_NONE
+	1	ERROR_INVALID_NAME
+	2	ERROR_INVALID_PIN
+	3	ERROR_PIN_NEEDED
+	4	ERROR_PIN_NOT_NEEDED
+	5	ERROR_RESET_NEEDED
+	6	ERROR_WRONG_CHANNEL
+	7	ERROR_MAX
+
+
+
+SLEEP_REPORT (7 aka 0x07) Message_type
+======================================
+	Flow:  headband -> device
+	Use: informs the Zeo App of the in-process or end results of the sleep monitoring process;
+	     the headband will send this every 5 minutes, or when queried, or when the headband's button is pressed
+	Data_Content_Len = 1144
+	Data_Content format:
+		Max
+		Length (bytes)	Array size	Format		FieldName			Notes
+		------		----------	--------	-----				-----
+		4				uint 32 bit	Display_Hypno_Startime		Seconds since 1/1/1970
+		2				uint 16 bit	Awakenings
+		2				uint 16 bit	Time_In_Deep			30-second intervals
+		2				uint 16 bit	Time_In_Light			30-second intervals
+		2				uint 16 bit	Time_In_REM			30-second intervals
+		2				uint 16 bit	Time_In_Awake			30-second intervals
+		2				uint 16 bit	Time_To_Z			30-second intervals
+		2				uint 16 bit	Total_Z				30-second intervals
+		2				uint 16 bit	ZQ_Score
+		1				bool 8 bit	Sleep_Valid
+		1				bool 8 bit	Valid_For_History
+		1				uint 8 bit	Voltage_Battery
+		1				bool 8 bit	User_Initiated
+		4				uint 32 bit	Accumulators_Deep_Sum
+		10		5		uint 16 bit	Accumulators_Stage_Counts
+		2				uint 16 bit	Accumulators_Times_Woken
+		2				uint 16 bit	Accumulators_Total_Count
+		2				uint 16 bit	Accumulators_Total_Sleep_Count
+		2				uint 16 bit	Count_To_Z
+		2				zero						padding; should be 0
+		4				uint 32 bit	End_Of_Night			Seconds since 1/1/1970
+		108				see below	Display_Hypnogram
+		1				bool 8 bit	Insufficient_Data		A night flagged with Insufficient Data is not stored in sleep history
+		3				zero						padding; should be 0
+		4				uint 32 bit	Insufficient_Data_Startime
+		2				uint 16 bit	Light_Changed_to_Deep
+		2				zero						padding; should be 0
+		4				uint 32 bit	Start_Of_Night			Seconds since 1/1/1970
+		1				bool 8 bit	Valid
+		3				zero						padding; should be 0
+		964				see below	Base_Hypnogram
+
+	Display_Hypnogram
+	-----------------
+		Note: each array entry (1 nibble) is a Sleep_Stage for a 5 minute interval
+		Maximum length = 108 bytes
+		Length (bytes)	Array size	Format		FieldName			Notes
+		------		----------	--------	-----				-----
+		4				uint 32 bit	Hypnogram_Length		is the Array_size
+		4				uint 32 bit	End_Of_Night_Count
+		variable	variable	enum 4 bit	Sleep_Stage			Max of 96 nibbles; see below
+		4				uint 32 bit	Start_Time			
+	
+	Base_Hypnogram
+	--------------
+		Note: each array entry (1 nibble) is a Sleep_Stage for a 30 second interval
+		Maximum length = 964 bytes
+		Length (bytes)	Array size	Format		FieldName			Notes
+		------		----------	--------	-----				-----
+		4				uint 32 bit	Hypnogram_Length		is the Array_size
+		variable	variable	enum 4 bit	Sleep_Stage			Max of 1920 nibbles; see below
+
+	Sleep_Stage
+	-----------
+	0	SLEEP_STAGE_UNDEFINED
+	1	SLEEP_STAGE_WAKE
+	2	SLEEP_STAGE_REM
+	3	SLEEP_STAGE_LIGHT
+	4	SLEEP_STAGE_DEEP
+	6	SLEEP_STAGE_LIGHT_TO_DEEP
+
+
+SET_UP_BLUETOOTH (8 aka 0x08) Message_type
+==========================================
+	Data_Content_Len = 56
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		8		uint 64 bit	Bluetooth_Address
+		16		binary		Device_Link_Key
+		20		char		Headband_Name
+		8		char		Headband_Pin
+		1		enum 8 bit	Setup_Type		see below
+		3		zero					padding; should be 0
+
+	Setup_Type
+	----------
+	0	SETUP_BD_DATA
+	1	SETUP_NEW_NAME
+	2	SETUP_NEW_PIN
+	3	SETUP_PIN
+
+
+
+STATE_REPORT (9 aka 0x09) Message_type
+======================================
+	Flow:  headband -> device
+	Use: informs the Zeo App of various settings and conditions of the headband;
+	     only sent upon device query or when headband's button is pressed
+	Data_Content_Len = 16
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		1		bool 8 bit	Active_Forced
+		1		bool 8 bit	Bluetooth_Locked
+		1		bool 8 bit	Demo_Mode
+		1		bool 8 bit	Docked
+		1		bool 8 bit	On_Head
+		1		bool 8 bit	Requires_PIN
+		1		bool 8 bit	Was_Charged
+		1		bool 8 bit	Was_Queried
+		1		uint 8 bit	Headband_Voltage	1/100s of a volt
+		1		enum 8 bit	Headband_Voltage_Status	see below
+		1		enum 8 bit	Last_Alarm_Reason	see below
+		1		enum 8 bit	Last_Algorith_Mode	see below
+		4		uint 32 bit	Sensor_Use_Seconds
+
+	Headband_Voltage_Status
+	-----------------------
+	0	ZEO_VOLTAGE_NONE
+	1	ZEO_VOLTAGE_CHARGED
+	2	ZEO_VOLTAGE_CHARGING
+	3	ZEO_VOLTAGE_ON_BATTERY
+	4	ZEO_VOLTAGE_TOO_LOW
+	5	ZEO_VOLTAGE_NMAX
+
+	Last_Alarm_Reason	
+	-----------------
+	0	NONE	0
+	1	RISING_OUT_OF_DEEP
+	2	FROM_NONREM_TO_REM
+	3	FROM_REM_TO_NONREM
+	4	ALREADY_AWAKE
+
+	Last_Algorith_Mode
+	-----------------
+	0	IDLE
+	1	STARTING
+	2	RECORDING
+	3	ENDING
+
+
+TIME_QUERY (10 aka 0x0A) Message_type
+=====================================
+	Flow:  device -> headband
+	Use: informs the headband of the device's current date/time, and requests a TIME_REPORT
+	Data_Content_Len = 8
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		4		uint 32 bit	Current_Time_sec	number of seconds since 1/1/1970
+		4		uint 32 bit	Current_Time_plus_ms	plus number of milliseconds
+TIME_REPORT (11 aka 0x0B) Message_type
+======================================
+	Flow:  headband -> device
+	Use: informs the Zeo App of the headband's current date/time
+	Data_Content_Len = 12
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		4		uint 32 bit	Current_Time_sec	number of seconds since 1/1/1970
+		4		uint 32 bit	Current_Time_plus_ms	plus number of milliseconds
+		1		bool 8 bit	Is_An_Offset
+		1		bool 8 bit	Offset_Is_Negative
+		1		uint 8 bit	Query_Sequence_No	SeqNo of the querying TIME_QUERY
+		1		zero					padding; should be 0
+
+
+WAKEUP_NOTIFY (12 aka 0x0C) Message_type
+========================================
+	Flow:  headband -> device
+	Use: informs the Zeo App that a wakeup alarm of the user should occur
+	Data_Content_Len = 4
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		1		enum 8 bit	Wake_reason		see below
+		3		zero					padding; should be 0
+
+	Wake_reason
+	-----------
+	0	WAKE_REM_TO_NONREM
+	1	WAKE_NONREM_TO_REM
+	2	WAKE_ON_WAKE
+	3	WAKE_RISING_OUT_OF_DEEP
+	8	WAKE_END_OF_WAKUP_INTERVAL
+
+
+WAKEUP_WINDOW (13 aka 0x0D) Message_type
+========================================
+	Flow:  device -> headband
+	Use: informs the headband of the wakeup window to be used in alarm mode
+	Data_Content_Len = 12
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		4		uint 32 bit	DateTime_Msg_Sent	number of seconds since 1/1/1970
+		4		uint 32 bit	Window_Begin_Time	number of seconds for a 24 hour period
+		4		uint 32 bit	Window_End_Time		number of seconds for a 24 hour period
+
+LED_ON (163 aka 0xA3) Message_type
+=================================
+	Flow: device -> headband
+	Use: When the headband is off its charger, determines whether the LED is on or off
+	Data_Content_Len = 4
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		1		bool 8 bit	LED_On
+		3		zero					padding; should be 0
+
+TEST_VOLTAGE_QUERY (168	aka 0xA8) Message_type
+==============================================
+	Flow: device -> headband
+	Use: requests a TEST_VOLTAGE_REPORT from the headband
+	Data_Content_Len = 4
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		4		zero					padding; should be 0
+
+TEST_VOLTAGE_REPORT (169 aka 0xA9) Message_type
+=========================================
+	Flow:  headband -> device
+	Use: voltage report that was requested by the device; DataContent meaning unknown
+	Data_Content_Len = 4
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		4		unknown		unknown			
+
+TEST_CAL_DATA_QUERY (159 aka 0x9F) Message_type
+===============================================
+	Flow: device -> headband
+	Use: requests a TEST_CAL_DATA_REPORT from the headband
+	Data_Content_Len = 4
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		4		zero					padding; should be 0
+
+TEST_CAL_DATA_REPORT (160 aka 0xA0) Message_type
+================================================
+	Flow:  headband -> device
+???can also be sent???
+	Use: calibration data report that was requested by the device; DataContent meaning unknown
+	Data_Content_Len = 28
+	Data_Content format:
+		Length (bytes)	Format		FieldName		Notes
+		------		------		---------		-----
+		28		unknown		unknown			
+
+REPORT_ACCELEROMETER (5 aka 0x05) Message_type
+==============================================
+	Note: the two arrays store information every 30 seconds for 5 total minutes, thus 10 entries
+	Data_Content_Len = 72
+	Data_Content format:
+		Total
+		Length (bytes)	Array size	SubArray size	Format		FieldName		Notes
+		------		----------	-------------	------		---------		-----
+		40		10				int 32 bit	Diff_Vec_Mag_Sums	
+		30		10		3		int 8 bit	Accelerometer X,Y,Z			
+		1						int 8 bit	Sample_Average
+		1						zero					padding; should be 0
+
+
