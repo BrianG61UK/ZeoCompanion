@@ -7,6 +7,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.net.Uri;
 import android.opengl.GLES10;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
@@ -530,6 +531,12 @@ public class MainActivity extends AppCompatActivity {
                 Utilities.showYesNoDialog(this, "Confirm", "Are you sure you want to reload the Factory Defaults for all Attribute, Value, and Event Doing tables?  You will lose any Customizations you may have made.",
                         "Continue", "Cancel", yesNoResponseListener3, 3, "", "");
                 return true;
+
+            case R.id.action_user_guide:
+                String url = "https://github.com/azmikemm/ZeoCompanion/raw/master/Resources/Users Guide/ForVersions/Users_Guide_" + BuildConfig.VERSION_NAME + ".pdf";
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(browserIntent);
+                break;
 
             case R.id.action_about:
                 // show an "About" alert dialog
