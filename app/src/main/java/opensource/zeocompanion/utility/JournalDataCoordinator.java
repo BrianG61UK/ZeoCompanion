@@ -28,6 +28,7 @@ import opensource.zeocompanion.zeo.ZeoAppHandler;
 public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
     // member variables
     private Context mContext = null;
+    private boolean alreadyRegisteredZAH = false;
     private int mDaypoint = 0;
     private Handler mMainActivityHandler = null;
     private CompanionSleepEpisodesRec mDaypoint_CSEs[] = { null, null, null};
@@ -185,8 +186,9 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
 
     // called by MainActivity only if the end-user has chosen to utilize the sleep journal
     public void registerWithZeoAppHandler() {
-        if (ZeoCompanionApplication.mZeoAppHandler != null) {
+        if (ZeoCompanionApplication.mZeoAppHandler != null && !alreadyRegisteredZAH) {
             ZeoCompanionApplication.mZeoAppHandler.setZAH_Listener(this);
+            alreadyRegisteredZAH = true;
         }
     }
 
@@ -267,7 +269,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
             case ZeoAppHandler.ZAH_ZEOAPP_STATE_RECORDING:
                 // capture the max and especially min battery voltages while recording
                 if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_active_SleepEpisode_ID != 0) {
-                    CompanionSleepEpisodesRec sRec = getTodayDaypointCSECreateIfShould();
+                    CompanionSleepEpisodesRec sRec = getTodayDaypointCSE();
                     if (sRec != null) {
                         if (sRec.rZeoHeadbandBatteryVoltage_High != ZeoCompanionApplication.mZeoAppHandler.mZeoHeadband_voltage_maxWhileRecording ||
                                 sRec.rZeoHeadbandBatteryVoltage_Low != ZeoCompanionApplication.mZeoAppHandler.mZeoHeadband_voltage_minWhileRecording) {
