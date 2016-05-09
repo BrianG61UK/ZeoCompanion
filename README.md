@@ -4,6 +4,10 @@ Companion for Zeo Android App for now defunct Zeo Pro Sleep Manager App and Head
 Please read the User Guide for detailed explanations on how to utilize the App, and how it interacts with the Zeo App.
 A current copy of the User Guide is provided with each Release, and is accessible online from the App's menu.
 
+If you prefer to obtain this App for free from either the Google Play App store, or the Amazon App store, you will receive automatic update notice as updates to this App get posted to those stores.
+- Google App Store:  https://play.google.com/store/apps/details?id=opensource.zeocompanion&hl=en
+- Amazon App Store:  http://www.amazon.com/TheCyberMike-ZeoCompanion/dp/B01FCESRTO
+
 This App:
 - is targeted for Tablet Android devices; the views are data-dense and require a larger screen to be utilized effectively.
 - is targeted for Android OS versions 4.0.3 (Ice Cream Sandwich) or later (API level 15 or higher).
