@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ZeoCompanion</string>
+    <string name="app_name">Companion for Zeo</string>
     <string name="title_activity_headband">Headband Commander</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_history_detail">History Detail</string>
