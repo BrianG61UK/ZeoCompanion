@@ -1,7 +1,8 @@
-# ZeoCompanion
-ZeoCompanion Android App for now defunct Zeo Pro Sleep Manager App and Headband.  This App is not useful unless you own a Zeo "Mobile" Headband and its Android App.
+# Companion for Zeo
+Companion for Zeo Android App for now defunct Zeo Pro Sleep Manager App and Headband.  This App is not useful unless you own a Zeo "Mobile" Headband and its Android App.
 
-Please read the User Guide for detailed explanations on how to utilize the App, and how it interacts with the Zeo App.  A current copy of the User Guide is bundled with each Release.
+Please read the User Guide for detailed explanations on how to utilize the App, and how it interacts with the Zeo App.
+A current copy of the User Guide is provided with each Release, and is accessible online from the App's menu.
 
 This App:
 - is targeted for Tablet Android devices; the views are data-dense and require a larger screen to be utilized effectively.
