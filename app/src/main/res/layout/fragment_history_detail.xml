@@ -1,0 +1,190 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:context=".fragments.HistoryDetailActivityFragment">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp" >
+
+            <TextView
+                android:id="@+id/TextView_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Date"
+                android:textSize="14sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/TextView_header_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:textSize="12sp"
+                android:layout_toRightOf="@id/TextView_date"
+                android:textColor="#FFFFFF" />
+
+            <android.support.v7.widget.AppCompatCheckBox
+                android:id="@+id/checkBox_showAmended"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show Amended"
+                app:buttonTint="#FFFFFF"
+                android:layout_alignParentRight="true" />
+
+        </RelativeLayout>
+
+        <opensource.zeocompanion.views.HypnogramView
+            android:id="@+id/graph_hypnogram_summary"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:padding="10dp" />
+
+        <TextView
+            android:id="@+id/textView_dailyResult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Today's results:"
+            android:textSize="14sp"
+            android:textColor="#FFFFFF"
+            android:layout_toLeftOf="@+id/graph_dailyResult"
+            android:layout_alignParentLeft="true" />
+
+        <opensource.zeocompanion.views.DailyResultGraphView
+            android:id="@+id/graph_dailyResult"
+            android:layout_width="400dp"
+            android:layout_height="200dp"
+            android:layout_marginLeft="5dp"
+            android:layout_alignParentRight="true" />
+
+
+        <TableLayout
+            android:id="@+id/tabla_cuerpo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp">
+
+            <TableRow
+                android:id="@+id/tableRow1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textView_header1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorOffBlack3"
+                    android:padding="5dp"
+                    android:text="Param" />
+
+                <TextView
+                    android:id="@+id/textView_header2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorOffBlack3"
+                    android:padding="5dp"
+                    android:text="Zeo" />
+
+                <TextView
+                    android:id="@+id/textView_header3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorOffBlack3"
+                    android:padding="5dp"
+                    android:text="Journal" />
+
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textView_content21"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="Param" />
+
+                <TextView
+                    android:id="@+id/textView_content22"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="Zeo" />
+
+                <TextView
+                    android:id="@+id/textView_content23"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="Journal" />
+
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textView_content31"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="" />
+
+                <TextView
+                    android:id="@+id/textView_content32"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="" />
+
+                <TextView
+                    android:id="@+id/textView_content33"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="" />
+
+            </TableRow>
+        </TableLayout>
+
+        <TextView
+            android:id="@+id/textView_hypnogram_detailed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="30 sec resolution Hypnogram; click to expand:"
+            android:textSize="14sp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:layout_marginTop="5dp" />
+
+        <opensource.zeocompanion.views.HypnogramView
+            android:id="@+id/graph_hypnogram_detailed"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:padding="5dp"
+            android:clickable="true" />
+
+        <TextView
+            android:id="@+id/textView_summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" />
+
+    </LinearLayout>
+</ScrollView>

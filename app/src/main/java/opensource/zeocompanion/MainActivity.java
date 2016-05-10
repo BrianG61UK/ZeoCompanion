@@ -848,25 +848,37 @@ public class MainActivity extends AppCompatActivity {
 
             switch (mPositionMap[position]) {
                 case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE:
+                    if (screenWidthDp < 600) {
+                        return "Pre Bed";
+                    }
                     return "Prior To Bed";
                 case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_INBED:
                     return "In Bed";
                 case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_GOING:
-                    if (screenWidthDp < 800) {
+                    if (screenWidthDp < 600) {
+                        return "Fall Z";
+                    } else if (screenWidthDp < 800) {
                         return "Going sleep";
                     } else if (screenWidthDp < 1000 && largeText && mActiveTabsCnt == TOTAL_TABS) {
                         return "Going sleep";
                     }
                     return "Going to sleep";
                 case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_DURING:
+                    if (screenWidthDp < 600) {
+                        return "In Z";
+                    }
                     return "While sleep";
                 case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_AFTER:
-                    if (screenWidthDp < 800) {
+                    if (screenWidthDp < 600) {
+                        return "End Z";
+                    } else if (screenWidthDp < 800) {
                         return "After sleep";
                     }
                     return "After sleep";
                 case TAB_SUMMARY:
-                    if (screenWidthDp < 800) {
+                    if (screenWidthDp < 600) {
+                        return "Sum Z";
+                    } else if (screenWidthDp < 800) {
                         return "Jour Summ";
                     } else if (screenWidthDp < 1000 && largeText && mActiveTabsCnt == TOTAL_TABS) {
                         return "Journal Summ";
