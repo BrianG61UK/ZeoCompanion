@@ -495,7 +495,7 @@ public class ZeoCompanionApplication extends Application {
             if (threadName != null) {
                 if (!threadName.isEmpty()) { wrt.write(" in Thread "+threadName + " "); }
             }
-            wrt.write("Appver " + BuildConfig.VERSION_NAME);
+            wrt.write("AppVerName " + BuildConfig.VERSION_NAME + " AppVerCode " + BuildConfig.VERSION_CODE);
             if (mDatabaseHandler != null) { wrt.write(" with DBver " +mDatabaseHandler.mVersion); }
             wrt.write("\n");
             if (method != null) {
