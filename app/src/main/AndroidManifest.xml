@@ -10,8 +10,8 @@
 
     <supports-screens
         android:largeScreens="true"
-        android:normalScreens="false"
-        android:requiresSmallestWidthDp="511"
+        android:normalScreens="true"
+        android:requiresSmallestWidthDp="500"
         android:smallScreens="false"
         android:xlargeScreens="true" />
 
@@ -22,7 +22,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:versionCode="19"
+        android:versionCode="20"
         android:versionName="1.0.1">
         <activity
             android:name=".MainActivity"
