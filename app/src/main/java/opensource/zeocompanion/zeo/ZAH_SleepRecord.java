@@ -45,7 +45,7 @@ public class ZAH_SleepRecord {
     public long rStartOfNightOrig = 0;
     public int rValid = 0;
     public int rValidForHistory = 0;
-    public double rVoltageBattery = 0.0;
+    public int rVoltageBattery = 0;
 
     public static final String UPLOADED_ON = "uploaded_on";
     public static final String CLOCK_OFFSET = "clock_offset";
@@ -209,8 +209,8 @@ public class ZAH_SleepRecord {
         if (i >= 0) { rValidForHistory = cursor.getInt(i); mHasExtended = true; }
         else { rValidForHistory = 0; }
         i = cursor.getColumnIndex(VOLTAGE_BATTERY);
-        if (i >= 0) { rVoltageBattery = ((double)cursor.getInt(i)) / 100.0; mHasExtended = true; }
-        else { rVoltageBattery = 0.0; }
+        if (i >= 0) { rVoltageBattery = cursor.getInt(i); mHasExtended = true; }
+        else { rVoltageBattery = 0; }
     }
 
     // destructor to assist garbage collection when held in large multi-nested ListArrays

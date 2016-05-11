@@ -184,8 +184,8 @@ public class CompanionDatabase extends SQLiteOpenHelper {
             // upgrade version 3 database to version 4
             // alter the sleep_journal_records table with new columns
             try {
-                db.execSQL("ALTER TABLE "+CompanionDatabaseContract.CompanionSleepEpisodes.TABLE_NAME_INTERNAL+" ADD COLUMN "+CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_VOLT_HIGH+" INTEGER");
-                db.execSQL("ALTER TABLE "+CompanionDatabaseContract.CompanionSleepEpisodes.TABLE_NAME_INTERNAL+" ADD COLUMN "+CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_VOLT_LOW+" INTEGER");
+                db.execSQL("ALTER TABLE "+CompanionDatabaseContract.CompanionSleepEpisodes.TABLE_NAME_INTERNAL+" ADD COLUMN "+CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_HIGH+" INTEGER");
+                db.execSQL("ALTER TABLE "+CompanionDatabaseContract.CompanionSleepEpisodes.TABLE_NAME_INTERNAL+" ADD COLUMN "+CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_LOW+" INTEGER");
                 db.execSQL("ALTER TABLE "+CompanionDatabaseContract.CompanionSleepEpisodes.TABLE_NAME_INTERNAL+" ADD COLUMN "+CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DISPLAY_HYPNOGRAM_STARTTIME+" INTEGER");
             } catch (Exception e) {
                 ZeoCompanionApplication.postToErrorLog(_CTAG + ".onUpgrade", e, "Upgrade to 4: failed adding new columns to sleep_journal_records table");    // automatically posts a Log.e

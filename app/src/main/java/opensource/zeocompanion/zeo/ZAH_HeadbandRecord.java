@@ -46,7 +46,7 @@ public class ZAH_HeadbandRecord {
     public boolean rRequires_pin = false;
     public long rSensor_used = 0;
     public String rSerial = null;
-    public double rVoltage = 0;
+    public int rVoltage = 0;
     public int rVoltage_status = 0;
     public boolean rWas_charged = false;
 
@@ -237,8 +237,8 @@ public class ZAH_HeadbandRecord {
         if (i >= 0) { rSensor_used = cursor.getLong(i); mHasExtended = true; }
         else { rSensor_used = 0L; }
         i = cursor.getColumnIndex(VOLTAGE);
-        if (i >= 0) { rVoltage = ((double)cursor.getInt(i)) / 100.0; mHasExtended = true; }
-        else { rVoltage = 0.0; }
+        if (i >= 0) { rVoltage = cursor.getInt(i); mHasExtended = true; }
+        else { rVoltage = 0; }
         i = cursor.getColumnIndex(VOLTAGE_STATUS);
         if (i >= 0) { rVoltage_status = cursor.getInt(i); mHasExtended = true; }
         else { rVoltage_status = 0; }

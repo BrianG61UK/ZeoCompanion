@@ -271,10 +271,10 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                 if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_active_SleepEpisode_ID != 0) {
                     CompanionSleepEpisodesRec sRec = getTodayDaypointCSE();
                     if (sRec != null) {
-                        if (sRec.rZeoHeadbandBatteryVoltage_High != ZeoCompanionApplication.mZeoAppHandler.mZeoHeadband_voltage_maxWhileRecording ||
-                                sRec.rZeoHeadbandBatteryVoltage_Low != ZeoCompanionApplication.mZeoAppHandler.mZeoHeadband_voltage_minWhileRecording) {
-                            sRec.rZeoHeadbandBatteryVoltage_High = ZeoCompanionApplication.mZeoAppHandler.mZeoHeadband_voltage_maxWhileRecording;
-                            sRec.rZeoHeadbandBatteryVoltage_Low = ZeoCompanionApplication.mZeoAppHandler.mZeoHeadband_voltage_minWhileRecording;
+                        if (sRec.rZeoHeadbandBattery_High != ZeoCompanionApplication.mZeoAppHandler.mZeoHeadband_battery_maxWhileRecording ||
+                                sRec.rZeoHeadbandBattery_Low != ZeoCompanionApplication.mZeoAppHandler.mZeoHeadband_battery_minWhileRecording) {
+                            sRec.rZeoHeadbandBattery_High = ZeoCompanionApplication.mZeoAppHandler.mZeoHeadband_battery_maxWhileRecording;
+                            sRec.rZeoHeadbandBattery_Low = ZeoCompanionApplication.mZeoAppHandler.mZeoHeadband_battery_minWhileRecording;
                             sRec.saveToDB();
                         }
                     }
@@ -747,11 +747,11 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
             }
             theArray.add(str);
 
-            if (theCSE.rZeoHeadbandBatteryVoltage_High > 0.0) {
-                theArray.add("Battery voltage Highest: "+theCSE.rZeoHeadbandBatteryVoltage_High);
+            if (theCSE.rZeoHeadbandBattery_High > 0) {
+                theArray.add("Battery Highest: "+theCSE.rZeoHeadbandBattery_High);
             }
-            if (theCSE.rZeoHeadbandBatteryVoltage_Low > 0.0) {
-                theArray.add("Battery voltage Lowest: "+theCSE.rZeoHeadbandBatteryVoltage_Low);
+            if (theCSE.rZeoHeadbandBattery_Low > 0) {
+                theArray.add("Battery Lowest: "+theCSE.rZeoHeadbandBattery_Low);
             }
 
             theCSE.unpackEventCSVstring();

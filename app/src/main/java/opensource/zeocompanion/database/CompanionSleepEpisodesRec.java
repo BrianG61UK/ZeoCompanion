@@ -25,8 +25,8 @@ public class CompanionSleepEpisodesRec {
     public long rZeoEventStarting_Timestamp = 0;
     public long rZeoEventRecording_Timestamp = 0;
     public long rZeoEventEnding_Timestamp = 0;
-    public double rZeoHeadbandBatteryVoltage_High = 0.0;
-    public double rZeoHeadbandBatteryVoltage_Low = 0.0;
+    public int rZeoHeadbandBattery_High = 0;
+    public int rZeoHeadbandBattery_Low = 0;
     //public int rCountAwakenings = 0;  // not used
     public long rEvent_GotIntoBed_Timestamp = 0;
     public long rEvent_TryingToSleep_Timestamp = 0;
@@ -66,8 +66,8 @@ public class CompanionSleepEpisodesRec {
         rZeoEventStarting_Timestamp = 0;
         rZeoEventRecording_Timestamp = 0;
         rZeoEventEnding_Timestamp = 0;
-        rZeoHeadbandBatteryVoltage_High = 0.0;
-        rZeoHeadbandBatteryVoltage_Low = 0.0;
+        rZeoHeadbandBattery_High = 0;
+        rZeoHeadbandBattery_Low = 0;
         //rCountAwakenings = 0; // not used
         rEvent_GotIntoBed_Timestamp = 0;
         rEvent_TryingToSleep_Timestamp = 0;
@@ -145,8 +145,8 @@ public class CompanionSleepEpisodesRec {
                 else { rAmend_Base_Hypnogram = cursor.getBlob(cursor.getColumnIndex(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_BASE_HYPNOGRAM)); }
             }
             if (ZeoCompanionApplication.mDatabaseHandler.mVersion >= 4) {
-                rZeoHeadbandBatteryVoltage_High = (double)cursor.getInt(cursor.getColumnIndex(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_VOLT_HIGH)) / 100.0;
-                rZeoHeadbandBatteryVoltage_Low = (double)cursor.getInt(cursor.getColumnIndex(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_VOLT_LOW)) / 100.0;
+                rZeoHeadbandBattery_High = cursor.getInt(cursor.getColumnIndex(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_HIGH));
+                rZeoHeadbandBattery_Low = cursor.getInt(cursor.getColumnIndex(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_LOW));
                 rAmend_Display_Hypnogram_Starttime = cursor.getLong(cursor.getColumnIndex(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DISPLAY_HYPNOGRAM_STARTTIME));
             }
         } catch (Exception e) {
@@ -232,8 +232,8 @@ public class CompanionSleepEpisodesRec {
                 else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_BASE_HYPNOGRAM, rAmend_Base_Hypnogram); }
             }
             if (ZeoCompanionApplication.mDatabaseHandler.mVersion >= 4) {
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_VOLT_HIGH, (int)(rZeoHeadbandBatteryVoltage_High * 100.0));
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_VOLT_LOW, (int)(rZeoHeadbandBatteryVoltage_Low * 100.0));
+                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_HIGH, rZeoHeadbandBattery_High);
+                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_LOW, rZeoHeadbandBattery_Low);
                 values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DISPLAY_HYPNOGRAM_STARTTIME, rAmend_Display_Hypnogram_Starttime);
             }
 

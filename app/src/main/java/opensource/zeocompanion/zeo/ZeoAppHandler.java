@@ -28,9 +28,9 @@ public class ZeoAppHandler {
     public int mZeoApp_State = ZAH_ZEOAPP_STATE_UNKNOWN;
     public long mZeoApp_State_timestamp = 0L;
     public long mZeoApp_active_SleepEpisode_ID = 0L;
-    public double mZeoHeadband_voltage_lastProbed = 0.0;
-    public double mZeoHeadband_voltage_maxWhileRecording = 0.0;
-    public double mZeoHeadband_voltage_minWhileRecording = 0.0;
+    public int mZeoHeadband_battery_lastProbed = 0;
+    public int mZeoHeadband_battery_maxWhileRecording = 0;
+    public int mZeoHeadband_battery_minWhileRecording = 0;
     private Context mContext = null;
     private boolean mContinueZeoAppProbing = false;
     private boolean mAtNonJournal = false;
@@ -285,7 +285,7 @@ public class ZeoAppHandler {
         // first obtain the active headband record (it must be paired and connected); that record contains the ZeoApp's current state;
         // there may be more than one Zeo Headband record if the App has been paired with other headbands in the past
         int mZeoApp_State = ZAH_ZEOAPP_STATE_UNKNOWN;
-        mZeoHeadband_voltage_lastProbed = 0.0;
+        mZeoHeadband_battery_lastProbed = 0;
         mZeoAppProbeDelayMS = DEFAULT_ZEOAPP_PROBE_DELAY_MS;
 
         final Cursor cursor1 = mContext.getContentResolver().query(
@@ -301,7 +301,7 @@ public class ZeoAppHandler {
                     ZAH_HeadbandRecord rec = new ZAH_HeadbandRecord(cursor1);
                     if (rec.rBonded_to_device && rec.rConnected_to_device) {
                         mZeoApp_State = rec.rAlgorithm_mode;
-                        mZeoHeadband_voltage_lastProbed = rec.rVoltage;
+                        mZeoHeadband_battery_lastProbed = rec.rVoltage;
                         break;
                     }
                 } while (cursor1.moveToNext());
@@ -342,7 +342,7 @@ public class ZeoAppHandler {
         //Log.d(_CTAG+".probeAppState", "-->Probing the ZeoApp");
         int priorState = mZeoApp_State; // keep for Log.d
         int newState = ZAH_ZEOAPP_STATE_UNKNOWN;
-        mZeoHeadband_voltage_lastProbed = 0.0;
+        mZeoHeadband_battery_lastProbed = 0;
 
         // first obtain the active headband record (it must be paired and connected); that record contains the ZeoApp's current state;
         // there may be more than one Zeo Headband record if the App has been paired with other headbands in the past
@@ -361,7 +361,7 @@ public class ZeoAppHandler {
                     if (hRec.rBonded_to_device && hRec.rConnected_to_device) {
                         newState = hRec.rAlgorithm_mode;
                         if (hRec.rDocked) { newState = ZAH_ZEOAPP_STATE_IDLE; }  // sometimes the headband gets stuck on Ending state even when its on the charger
-                        mZeoHeadband_voltage_lastProbed = hRec.rVoltage;
+                        mZeoHeadband_battery_lastProbed = hRec.rVoltage;
                         break;
                     }
                     hRec = null;  // help with garbage collection
@@ -381,8 +381,8 @@ public class ZeoAppHandler {
 
             if (newState == ZAH_ZEOAPP_STATE_IDLE) {
                 // just changed to idle, so reset the observed headband voltage values
-                mZeoHeadband_voltage_maxWhileRecording = 0.0;
-                mZeoHeadband_voltage_minWhileRecording = 0.0;
+                mZeoHeadband_battery_maxWhileRecording = 0;
+                mZeoHeadband_battery_minWhileRecording = 0;
             }
 
             // change to the new state
@@ -431,7 +431,7 @@ public class ZeoAppHandler {
                                     theReturn = true;
                                     mZeoApp_active_SleepEpisode_ID = zRec.rSleepEpisodeID;
 
-                                    if (mZeoHeadband_voltage_lastProbed == 0.0) { mZeoHeadband_voltage_lastProbed = zRec.rVoltageBattery;  }
+                                    if (mZeoHeadband_battery_lastProbed == 0) { mZeoHeadband_battery_lastProbed = zRec.rVoltageBattery;  }
 
                                     if (mZeoApp_State == ZAH_ZEOAPP_STATE_RECORDING) {
                                         long delta = zRec.rStartOfNight - mZeoApp_State_timestamp;
@@ -456,7 +456,7 @@ public class ZeoAppHandler {
                             } else {
                                 // sleep record is known; process the latest version of it
                                 mTimestampLastPollKnownSleepRecordID = ts;
-                                if (mZeoHeadband_voltage_lastProbed == 0.0) { mZeoHeadband_voltage_lastProbed = zRec.rVoltageBattery;  }
+                                if (mZeoHeadband_battery_lastProbed == 0) { mZeoHeadband_battery_lastProbed = zRec.rVoltageBattery;  }
                                 // now check for gaps in sleep record during recording
                                 // TODO V1.1 Look for suddenly missing recording
                                 break;
@@ -469,10 +469,10 @@ public class ZeoAppHandler {
         }
 
         // preserve the maximum and minimum non-zero headband voltage observed
-        if (mZeoApp_State > ZAH_ZEOAPP_STATE_IDLE && mZeoHeadband_voltage_lastProbed > 0.0) {
-            if (mZeoHeadband_voltage_lastProbed > mZeoHeadband_voltage_maxWhileRecording) { mZeoHeadband_voltage_maxWhileRecording = mZeoHeadband_voltage_lastProbed; }
-            if (mZeoHeadband_voltage_minWhileRecording == 0.0) { mZeoHeadband_voltage_minWhileRecording = mZeoHeadband_voltage_lastProbed; }
-            else if (mZeoHeadband_voltage_lastProbed < mZeoHeadband_voltage_minWhileRecording) { mZeoHeadband_voltage_minWhileRecording = mZeoHeadband_voltage_lastProbed; }
+        if (mZeoApp_State > ZAH_ZEOAPP_STATE_IDLE && mZeoHeadband_battery_lastProbed > 0) {
+            if (mZeoHeadband_battery_lastProbed > mZeoHeadband_battery_maxWhileRecording) { mZeoHeadband_battery_maxWhileRecording = mZeoHeadband_battery_lastProbed; }
+            if (mZeoHeadband_battery_minWhileRecording == 0) { mZeoHeadband_battery_minWhileRecording = mZeoHeadband_battery_lastProbed; }
+            else if (mZeoHeadband_battery_lastProbed < mZeoHeadband_battery_minWhileRecording) { mZeoHeadband_battery_minWhileRecording = mZeoHeadband_battery_lastProbed; }
         }
 
         if (theReturn) {

@@ -362,7 +362,7 @@ public class HistoryDetailActivityFragment extends Fragment {
             // now compose and prepare the Zeo vs Amended table
             tvh1.setVisibility(View.VISIBLE);
             tvc21.setVisibility(View.VISIBLE);
-            tvc21.setText("From/To:\nZQ:\n#Awakens:\nTotal Duration:\nRecording Duration:\n  Still awake until:\n  Awake (%total):\n  Total sleep (%goal):\n    REM (%total): \n    Light (total):\n    Deep (%total):\nHB Battery (v):");
+            tvc21.setText("From/To:\nZQ:\n#Awakens:\nTotal Duration:\nRecording Duration:\n  Still awake until:\n  Awake (%total):\n  Total sleep (%goal):\n    REM (%total): \n    Light (total):\n    Deep (%total):\nHB Battery:");
             if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord != null) {
                 tvh2.setVisibility(View.VISIBLE);
                 tvc22.setVisibility(View.VISIBLE);
@@ -391,10 +391,10 @@ public class HistoryDetailActivityFragment extends Fragment {
                 str = str +     "    " + Utilities.showTimeInterval(ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Light_min, true) + " (" + String.format("%.1f", pctLight) + "%)\n";
                 str = str +     "    " + Utilities.showTimeInterval(ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Deep_min, true) + " (" + String.format("%.1f", pctDeep) + "%)\n";
                 if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.mHasExtended) {
-                    if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rVoltageBattery > 0.0) {
-                        if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rVoltageBattery > 1.5) { str = str + "Start: "; }
+                    if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rVoltageBattery > 0) {
+                        if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rVoltageBattery > 150) { str = str + "Start: "; }
                         else { str = str + "End: "; }
-                        str = str + String.format("%.2f", ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rVoltageBattery);
+                        str = str + ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rVoltageBattery;
                     }
                 }
                 tvc22.setText(str);
@@ -465,11 +465,11 @@ public class HistoryDetailActivityFragment extends Fragment {
                     str = str +     "    " + Utilities.showTimeInterval(ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Light_min, true) + " (" + String.format("%.1f", pctLight) + "%)\n";
                     str = str +     "    " + Utilities.showTimeInterval(ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Deep_min, true) + " (" + String.format("%.1f", pctDeep) + "%)\n";
                 } else { str = str + "\n\n\n\n\n"; }
-                if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rZeoHeadbandBatteryVoltage_High > 0.0) {
-                    str = str + String.format("%.2f", ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rZeoHeadbandBatteryVoltage_High);
+                if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rZeoHeadbandBattery_High > 0) {
+                    str = str + ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rZeoHeadbandBattery_High;
                 }
-                if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rZeoHeadbandBatteryVoltage_Low > 0.0) {
-                    str = str + " to " + String.format("%.2f", ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rZeoHeadbandBatteryVoltage_Low);
+                if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rZeoHeadbandBattery_Low > 0) {
+                    str = str + " to " + ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rZeoHeadbandBattery_Low;
                 }
                 tvc23.setText(str);
 

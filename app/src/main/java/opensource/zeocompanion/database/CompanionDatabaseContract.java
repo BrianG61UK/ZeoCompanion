@@ -75,8 +75,8 @@ public final class CompanionDatabaseContract {
         public static final String COLUMN_ZEO_SLEEP_EPISODE_ID = "zeo_sleep_episode_id";    // long integer
         public static final String COLUMN_EVENT_ZEO_STARTING_TIMESTAMP = "evt_zeoStart_timestamp";  // long integer
         public static final String COLUMN_EVENT_ZEO_RECORDING_TIMESTAMP = "evt_zeoRecord_timestamp";  // long integer
-        public static final String COLUMN_HEADBAND_BATTERY_VOLT_HIGH = "zeo_headband_battery_high";  // integer
-        public static final String COLUMN_HEADBAND_BATTERY_VOLT_LOW = "zeo_headband_battery_low";  // long integer
+        public static final String COLUMN_HEADBAND_BATTERY_HIGH = "zeo_headband_battery_high";  // integer
+        public static final String COLUMN_HEADBAND_BATTERY_LOW = "zeo_headband_battery_low";  // long integer
         public static final String COLUMN_EVENT_ZEO_ENDING_TIMESTAMP = "evt_zeoEnd_timestamp";  // long integer
         public static final String COLUMN_CNT_AWAKENINGS = "cnt_awakenings";  // integer
         public static final String COLUMN_EVENT_GOT_INTO_BED_TIMESTAMP = "evt_GIB_timestamp";  // long integer
@@ -118,8 +118,8 @@ public final class CompanionDatabaseContract {
                 COLUMN_EVENT_ZEO_STARTING_TIMESTAMP + " INTEGER, " +
                 COLUMN_EVENT_ZEO_RECORDING_TIMESTAMP + " INTEGER, " +
                 COLUMN_EVENT_ZEO_ENDING_TIMESTAMP +  " INTEGER, " +
-                COLUMN_HEADBAND_BATTERY_VOLT_HIGH + " INTEGER, " +
-                COLUMN_HEADBAND_BATTERY_VOLT_LOW + " INTEGER, " +
+                COLUMN_HEADBAND_BATTERY_HIGH + " INTEGER, " +
+                COLUMN_HEADBAND_BATTERY_LOW + " INTEGER, " +
                 COLUMN_CNT_AWAKENINGS + " INTEGER, " +
                 COLUMN_EVENT_GOT_INTO_BED_TIMESTAMP + " INTEGER, " +
                 COLUMN_EVENT_TRYING_TO_SLEEP_TIMESTAMP + " INTEGER, " +
@@ -154,8 +154,8 @@ public final class CompanionDatabaseContract {
                 COLUMN_EVENT_ZEO_STARTING_TIMESTAMP,
                 COLUMN_EVENT_ZEO_RECORDING_TIMESTAMP,
                 COLUMN_EVENT_ZEO_ENDING_TIMESTAMP,
-                COLUMN_HEADBAND_BATTERY_VOLT_HIGH,
-                COLUMN_HEADBAND_BATTERY_VOLT_LOW,
+                COLUMN_HEADBAND_BATTERY_HIGH,
+                COLUMN_HEADBAND_BATTERY_LOW,
                 COLUMN_CNT_AWAKENINGS,
                 COLUMN_EVENT_GOT_INTO_BED_TIMESTAMP,
                 COLUMN_EVENT_TRYING_TO_SLEEP_TIMESTAMP,

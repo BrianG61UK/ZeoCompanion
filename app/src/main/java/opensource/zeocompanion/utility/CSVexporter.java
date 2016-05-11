@@ -468,18 +468,18 @@ public class CSVexporter {
         str = str + "unknown,ZC-V"+ BuildConfig.VERSION_NAME;
 
         // Extended Sleep Record section
-        double battLow = 0.0;
-        double battHigh = 0.0;
+        int battLow = 0;
+        int battHigh = 0;
         if (iRec.theCSErecord != null) {
-            if (iRec.theCSErecord.rZeoHeadbandBatteryVoltage_Low > 0.0) { battLow = iRec.theCSErecord.rZeoHeadbandBatteryVoltage_Low; }
-            if (iRec.theCSErecord.rZeoHeadbandBatteryVoltage_High > 0.0) { battHigh = iRec.theCSErecord.rZeoHeadbandBatteryVoltage_High; }
+            if (iRec.theCSErecord.rZeoHeadbandBattery_Low > 0) { battLow = iRec.theCSErecord.rZeoHeadbandBattery_Low; }
+            if (iRec.theCSErecord.rZeoHeadbandBattery_High > 0) { battHigh = iRec.theCSErecord.rZeoHeadbandBattery_High; }
         }
         if (iRec.theZAH_SleepRecord != null) {
-            if (iRec.theZAH_SleepRecord.rVoltageBattery > 0.0) {
-                if (iRec.theZAH_SleepRecord.rVoltageBattery > 1.5) {
-                    if (battHigh == 0.0) { battHigh = iRec.theZAH_SleepRecord.rVoltageBattery; }
+            if (iRec.theZAH_SleepRecord.rVoltageBattery > 0) {
+                if (iRec.theZAH_SleepRecord.rVoltageBattery > 150) {
+                    if (battHigh == 0) { battHigh = iRec.theZAH_SleepRecord.rVoltageBattery; }
                 } else {
-                    if (battLow == 0.0) { battLow = iRec.theZAH_SleepRecord.rVoltageBattery; }
+                    if (battLow == 0) { battLow = iRec.theZAH_SleepRecord.rVoltageBattery; }
                 }
             }
         }
@@ -491,7 +491,7 @@ public class CSVexporter {
             str = str + mSDF2s.format(new Date(iRec.theZAH_SleepRecord.rStartOfNightOrig)) + ",";
         } else { str = str + ","; }
 
-        str = str + String.format("%.2f", battHigh) + "," + String.format("%.2f", battLow) + ",";
+        str = str + battHigh + "," + battLow + ",";
         str = str + ",,";   // no impedance is available at this time
 
         if (isAmended && mAmendedPlaceFirst) { str = str + buildAmendedSleepExtended(iRec, asEpochs); }
