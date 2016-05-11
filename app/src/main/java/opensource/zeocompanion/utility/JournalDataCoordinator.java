@@ -49,16 +49,26 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
     // the ZeoAppHandler will have been resynchronized before this handler
     public void resynchronize() {
         // first toss out anything that is now too old
+        //Log.d(_CTAG+".resynchronize","STARTING");
         long timeNow = System.currentTimeMillis();
         long time24HoursAgo = timeNow - 86400000L;
         if (mDaypoint_CSEs[0] != null) {
-            if (mDaypoint_CSEs[0].rStartOfRecord_Timestamp <= time24HoursAgo) { mDaypoint_CSEs[0].destroy(); mDaypoint_CSEs[0] = null; }
+            if (mDaypoint_CSEs[0].rStartOfRecord_Timestamp <= time24HoursAgo) {
+                mDaypoint_CSEs[0].destroy(); mDaypoint_CSEs[0] = null;
+                //Log.d(_CTAG+".resynchronize","Yesterday CSE too old; removing from daypoint");
+            }
         }
         if (mDaypoint_CSEs[1] != null) {
-            if (mDaypoint_CSEs[1].rStartOfRecord_Timestamp <= time24HoursAgo) { mDaypoint_CSEs[1].destroy(); mDaypoint_CSEs[1] = null; }
+            if (mDaypoint_CSEs[1].rStartOfRecord_Timestamp <= time24HoursAgo) {
+                mDaypoint_CSEs[1].destroy(); mDaypoint_CSEs[1] = null;
+                //Log.d(_CTAG+".resynchronize","Today CSE too old; removing from daypoint");
+            }
         }
         if (mDaypoint_CSEs[2] != null) {
-            if (mDaypoint_CSEs[2].rStartOfRecord_Timestamp <= time24HoursAgo) { mDaypoint_CSEs[2].destroy(); mDaypoint_CSEs[2] = null; }
+            if (mDaypoint_CSEs[2].rStartOfRecord_Timestamp <= time24HoursAgo) {
+                mDaypoint_CSEs[2].destroy(); mDaypoint_CSEs[2] = null;
+                //Log.d(_CTAG+".resynchronize","Tomorrow CSE too old; removing from daypoint");
+            }
         }
 
         // now if we've got nothing at all in the Daypoints, attempt a recovery from the database;
@@ -71,11 +81,13 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
-                        priorDbRecs.add(new CompanionSleepEpisodesRec(cursor));
+                        CompanionSleepEpisodesRec sRec = new CompanionSleepEpisodesRec(cursor);
+                        if (!sRec.isUnlinkedAndDead()) { priorDbRecs.add(sRec); }
                     } while (cursor.moveToNext());
                 }
                 cursor.close();
             }
+            Log.d(_CTAG+".resynchronize","Located "+priorDbRecs.size()+" potential CSEs");
 
             // process the results of the recent records query
             if (priorDbRecs.size() > 0) {
@@ -93,33 +105,49 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                         // this record started in-the-future
                         if (sRec.rZeoSleepEpisode_ID != 0) {
                             mDaypoint_CSEs[1] = sRec;   // it is ZeoApp active, so it has to become the current Daypoint
+                            Log.d(_CTAG+".resynchronize","Slotted future CSE ID "+sRec.rID+" into Today daypoint");
                         } else if (sRec.doEventsExist()) {
                             mDaypoint_CSEs[1] = sRec;   // Journal events are present, so it has to become the current Daypoint
+                            Log.d(_CTAG+".resynchronize","Slotted future CSE ID "+sRec.rID+" into Today daypoint");
                         } else {
                             mDaypoint_CSEs[2] = sRec;   // it may have some pre-content, but its not yet active, so put this in the Tomorrow Daypoint
+                            Log.d(_CTAG+".resynchronize","Slotted future CSE ID "+sRec.rID+" into Tomorrow daypoint");
                         }
                     } else if (sRec.rStartOfRecord_Timestamp >= time18oursAgo) {
                         // this record started in-the-past but only within the last 18 hours
                         if (sRec.rEndOfRecord_Timestamp != 0 || (sRec.rStatesFlag & endingStatesFlags) != 0) {
                             // this record is ended, so its for the Yesterday Daypoint and we are done looking at DB records
-                            if (mDaypoint_CSEs[0] == null)  mDaypoint_CSEs[0] = sRec;
+                            if (mDaypoint_CSEs[0] == null)  {
+                                mDaypoint_CSEs[0] = sRec;
+                                Log.d(_CTAG+".resynchronize","Slotted ended CSE ID "+sRec.rID+" into Yesterday daypoint; stop processing CSEs");
+                            }
                             break;
                         } else if ((sRec.rStatesFlag & statesFlagsToCheck) != 0 || sRec.rZeoSleepEpisode_ID != 0) {
                             // the record is active and not apparently ended
                             if (mDaypoint_CSEs[1] == null) {
                                 mDaypoint_CSEs[1] = sRec;   // and the Today Daypoint is empty
+                                Log.d(_CTAG+".resynchronize","Slotted active CSE ID "+sRec.rID+" into Today daypoint");
                             } else {
                                 // however a more recent record already is in-place, so it cannot be made current and we are done searching
-                                if (mDaypoint_CSEs[0] == null)  mDaypoint_CSEs[0] = sRec;
+                                if (mDaypoint_CSEs[0] == null)  {
+                                    mDaypoint_CSEs[0] = sRec;
+                                    Log.d(_CTAG+".resynchronize","Slotted active CSE ID "+sRec.rID+" into Yesterday daypoint; stop processing CSEs");
+                                }
                                 break;
                             }
                         } else {
                             // it has not been recorded into and is just waiting
-                            if (mDaypoint_CSEs[1] == null)  mDaypoint_CSEs[1] = sRec;   // put it into the Today Daypoint
+                            if (mDaypoint_CSEs[1] == null) {
+                                mDaypoint_CSEs[1] = sRec;   // put it into the Today Daypoint
+                                Log.d(_CTAG+".resynchronize","Slotted pending CSE ID "+sRec.rID+" into Today daypoint");
+                            }
                         }
                     } else {
                         // this record started in-the-past more than 18 hours ago but less than 36 hours ago
-                        if (mDaypoint_CSEs[0] == null)  mDaypoint_CSEs[0] = sRec;   // put it into the Yesterday Daypoint and we are done
+                        if (mDaypoint_CSEs[0] == null) {
+                            mDaypoint_CSEs[0] = sRec;   // put it into the Yesterday Daypoint and we are done
+                            Log.d(_CTAG+".resynchronize","Slotted older CSE ID "+sRec.rID+" into Yesterday daypoint; stop processing CSEs");
+                        }
                         break;
                     }
                     pos++;
@@ -128,60 +156,110 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
         }
 
         // then check whether a sleep session is in-progress from the ZeoApp's point-of-view
-        if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State > ZeoAppHandler.ZAH_ZEOAPP_STATE_IDLE) {
-            if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_active_SleepEpisode_ID != 0) {
-                // the ZeoApp is not idle and has a record started; where is our matching record?
-                boolean found = false;
-                for (int dp = -1; dp <= 1; dp++) {
-                    if (mDaypoint_CSEs[dp + 1] != null) {
-                        if (mDaypoint_CSEs[dp + 1].rZeoSleepEpisode_ID == ZeoCompanionApplication.mZeoAppHandler.mZeoApp_active_SleepEpisode_ID) {
-                            // found it
-                            switch (dp) {
-                                case -1:
-                                    // our prior CSE is still active
-                                    if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State < ZeoAppHandler.ZAH_ZEOAPP_STATE_ENDING) {
-                                        // the ZeoApp is starting or recording; so this state is wrong
-                                        if (mDaypoint_CSEs[1] == null) {
-                                            // Today slot is empty, so move into it
-                                            mDaypoint_CSEs[1] = mDaypoint_CSEs[0];  // Today slot is empty, so just move back
-                                            mDaypoint_CSEs[0] = null;
-                                            dp = 0;
-                                        } else {
-                                            // Today slot has something in it, but so jam Today into Tomorrow (if anything is in Tomorrow its bitbucketed)
-                                            if (mDaypoint_CSEs[2] != null) { mDaypoint_CSEs[2].destroy(); }
-                                            mDaypoint_CSEs[2] = mDaypoint_CSEs[1];
-                                            mDaypoint_CSEs[1] = mDaypoint_CSEs[0];
-                                            mDaypoint_CSEs[0] = null;
-                                            dp = 0;
-                                        }
+        if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State <= ZeoAppHandler.ZAH_ZEOAPP_STATE_IDLE) { return; }    // idle
+
+        // A sleep session is starting or is in-progress
+        if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_active_SleepEpisode_ID != 0) {
+            Log.d(_CTAG+".resynchronize","Zeo App is not Idle and has allocated a ZSE record");
+            // the ZeoApp is not idle and has a record started; where is our matching record?
+            for (int dp = -1; dp <= 1; dp++) {
+                if (mDaypoint_CSEs[dp + 1] != null) {
+                    if (mDaypoint_CSEs[dp + 1].rZeoSleepEpisode_ID == ZeoCompanionApplication.mZeoAppHandler.mZeoApp_active_SleepEpisode_ID) {
+                        // found it
+                        switch (dp) {
+                            case -1:
+                                // our prior CSE is still active; this can be a normal state if user has pressed DONE SLEEPING yet still has the headband on;
+                                // or if Zeo App is at ENDING
+                                if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State == ZeoAppHandler.ZAH_ZEOAPP_STATE_ENDING ||
+                                        (mDaypoint_CSEs[0].rStatesFlag & CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_JOURNAL_EXPLICITEND) != 0) {
+                                    // this is the correct state; do nothing
+                                    Log.d(_CTAG+".resynchronize","ZSE record has been found linked in Yesterday Ending CSE; no changes");
+                                } else if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State < ZeoAppHandler.ZAH_ZEOAPP_STATE_ENDING) {
+                                    // the ZeoApp is starting or recording and no endings have been indicated; so this state is wrong
+                                    Log.d(_CTAG+".resynchronize","ZSE record has been found linked in Yesterday nonEnding CSE; move everything up");
+                                    if (mDaypoint_CSEs[1] == null) {
+                                        // Today slot is empty, so move into it
+                                        mDaypoint_CSEs[1] = mDaypoint_CSEs[0];  // Today slot is empty, so just move back
+                                        mDaypoint_CSEs[0] = null;
+                                        dp = 0;
+                                    } else {
+                                        // Today slot has something in it, but so jam Today into Tomorrow (if anything is in Tomorrow its bitbucketed)
+                                        if (mDaypoint_CSEs[2] != null) { mDaypoint_CSEs[2].destroy(); }
+                                        mDaypoint_CSEs[2] = mDaypoint_CSEs[1];
+                                        mDaypoint_CSEs[1] = mDaypoint_CSEs[0];
+                                        mDaypoint_CSEs[0] = null;
+                                        dp = 0;
                                     }
-                                    break;
-                                case 0:
-                                    // this is exactly where it should be; do nothing
-                                    break;
-                                case 1:
-                                    // somehow our future CSE is now active; move everything down
-                                    if (mDaypoint_CSEs[0] != null) { mDaypoint_CSEs[0].destroy(); }
-                                    mDaypoint_CSEs[0] = mDaypoint_CSEs[1];
-                                    mDaypoint_CSEs[1] = mDaypoint_CSEs[2];
-                                    mDaypoint_CSEs[2] = null;
+                                }
+                                break;
+                            case 0:
+                                // this is exactly where it should be; do nothing
+                                Log.d(_CTAG+".resynchronize","ZSE record has been found linked in Today CSE; no changes");
+                                break;
+                            case 1:
+                                // somehow our future CSE is now active; move everything down
+                                Log.d(_CTAG+".resynchronize","ZSE record has been found linked in Tomorrow CSE; move everything down");
+                                if (mDaypoint_CSEs[0] != null) { mDaypoint_CSEs[0].destroy(); }
+                                mDaypoint_CSEs[0] = mDaypoint_CSEs[1];
+                                mDaypoint_CSEs[1] = mDaypoint_CSEs[2];
+                                mDaypoint_CSEs[2] = null;
+                                dp = 0;
+                                break;
+                        }
+                        syncCSEtoZeoRecord(mDaypoint_CSEs[dp + 1], false);
+                        return;
+                    }
+                }
+            }
+            // did not find the ZeoApp sleep episode ID in any Daypoint CSE, so force resync to the Today Daypoint
+            syncTodayDaypointToZeoRecord(false);
+            return;
+        }
+
+        // Zeo App is not idle and has no Zeo Sleep Record yet (this should only occur in STARTING mode);
+        // a STARTING-only CSE is not saved in the database but should be present in the daypoint CSEs unless the App crashed
+        if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State <= ZeoAppHandler.ZAH_ZEOAPP_STATE_STARTING) {
+            for (int dp = -1; dp <= 1; dp++) {
+                if (mDaypoint_CSEs[dp + 1] != null) {
+                    long contents = mDaypoint_CSEs[dp + 1].getContentsBitmap();
+                    if ((contents & 0x0000F100) == 0x00001100) {
+                        // found it
+                        switch (dp) {
+                            case -1:
+                                // our prior CSE is still active as a STARTING record
+                                Log.d(_CTAG+".resynchronize","CSE record in STARTING state has been found in Yesterday CSE; move everything up");
+                                if (mDaypoint_CSEs[1] == null) {
+                                    // Today slot is empty, so move into it
+                                    mDaypoint_CSEs[1] = mDaypoint_CSEs[0];  // Today slot is empty, so just move back
+                                    mDaypoint_CSEs[0] = null;
                                     dp = 0;
-                                    break;
-                            }
-                            syncCSEtoZeoRecord(mDaypoint_CSEs[dp + 1], false);
-                            return;
+                                } else {
+                                    // Today slot has something in it, but so jam Today into Tomorrow (if anything is in Tomorrow its bitbucketed)
+                                    if (mDaypoint_CSEs[2] != null) { mDaypoint_CSEs[2].destroy(); }
+                                    mDaypoint_CSEs[2] = mDaypoint_CSEs[1];
+                                    mDaypoint_CSEs[1] = mDaypoint_CSEs[0];
+                                    mDaypoint_CSEs[0] = null;
+                                    dp = 0;
+                                }
+                                break;
+                            case 0:
+                                // this is exactly where it should be; do nothing
+                                Log.d(_CTAG+".resynchronize","CSE record in STARTING state has been found in Today CSE; no changes");
+                                break;
+                            case 1:
+                                // somehow our future CSE is now active; move everything down
+                                Log.d(_CTAG+".resynchronize","CSE record in STARTING state has been found in Tomorrow CSE; move everything down");
+                                if (mDaypoint_CSEs[0] != null) { mDaypoint_CSEs[0].destroy(); }
+                                mDaypoint_CSEs[0] = mDaypoint_CSEs[1];
+                                mDaypoint_CSEs[1] = mDaypoint_CSEs[2];
+                                mDaypoint_CSEs[2] = null;
+                                dp = 0;
+                                break;
                         }
                     }
                 }
-                // did not find the ZeoApp sleep episode ID in any Daypoint CSE, so force resync to the Today Daypoint
-                syncTodayDaypointToZeoRecord(false);
-                return;
             }
         }
-
-        // ZeoApp is either idle, or is in STARTING but has not allocated a sleep episode record yet
-        long time2HoursAgo = timeNow - 7200000L;
-        // ?? ZeoApp is either idle, or is in STARTING but has not allocated a sleep episode record yet
     }
 
     // called by MainActivity only if the end-user has chosen to utilize the sleep journal
@@ -214,6 +292,10 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
             mMainActivityHandler.sendMessage(msg);
         }
     }
+
+    /////////////////////////////////////////////////////////////////////////
+    // Methods related to synchronization with the Zeo App
+    /////////////////////////////////////////////////////////////////////////
 
     // Thread context: Main Thread
     // callback from the ZeoApp Handler; state change occured
@@ -368,6 +450,10 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////
+    // Methods related to management of the Daypoint
+    /////////////////////////////////////////////////////////////////////////
+
     // return the Journal's current daypoint number
     public int getJournalDaypoint() { return mDaypoint; }
 
@@ -375,10 +461,9 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
     public String getZeoTomorrowDaypointStateString() {
         switch (mDaypoint) {
             case -1:
-                if (mDaypoint_CSEs[1] == null) { return "Tonight"; }
-                return getDaypointStatus_internal()+"\n"+getDaypointTimes_internal(1);
+                return getTodayDaypointStatus_internal()+"\n"+getDaypointTimes_internal(1);
             case 0:
-                if (mDaypoint_CSEs[2] == null) { return "None"; }
+                if (mDaypoint_CSEs[2] == null) { return ""; }
                 return "Next\n"+getDaypointTimes_internal(2);
             case 1:
                 return "";  // we are at the Tomorrow Daypoint, so there is nothing to show here
@@ -393,10 +478,9 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                 if (mDaypoint_CSEs[0] == null) { return "None"; }
                 return "Prior\n"+getDaypointTimes_internal(0);
             case 0:
-                if (mDaypoint_CSEs[1] == null) { return "Tonight"; }
-                return getDaypointStatus_internal()+"\n"+getDaypointTimes_internal(1);
+                return getTodayDaypointStatus_internal()+"\n"+getDaypointTimes_internal(1);
             case 1:
-                if (mDaypoint_CSEs[2] == null) { return "None"; }
+                if (mDaypoint_CSEs[2] == null) { return ""; }   // do not show option for NEXT
                 return "Next\n"+getDaypointTimes_internal(2);
         }
         return "Unknown";
@@ -411,8 +495,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                 if (mDaypoint_CSEs[0] == null) { return "None"; }
                 return "Prior\n"+getDaypointTimes_internal(0);
             case 1:
-                if (mDaypoint_CSEs[1] == null) { return "Tonight"; }
-                return getDaypointStatus_internal()+"\n"+getDaypointTimes_internal(1);
+                return getTodayDaypointStatus_internal()+"\n"+getDaypointTimes_internal(1);
         }
         return "Unknown";
     }
@@ -429,7 +512,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
             case 0:
                 return ZeoCompanionApplication.mZeoAppHandler.getStateString();
             case 1:
-                return "Idle";
+                return "None";
         }
         return "Unknown";
     }
@@ -454,8 +537,16 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
     public String isFragmentDaypointEnabled(int sleepStage) {
         switch (sleepStage) {
             case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE:
-                if (mDaypoint == -1 && mDaypoint_CSEs[0] == null) { return "No immediately prior sleep session is available"; }
-                return null;
+                switch (mDaypoint) {
+                    case -1:
+                        if (mDaypoint_CSEs[0] == null) { return "No immediately prior sleep session is available"; }
+                        return null;
+                    case 0:
+                        return null;
+                    case 1:
+                        return "Entry of Before Attributes for future sleep sessions is not allowed";
+                }
+                break;
             case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_INBED:
             case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_GOING:
             case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_DURING:
@@ -466,7 +557,6 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                     case 0:
                         return null;
                     case 1:
-                        if (sleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_INBED) { return null; }
                         return "Entry of Going or During Events for future sleep sessions is not allowed";
                 }
                 break;
@@ -507,12 +597,12 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
 
     // the Journal Status Bar fragment's Tomorrow/Next button has been pressed
     public void daypointTomorrowButtonPressed() {
-        if (mDaypoint < 1) { mDaypoint++; }
+        if (mDaypoint < 0) { mDaypoint++; }
         sendDoAllUpdateMsgToUI();
     }
 
     // generates a overday Journal status for only "Today" daypoint
-    private String getDaypointStatus_internal() {
+    private String getTodayDaypointStatus_internal() {
         if (mDaypoint_CSEs[1] == null) {
             // there is no "Today" daypoint CSE record, so just examine the Zeo App's status
             switch (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State) {
@@ -610,15 +700,36 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
     // get the CSE that the Daypoint is currently pointing
     private CompanionSleepEpisodesRec getTodayDaypointCSE() { return mDaypoint_CSEs[1]; }
 
-    // get the CSE that the Daypoint is currently pointing to (and create it if it is null)
+    // get the CSE that the Daypoint is currently pointing to (and create it if it is null);
+    // this is called by attribute and event add/delete handlers
     private CompanionSleepEpisodesRec getDaypointCSECreateIfShould() {
-        if (mDaypoint_CSEs[mDaypoint+1] == null) { mDaypoint_CSEs[mDaypoint+1] = createNewCSE_internal(); }
+        if (mDaypoint_CSEs[mDaypoint+1] == null) {
+            if (mDaypoint != 0) {
+                // create a CSE for yesterday or tomorrow
+                mDaypoint_CSEs[mDaypoint+1] = createNewCSE_internal();
+            } else {
+                // create a CSE for today
+                if (mDaypoint_CSEs[2] != null) {
+                    // there is a Tomorrow CSE stored away, so use it; this should rarely if never happen
+                    mDaypoint_CSEs[1] = mDaypoint_CSEs[2];
+                    mDaypoint_CSEs[2] = null;
+                } else { mDaypoint_CSEs[1] = createNewCSE_internal(); }
+            }
+        }
         return mDaypoint_CSEs[mDaypoint+1];
     }
 
-    // get the CSE for the Today Daypoint (and create it if it is null)
+    // get the CSE for the Today Daypoint (and create it if it is null);
+    // this is called when the Zeo App state changes
     private CompanionSleepEpisodesRec getTodayDaypointCSECreateIfShould() {
-        if (mDaypoint_CSEs[1] == null) { mDaypoint_CSEs[1] = createNewCSE_internal(); }
+        if (mDaypoint_CSEs[1] == null) {
+            if (mDaypoint_CSEs[2] != null) {
+                // there is a Tomorrow CSE stored away, so use it; this should rarely if never happen
+                mDaypoint_CSEs[1] = mDaypoint_CSEs[2];
+                mDaypoint_CSEs[2] = null;
+            } else { mDaypoint_CSEs[1] = createNewCSE_internal(); }
+
+        }
         return mDaypoint_CSEs[1];
     }
 
@@ -632,10 +743,12 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
         return -2;
     }
 
-    // create or obtain a new CDS for a Daypoint slot
+    /////////////////////////////////////////////////////////////////////////
+    // CSE management methods; creating, deleting, adding events, managing attribute adds/deletes
+    /////////////////////////////////////////////////////////////////////////
+
+    // create or obtain a new CDE for a Daypoint slot
     private CompanionSleepEpisodesRec createNewCSE_internal() {
-        // ?? this logic is incomplete; if backdating or forward dating then need end-user to specify TOD
-        // for a TODAY, should we also look forward to the NEXT?
         CompanionSleepEpisodesRec newCSE = new CompanionSleepEpisodesRec(System.currentTimeMillis());
         sendDoJSBupdateMsgToUI();
         return newCSE;
@@ -701,7 +814,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
 
     // remove an attribute/value pair within the Daypoint; will return false if the Daypoint will not allow a the removal of an attribute/value pair
     public boolean removeDaypointInfoAttributeValueOfType(int sleepStage, CompanionAttributesRec typeRec) {
-        CompanionSleepEpisodesRec activeCSE = getDaypointCSECreateIfShould();
+        CompanionSleepEpisodesRec activeCSE = getDaypointCSE();
         if (activeCSE == null) { return false; }
         activeCSE.removeAttribute(sleepStage, typeRec);
         activeCSE.saveToDB();
@@ -801,6 +914,10 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////
+    // Methods related to creating and managing integrated History Records
+    /////////////////////////////////////////////////////////////////////////
+
     // this class defines an Integrated History Record that combine ZeoCompanion Sleep information with the Zeo App's cooresponding Sleep information
     public class IntegratedHistoryRec {
         public long mTimestamp = 0;
@@ -859,15 +976,17 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                 if (cursor1.moveToFirst()) {
                     do {
                         CompanionSleepEpisodesRec sRec1 = new CompanionSleepEpisodesRec(cursor1);
-                        IntegratedHistoryRec iRec1 = new IntegratedHistoryRec();
-                        iRec1.theZAH_SleepRecord = null;
-                        iRec1.theCSErecord = sRec1;
-                        iRec1.mTimestamp = sRec1.rStartOfRecord_Timestamp;
-                        iRec1.mCSEid = sRec1.rID;
-                        iRec1.mZSEid = sRec1.rZeoSleepEpisode_ID;
-                        iRec1.mFound = 0x01;
-                        theArray.add(iRec1);
-                        journalCnt++;
+                        if (!sRec1.isUnlinkedAndDead()) {
+                            IntegratedHistoryRec iRec1 = new IntegratedHistoryRec();
+                            iRec1.theZAH_SleepRecord = null;
+                            iRec1.theCSErecord = sRec1;
+                            iRec1.mTimestamp = sRec1.rStartOfRecord_Timestamp;
+                            iRec1.mCSEid = sRec1.rID;
+                            iRec1.mZSEid = sRec1.rZeoSleepEpisode_ID;
+                            iRec1.mFound = 0x01;
+                            theArray.add(iRec1);
+                            journalCnt++;
+                        }
                     } while (cursor1.moveToNext());
                 }
                 cursor1.close();
@@ -883,6 +1002,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                 do {
                     ZAH_SleepRecord zRec1 = new ZAH_SleepRecord(cursor2);
                     if (zeoOnly) {
+                        // Zeo records only; no integrating needed
                         if (includeZeoDead || zRec1.rTime_Total_Z_min > 0.0) {
                             IntegratedHistoryRec iRec2 = new IntegratedHistoryRec();
                             iRec2.theCSErecord = null;
@@ -894,12 +1014,13 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                             zeoCnt++;
                         }
                     } else {
+                        // integration is necessary
                         boolean found = false;
                         for (IntegratedHistoryRec existingIrec: theArray) {
                             if (existingIrec.mZSEid == zRec1.rSleepEpisodeID) {
                                 // found the matching CSE record
                                 if (includeZeoDead || zRec1.rTime_Total_Z_min > 0.0) {
-                                    // is a normal Zeo record; integrate it
+                                    // is a normal Zeo record or we want dead ZEO records; integrate it with its matching CSE
                                     existingIrec.theZAH_SleepRecord = zRec1;
                                     if (zRec1.rStartOfNight < existingIrec.mTimestamp) { existingIrec.mTimestamp = zRec1.rStartOfNight; }
                                     existingIrec.mZSEid = zRec1.rSleepEpisodeID;
@@ -908,22 +1029,22 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                                 } else {
                                     // this is a hidden Zeo record usually because it is incomplete or had no actual sleep
                                     if (existingIrec.theCSErecord != null) {
-                                        long mapOfContent = existingIrec.theCSErecord.getContentsBitmap();
-                                        if ((mapOfContent & 0xFFFF00F0) != 0L) {
-                                            // the CSE record has content other than Zeo linkup, so do not hide the integrated combination
+                                        // it has a matching CSE
+                                        if (existingIrec.theCSErecord.isZeoOnly()) {
+                                            // the CSE record has Zeo-only content and the Zeo record would normally be hidden, so eliminate the entire integrated record
+                                            //Log.d(_CTAG+".getIrecs","Removing CSE#"+existingIrec.mCSEid+" with ZSE#"+existingIrec.mZSEid);
+                                            theArray.remove(existingIrec);
+                                            journalCnt--;
+                                        } else {
+                                            // the CSE record has content other than Zeo-only content, so do not hide the integrated combination
                                             existingIrec.theZAH_SleepRecord = zRec1;
                                             if (zRec1.rStartOfNight < existingIrec.mTimestamp) { existingIrec.mTimestamp = zRec1.rStartOfNight; }
                                             existingIrec.mZSEid = zRec1.rSleepEpisodeID;
                                             existingIrec.mFound = (existingIrec.mFound | 0x02);
                                             found = true;
-                                        } else {
-                                            // the CSE record is empty and the Zeo record would normally be hidden, so eliminate the entire integrated record
-                                            //Log.d(_CTAG+".getIrecs","Removing CSE#"+existingIrec.mCSEid+" with ZSE#"+existingIrec.mZSEid);
-                                            theArray.remove(existingIrec);
-                                            journalCnt--;
                                         }
                                     } else {
-                                        // not sure how this would happen; preexisting integrated rec without any CSE content
+                                        // not sure how this would happen; preexisting integrated rec without any CSE content and a dead Zeo record
                                         theArray.remove(existingIrec);
                                         //Log.d(_CTAG+".getIrecs","Removing CSE#"+existingIrec.mCSEid+" with ZSE#"+existingIrec.mZSEid);
                                     }
@@ -932,6 +1053,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                             }
                         }
                         if (!found) {
+                            // no matching CSE was found, so include it as-is
                             if (includeZeoDead || zRec1.rTime_Total_Z_min > 0.0) {
                                 IntegratedHistoryRec iRec2 = new IntegratedHistoryRec();
                                 iRec2.theCSErecord = null;

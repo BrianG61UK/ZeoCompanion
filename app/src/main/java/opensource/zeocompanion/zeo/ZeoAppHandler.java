@@ -17,8 +17,6 @@ import com.myzeo.android.api.data.ZeoDataContract;
 import com.myzeo.android.api.data.ZeoDataContract.Headband;
 import com.myzeo.android.api.data.ZeoDataContract.SleepRecord;
 import com.obscuredPreferences.ObscuredPrefs;
-
-import opensource.zeocompanion.MainActivity;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.database.CompanionDatabaseContract;
 
@@ -143,25 +141,6 @@ public class ZeoAppHandler {
         if (observedSleepDurationMin != null) { mTypicalSleepDurationMin = observedSleepDurationMin; }
     }
 
-    // obtain a string explanation of a ZAH error number
-    public String getErrorString(int errNo) {
-        switch (errNo) {
-            case ZAH_ERROR_NONE:
-                return "Zeo API no error";
-            case ZAH_ERROR_NO_DB:
-                return "Zep App is not installed or has not yet been used";
-            case ZAH_ERROR_NO_HB_REC:
-                return "Zeo App has never been paired with a headband";
-            case ZAH_ERROR_NO_DATA:
-                return "Zeo App has no stored history data";
-            case ZAH_ERROR_NO_PERMISSION:
-                return "ZeoCompanion App not granted permission to access Zeo App";
-            case ZAH_ERROR_NOT_INSTALLED:
-                return "Zeo App is not installed";
-        }
-        return "Zeo API Unknown error";
-    }
-
     // verify the Zeo's API is active and the Zeo has been used;
     // this is performed everytime our App is brought to the foreground
     public int verifyAPI() {
@@ -192,6 +171,119 @@ public class ZeoAppHandler {
         PreferenceManager.getDefaultSharedPreferences(mContext).registerOnSharedPreferenceChangeListener(mPrefsChangeListener);
         return ZAH_ERROR_NONE;
     }
+
+    // called upon MainActivity startup if the Journal is enabled; the MainActivity could have been "offline" for milliseconds or even days;
+    // this is done before probing so it will not cause all sorts of "changed state" invocations that are meaningless if not done in real-time
+    public int resynchronize() {
+        // first obtain the active headband record (it must be paired and connected); that record contains the ZeoApp's current state;
+        // there may be more than one Zeo Headband record if the App has been paired with other headbands in the past
+        int mZeoApp_State = ZAH_ZEOAPP_STATE_UNKNOWN;
+        mZeoHeadband_battery_lastProbed = 0;
+        mZeoAppProbeDelayMS = DEFAULT_ZEOAPP_PROBE_DELAY_MS;
+
+        final Cursor cursor1 = mContext.getContentResolver().query(
+                Headband.CONTENT_URI,   // data manager, database and table name
+                ZAH_HeadbandRecord.ZAH_HEADBANDREC_EXTENDED_COLS,    // columns
+                null,   // where clause
+                null,   // values
+                null);  // sort order
+        if (cursor1 != null) {
+            if (cursor1.moveToFirst()) {
+                mZeoApp_State = ZAH_ZEOAPP_STATE_IDLE;
+                do {
+                    ZAH_HeadbandRecord rec = new ZAH_HeadbandRecord(cursor1);
+                    if (rec.rBonded_to_device && rec.rConnected_to_device) {
+                        mZeoApp_State = rec.rAlgorithm_mode;
+                        mZeoHeadband_battery_lastProbed = rec.rVoltage;
+                        break;
+                    }
+                } while (cursor1.moveToNext());
+            } else { Log.e(_CTAG + ".resync", "The ZeoApp Headband Table is empty"); return ZAH_ERROR_NO_HB_REC; }
+            cursor1.close();
+        } else { Log.e(_CTAG+".resync","The ZeoApp Headband Table is inaccessible"); return ZAH_ERROR_NO_DB; }
+
+        // if the App state is either recording or ending, get the current in-progress Sleep Episode ID
+        if (mZeoApp_State > ZAH_ZEOAPP_STATE_STARTING) {
+            String selection = SleepRecord.END_REASON + "=1";   // look for a record in "Active" state
+            String sort = SleepRecord.START_OF_NIGHT + " DESC";
+            final Cursor cursor2 = mContext.getContentResolver().query(
+                    SleepRecord.CONTENT_URI,    // data manager, database and table name
+                    ZAH_SleepRecord.ZAH_SLEEPREC_COLS,  // columns
+                    selection,  // where clause
+                    null,   // values
+                    sort);  // sort order
+            if (cursor2 != null) {
+                if (cursor2.moveToFirst()) {
+                    do {
+                        ZAH_SleepRecord rec = new ZAH_SleepRecord(cursor2);
+                        if (rec.rEndReason  == ZAH_SleepRecord.ZAH_ENDREASON_STILL_ACTIVE) {
+                            mZeoApp_active_SleepEpisode_ID = rec.rSleepEpisodeID;
+                            break;
+                        }
+                    } while (cursor2.moveToNext());
+                }
+                cursor2.close();
+            } else { Log.e(_CTAG+".resync","The ZeoApp SleepRecord Table is inaccessible"); return ZAH_ERROR_NO_DB; }
+        }
+        return ZAH_ERROR_NONE;
+    }
+
+    // obtain a string explanation of a ZAH error number
+    public String getErrorString(int errNo) {
+        switch (errNo) {
+            case ZAH_ERROR_NONE:
+                return "Zeo API no error";
+            case ZAH_ERROR_NO_DB:
+                return "Zep App is not installed or has not yet been used";
+            case ZAH_ERROR_NO_HB_REC:
+                return "Zeo App has never been paired with a headband";
+            case ZAH_ERROR_NO_DATA:
+                return "Zeo App has no stored history data";
+            case ZAH_ERROR_NO_PERMISSION:
+                return "ZeoCompanion App not granted permission to access Zeo App";
+            case ZAH_ERROR_NOT_INSTALLED:
+                return "Zeo App is not installed";
+        }
+        return "Zeo API Unknown error";
+    }
+
+    // return a string interpretation of the Zeo App's state
+    public String getStateString() {
+        switch (mZeoApp_State) {
+            case ZAH_ZEOAPP_STATE_UNKNOWN:
+                return "INACCESSIBLE!";
+            case ZAH_ZEOAPP_STATE_IDLE:
+                return "Idle";
+            case ZAH_ZEOAPP_STATE_STARTING:
+                return "Starting";
+            case ZAH_ZEOAPP_STATE_RECORDING:
+                return "Record";
+            case ZAH_ZEOAPP_STATE_ENDING:
+                return "Ending";
+        }
+        return "Unknown";
+    }
+
+    // look for conditions that would trigger a flashing red LED for the Zeo App;
+    // called by the Journal Status Bar
+    public int checkforZeoAppAlarm() {
+        if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State == ZeoAppHandler.ZAH_ZEOAPP_STATE_STARTING) {
+            long dur = System.currentTimeMillis() - ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State_timestamp;
+            if (dur > 300000) {
+                // Zeo App has been in Starting state for over five minutes without the headband starting to Record
+                if (dur < 900000) { return -1; }   // if within 15 min of start-of-sleep, allow notification sound
+                return 1;
+            }
+        }
+
+        // now check for gaps in sleep record during a live recording
+        // TODO V1.1 Look for suddenly missing recording
+        return 0;
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    // Methods related to probing of the Zeo App
+    /////////////////////////////////////////////////////////////////////////
 
     // add a new listener to our list; currently the JDC and MainActivity use this
     public void setZAH_Listener(ZAH_Listener listener) {
@@ -279,63 +371,7 @@ public class ZeoAppHandler {
         }
     }
 
-    // called upon MainActivity startup if the Journal is enabled; the MainActivity could have been "offline" for milliseconds or even days;
-    // this is done before probing so it will not cause all sorts of "changed state" invocations that are meaningless if not done in real-time
-    public int resynchronize() {
-        // first obtain the active headband record (it must be paired and connected); that record contains the ZeoApp's current state;
-        // there may be more than one Zeo Headband record if the App has been paired with other headbands in the past
-        int mZeoApp_State = ZAH_ZEOAPP_STATE_UNKNOWN;
-        mZeoHeadband_battery_lastProbed = 0;
-        mZeoAppProbeDelayMS = DEFAULT_ZEOAPP_PROBE_DELAY_MS;
-
-        final Cursor cursor1 = mContext.getContentResolver().query(
-                Headband.CONTENT_URI,   // data manager, database and table name
-                ZAH_HeadbandRecord.ZAH_HEADBANDREC_EXTENDED_COLS,    // columns
-                null,   // where clause
-                null,   // values
-                null);  // sort order
-        if (cursor1 != null) {
-            if (cursor1.moveToFirst()) {
-                mZeoApp_State = ZAH_ZEOAPP_STATE_IDLE;
-                do {
-                    ZAH_HeadbandRecord rec = new ZAH_HeadbandRecord(cursor1);
-                    if (rec.rBonded_to_device && rec.rConnected_to_device) {
-                        mZeoApp_State = rec.rAlgorithm_mode;
-                        mZeoHeadband_battery_lastProbed = rec.rVoltage;
-                        break;
-                    }
-                } while (cursor1.moveToNext());
-            } else { Log.e(_CTAG + ".resync", "The ZeoApp Headband Table is empty"); return ZAH_ERROR_NO_HB_REC; }
-            cursor1.close();
-        } else { Log.e(_CTAG+".resync","The ZeoApp Headband Table is inaccessible"); return ZAH_ERROR_NO_DB; }
-
-        // if the App state is either recording or ending, get the current in-progress Sleep Episode ID
-        if (mZeoApp_State > ZAH_ZEOAPP_STATE_STARTING) {
-            String selection = SleepRecord.END_REASON + "=1";   // look for a record in "Active" state
-            String sort = SleepRecord.START_OF_NIGHT + " DESC";
-            final Cursor cursor2 = mContext.getContentResolver().query(
-                    SleepRecord.CONTENT_URI,    // data manager, database and table name
-                    ZAH_SleepRecord.ZAH_SLEEPREC_COLS,  // columns
-                    selection,  // where clause
-                    null,   // values
-                    sort);  // sort order
-            if (cursor2 != null) {
-                if (cursor2.moveToFirst()) {
-                    do {
-                        ZAH_SleepRecord rec = new ZAH_SleepRecord(cursor2);
-                        if (rec.rEndReason  == ZAH_SleepRecord.ZAH_ENDREASON_STILL_ACTIVE) {
-                            mZeoApp_active_SleepEpisode_ID = rec.rSleepEpisodeID;
-                            break;
-                        }
-                    } while (cursor2.moveToNext());
-                }
-                cursor2.close();
-            } else { Log.e(_CTAG+".resync","The ZeoApp SleepRecord Table is inaccessible"); return ZAH_ERROR_NO_DB; }
-        }
-        return ZAH_ERROR_NONE;
-    }
-
-    // similar to resynchronize, probe the Zeo App's state and detect changes
+    // probe the Zeo App's state and detect changes;
     // returns true if the ZeoApp's state has changed
     public boolean probeAppState() {
         boolean theReturn = false;
@@ -482,52 +518,9 @@ public class ZeoAppHandler {
         return theReturn;
     }
 
-    // return a string interpretation of the Zeo App's state
-    public String getStateString() {
-        switch (mZeoApp_State) {
-            case ZAH_ZEOAPP_STATE_UNKNOWN:
-                return "INACCESSIBLE!";
-            case ZAH_ZEOAPP_STATE_IDLE:
-                return "Idle";
-            case ZAH_ZEOAPP_STATE_STARTING:
-                return "Starting";
-            case ZAH_ZEOAPP_STATE_RECORDING:
-                return "Record";
-            case ZAH_ZEOAPP_STATE_ENDING:
-                return "Ending";
-        }
-        return "Unknown";
-    }
-
-    // translate the EndReason code into a String
-    /*(public String getEndReasonString(int endReason) {
-        switch (endReason) {
-            case ZeoDataContract.SleepRecord.END_REASON_COMPLETE:
-                return "Complete";
-            case ZeoDataContract.SleepRecord.END_REASON_ACTIVE:
-                return "Still active";
-            default:
-                return "Terminated";
-        }
-    }*/
-
-    // look for conditions that would trigger a flashing red LED for the Zeo App
-    public int checkforZeoAppAlarm() {
-        if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State == ZeoAppHandler.ZAH_ZEOAPP_STATE_STARTING) {
-            long dur = System.currentTimeMillis() - ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State_timestamp;
-            if (dur > 300000) {
-                // Zeo App has been in Starting state for over five minutes without the headband starting to Record
-                if (dur < 900000) { return -1; }   // if within 15 min of start-of-sleep, allow notification sound
-                return 1;
-            }
-            // TODO V1.1 Utilize typical end-of-night per day-of-week
-        }
-
-        // now check for gaps in sleep record during a live recording
-        // TODO V1.1 Look for suddenly missing recording
-        return 0;
-    }
-
+    /////////////////////////////////////////////////////////////////////////
+    // Methods related to database reads of the Zeo App's database
+    /////////////////////////////////////////////////////////////////////////
 
     // get the most active headband record (used when the Headband Commander attempts to connect to the headband)
     public ZAH_HeadbandRecord getActiveHeadbandRecord() {
@@ -685,7 +678,7 @@ public class ZeoAppHandler {
     }
 
     //////////////////////////////////////////////////////////////////////
-    // All the below methods are utilized for Zeo App Database replication
+    // All the below methods are utilized for Zeo App Database replication;
     // Many of these methods run in a separate thread as indicated
     //////////////////////////////////////////////////////////////////////
 

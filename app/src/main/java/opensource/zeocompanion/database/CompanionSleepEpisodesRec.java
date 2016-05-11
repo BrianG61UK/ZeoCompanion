@@ -327,6 +327,25 @@ public class CompanionSleepEpisodesRec {
         return "Unknown";
     }
 
+    // is this CSE record an unlinked "dead" one that should be hidden?
+    // linked CSE records will not be considered "dead" by this method
+    public boolean isUnlinkedAndDead() {
+        if (rZeoSleepEpisode_ID != 0) { return false; }
+        long mapOfContent = getContentsBitmap();
+        if ((mapOfContent & 0xFFFF60F4) != 0L) { return false; }
+        // record is unlinked, has no attributes, is not amended, and has no events or only a Zeo Starting event
+        return true;
+    }
+
+    // is this CSE record (linked or unlinked) Zeo-only?
+    // meaning it has no attributes, and no events or only Zeo events
+    public boolean isZeoOnly() {
+        long mapOfContent = getContentsBitmap();
+        if ((mapOfContent & 0xFFFF00F0) != 0L) { return false; }
+        // record has no attributes, and has no events or only Zeo events
+        return true;
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     // Events management methods
     ////////////////////////////////////////////////////////////////////////////

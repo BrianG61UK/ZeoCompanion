@@ -99,6 +99,7 @@ public class JournalStatusBarFragment extends Fragment {
         int daypoint = ZeoCompanionApplication.mCoordinator.getJournalDaypoint();
 
         in.setText(ZeoCompanionApplication.mCoordinator.getTodayDaypointString());
+
         switch (daypoint) {
             case -1:
                 yesterdayBut.setVisibility(View.INVISIBLE);
@@ -113,7 +114,7 @@ public class JournalStatusBarFragment extends Fragment {
             case 0:
                 yesterdayBut.setVisibility(View.VISIBLE);
                 yesterdayTV.setText(ZeoCompanionApplication.mCoordinator.getZeoYesterdayDaypointStateString());
-                tomorrowBut.setVisibility(View.VISIBLE);
+                tomorrowBut.setVisibility(View.INVISIBLE);
                 tomorrowTV.setText(ZeoCompanionApplication.mCoordinator.getZeoTomorrowDaypointStateString());
                 if (mBlinkRedZeoApp) {
                     zeoDarkIM.setImageResource(R.drawable.button_blank_red_dark_icon);

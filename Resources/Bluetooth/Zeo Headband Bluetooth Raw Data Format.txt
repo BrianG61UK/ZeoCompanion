@@ -35,7 +35,7 @@ Contents
 		----		----					---
 		Android		56b32a76-479b-43d4-99ff-42d79823d0a5	Normal-service UUID used by the Android Bluetooth Server
 		Headband	56b32a76-479b-43d4-99ff-42d79823d0a6	Normal-service UUID used by the Headband
-		Headband	00000000-deca-fade-deca-deafdecacaff	Apple iPhone/iPad/iPod “Wireless iAP” RFCOMM Bluetooth Service
+		Headband	00000000-deca-fade-deca-deafdecacaff	Apple iPhone/iPad/iPod ï¿½Wireless iAPï¿½ RFCOMM Bluetooth Service
 
 
 =========================================
@@ -580,7 +580,7 @@ TEST_CAL_DATA_QUERY (159 aka 0x9F) Message_type
 TEST_CAL_DATA_REPORT (160 aka 0xA0) Message_type
 ================================================
 	Flow:  headband -> device
-???can also be sent???
+?can also be sent?
 	Use: calibration data report that was requested by the device; DataContent meaning unknown
 	Data_Content_Len = 28
 	Data_Content format:

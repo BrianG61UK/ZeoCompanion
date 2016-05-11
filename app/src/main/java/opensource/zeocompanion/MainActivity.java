@@ -299,6 +299,12 @@ public class MainActivity extends AppCompatActivity {
                 managePermissionActivation(3, Manifest.permission.INTERNET, "Internet", "Permission for access to the Internet is necessary to send exports via direct email");
             }
         }
+
+        // resynchonize the ZAH and JDC since a large amount of time may have passed
+        if (mPrefs.getBoolean("journal_enable", true)) {
+            ZeoCompanionApplication.mZeoAppHandler.resynchronize();
+            ZeoCompanionApplication.mCoordinator.resynchronize();
+        }
     }
 
     // called when Activity first starts, or when Activity returns to the Foreground
