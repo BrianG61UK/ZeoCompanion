@@ -23,8 +23,8 @@
         android:title="Email transport security"
         android:summary="Optional: Select the transport security required by provider: %s"
         android:defaultValue="None"
-        android:entries="@array/autoExportSecurityValues"
-        android:entryValues="@array/autoExportSecurityValues" />
+        android:entries="@array/directEmailSecurityValues"
+        android:entryValues="@array/directEmailSecurityValues" />
 
     <SwitchPreference
         android:key="email_smtp_authNeeded"

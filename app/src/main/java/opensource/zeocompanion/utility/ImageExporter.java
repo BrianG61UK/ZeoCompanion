@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import com.obscuredPreferences.ObscuredPrefs;
@@ -24,9 +25,10 @@ import opensource.zeocompanion.views.HypnogramView;
 // utility class that performs Image file creation, selection of data, and formatting of data
 public class ImageExporter {
     // member variables
-    Context mContext = null;
-    String mName = null;
-    boolean mAmendedPlaceFirst = false;
+    private Context mContext = null;
+    private String mImageDirectory = null;
+    private String mName = null;
+    private boolean mAmendedPlaceFirst = false;
 
     // member constants and other static content
     private static final String _CTAG = "IEU";
@@ -269,12 +271,19 @@ public class ImageExporter {
         else if (r != 0) { return new ReturnResults(null, "External Storage is not available; export file not created"); }
 
         // get all the necessary preferences
-        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mAmendedPlaceFirst = mPrefs.getBoolean("export_amended_placeFirst", false);
-        mName = mPrefs.getString("profile_name", "");
+        SharedPreferences sPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mAmendedPlaceFirst = sPrefs.getBoolean("export_amended_placeFirst", false);
+        mName = sPrefs.getString("profile_name", "");
+        mImageDirectory = sPrefs.getString("export_directory_image", "Android/data/opensource.zeocompanion/exports");
 
         // create the directory path to our exports subdirectory in external storage
-        File exportsDir = new File(ZeoCompanionApplication.mBaseExtStorageDir + File.separator + "exports");
+        File exportsDir = null;
+        if (mImageDirectory != null) {
+            exportsDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + mImageDirectory);
+        }
+        else {
+            exportsDir = new File(ZeoCompanionApplication.mBaseExtStorageDir + File.separator + "exports");
+        }
         exportsDir.mkdirs();
 
         // compose the export file name

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="autoExportSecurityValues">
+    <string-array name="directEmailSecurityValues">
         <item>TLS</item>
         <item>SSL</item>
         <item>None</item>
@@ -25,4 +25,11 @@
         <item>5.5 hours</item>
         <item>6 hours</item>
     </string-array>
+    <string-array name="exportDirectory">
+        <item>Android/data/opensource.zeocompanion/exports</item>
+        <item>Documents</item>
+        <item>Download</item>
+        <item>Pictures</item>
+    </string-array>
+
 </resources>

@@ -25,12 +25,13 @@ import opensource.zeocompanion.zeo.ZAH_SleepRecord;
 // utility class that performs CSV file creation, selection of data, and formatting of data
 public class CSVexporter {
     // member variables
-    Context mContext = null;
-    boolean mIncludeAmended = true;
-    boolean mAmendedPlaceFirst = false;
-    boolean mUseDBslotHeaders = true;
-    boolean mIncludeValueText = true;
-    String mName = null;
+    private Context mContext = null;
+    private boolean mIncludeAmended = true;
+    private boolean mAmendedPlaceFirst = false;
+    private boolean mUseDBslotHeaders = true;
+    private boolean mIncludeValueText = true;
+    private String mCSVdirectory = null;
+    private String mName = null;
 
     // member constants and other static content
     private static final String _CTAG = "CEU";
@@ -72,7 +73,7 @@ public class CSVexporter {
 
     // column names for an amended sleep record section in the main export format
     private static final String[] EXTENDED_SLEEP_RECORD_COLUMN_NAMES =  {
-            "Sleep Graphs Starttime", "Start of Night Headband", "Battery Voltage Start of Night Highest", "Battery Voltage End of Night Lowest",
+            "Sleep Graphs Starttime", "Start of Night Headband", "Battery Start of Night Highest", "Battery End of Night Lowest",
             "Impedance Start of Night", "Impedance End of Night", "Light Changed to Deep", "Deep Sum"
     };
 
@@ -201,9 +202,16 @@ public class CSVexporter {
         mUseDBslotHeaders = sPrefs.getBoolean("export_attribute_useExportNameInColumnHeader", true);
         mIncludeValueText = sPrefs.getBoolean("export_value_exportIncludeValueText", true);
         mName = sPrefs.getString("profile_name", "");
+        mCSVdirectory = sPrefs.getString("export_directory_CSV", "Android/data/opensource.zeocompanion/exports");
 
         // create the directory path to our exports subdirectory in external storage
-        File exportsDir = new File(ZeoCompanionApplication.mBaseExtStorageDir + File.separator + "exports");
+        File exportsDir = null;
+        if (mCSVdirectory != null) {
+            exportsDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + mCSVdirectory);
+        }
+        else {
+            exportsDir = new File(ZeoCompanionApplication.mBaseExtStorageDir + File.separator + "exports");
+        }
         exportsDir.mkdirs();
 
         // compose the export file name

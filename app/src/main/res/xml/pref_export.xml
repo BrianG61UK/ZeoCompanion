@@ -1,5 +1,21 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <ListPreference
+        android:key="export_directory_CSV"
+        android:title="CSV Export storage directory"
+        android:summary="Optional: External storage directory for CSV exports: %s"
+        android:defaultValue="Android/data/opensource.zeocompanion/exports"
+        android:entries="@array/exportDirectory"
+        android:entryValues="@array/exportDirectory" />
+
+    <ListPreference
+        android:key="export_directory_image"
+        android:title="Image Export storage directory"
+        android:summary="Optional: External storage directory for image exports: %s"
+        android:defaultValue="Android/data/opensource.zeocompanion/exports"
+        android:entries="@array/exportDirectory"
+        android:entryValues="@array/exportDirectory" />
+
     <SwitchPreference
         android:key="export_attribute_useExportNameInColumnHeader"
         android:title="@string/pref_title_export_attribute_useExportNameInColumnHeader"
