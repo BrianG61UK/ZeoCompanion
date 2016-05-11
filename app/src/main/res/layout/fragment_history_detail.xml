@@ -39,7 +39,7 @@
                 android:id="@+id/checkBox_showAmended"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Show Amended"
+                android:text="Show Amend"
                 app:buttonTint="#FFFFFF"
                 android:layout_alignParentRight="true" />
 
@@ -63,7 +63,7 @@
 
         <opensource.zeocompanion.views.DailyResultGraphView
             android:id="@+id/graph_dailyResult"
-            android:layout_width="400dp"
+            android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginLeft="5dp"
             android:layout_alignParentRight="true" />

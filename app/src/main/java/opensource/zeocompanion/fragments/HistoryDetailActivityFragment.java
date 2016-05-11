@@ -39,6 +39,7 @@ public class HistoryDetailActivityFragment extends Fragment {
     // member constants and other static content
     private static final String _CTAG = "HDF";
     SimpleDateFormat mDf1 = new SimpleDateFormat("EEE, MMM d, yyyy hh:mm a");
+    SimpleDateFormat mDf1a = new SimpleDateFormat("MMM d, ''yy hh:mm a");
     SimpleDateFormat mDf2 = new SimpleDateFormat("hh:mm a");
     SimpleDateFormat mDf2s = new SimpleDateFormat("hh:mm:ss a");
 
@@ -279,7 +280,8 @@ public class HistoryDetailActivityFragment extends Fragment {
             }
 
             // set the date TextView
-            theDate.setText(mDf1.format(new Date(ZeoCompanionApplication.mIrec_HDAonly.mTimestamp)));
+            if (screenSize.x < 600) { theDate.setText(mDf1a.format(new Date(ZeoCompanionApplication.mIrec_HDAonly.mTimestamp))); }
+            else { theDate.setText(mDf1.format(new Date(ZeoCompanionApplication.mIrec_HDAonly.mTimestamp))); }
 
             // set any header info TextView
             if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord != null && ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {

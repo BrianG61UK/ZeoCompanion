@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
@@ -14,6 +15,7 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +51,7 @@ public class MainHistoryFragment extends MainFragmentWrapper {
     private double mGoalTotalSleepMin = 480.0;
     private double mGoalDeepPct = 15.0;
     private double mGoalREMpct = 20.0;
+    private Point mScreenSize = null;
     private ListView mListView = null;
     private ZAHSR_Adapter mListView_Adapter = null;
     private ArrayList<JournalDataCoordinator.IntegratedHistoryRec> mListView_List = null;
@@ -83,6 +86,11 @@ public class MainHistoryFragment extends MainFragmentWrapper {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //Log.d(_CTAG + ".onCreateView", "==========FRAG ON-CREATEVIEW=====");
         mRootView = inflater.inflate(R.layout.fragment_main_history, container, false);
+
+        // obtain the screen size in its current orientation
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        mScreenSize = new Point();
+        display.getSize(mScreenSize);
 
         mListView_List = new ArrayList<JournalDataCoordinator.IntegratedHistoryRec>();
         loadListViewList();
@@ -294,6 +302,7 @@ public class MainHistoryFragment extends MainFragmentWrapper {
 
     // common simple date format used in all the rows
     private static SimpleDateFormat mZAHSR_Adapter_dateFormat = new SimpleDateFormat("EEE, MMM d, yyyy hh:mm a");
+    private static SimpleDateFormat mZAHSR_Adapter_dateFormat_small = new SimpleDateFormat("MMM d, ''yy hh:mm a");
 
     // ListView adaptor specific to this Fragment;
     // the adaptor utilizes IntegratedHistoryRec as its list entries
@@ -334,7 +343,8 @@ public class MainHistoryFragment extends MainFragmentWrapper {
 
             // now properly configure the row's data and attributes
             JournalDataCoordinator.IntegratedHistoryRec iRec = mArrayList.get(position);
-            viewHolder.theDate.setText(mZAHSR_Adapter_dateFormat.format(new Date(iRec.mTimestamp)));
+            if (mScreenSize.x < 600) { viewHolder.theDate.setText(mZAHSR_Adapter_dateFormat_small.format(new Date(iRec.mTimestamp))); }
+            else { viewHolder.theDate.setText(mZAHSR_Adapter_dateFormat.format(new Date(iRec.mTimestamp))); }
 
             boolean isAmended = false;
             if (iRec.theCSErecord != null) {

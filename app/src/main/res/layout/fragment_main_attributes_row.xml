@@ -11,10 +11,11 @@
          android:layout_height="wrap_content"
          android:layout_weight="1"
          android:padding="5dp"
-         android:textSize="20sp"
+         android:textSize="16sp"
          android:textColor="#FFFFFF"
          android:gravity="left"
-         android:textStyle="bold" />
+         android:textStyle="bold"
+         android:layout_gravity="fill" />
 
     <TextView
         android:id="@+id/rowTextViewValue"
@@ -22,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:padding="5dp"
-        android:textSize="20sp"
+        android:textSize="16sp"
         android:textColor="#FFFFFF"
         android:gravity="left" />
 
@@ -31,7 +32,7 @@
         android:layout_width="30dp"
         android:layout_height="wrap_content"
         android:layout_weight="3"
-        android:textSize="20sp"
+        android:textSize="16sp"
         android:gravity="left"
         android:spinnerMode="dropdown" />
 

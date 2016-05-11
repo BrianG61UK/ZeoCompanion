@@ -56,8 +56,10 @@ public class ListLinearLayout extends LinearLayout {
 
         for (int pos = 0; pos < m; pos++) {
             View newChild = mAdapter.getView(pos, null, this);
-            if (newChild != null) { addView(newChild, pos); }
-            mChildViews.add(newChild);
+            if (newChild != null) {
+                addView(newChild, pos);
+                mChildViews.add(newChild);
+            }
         }
 
         // must only refresh visibilities after layout is done because of typical Android layout bugs that will not layout children properly in a GONE-set view

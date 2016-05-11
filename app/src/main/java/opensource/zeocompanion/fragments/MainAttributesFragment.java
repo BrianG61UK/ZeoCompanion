@@ -3,8 +3,10 @@ package opensource.zeocompanion.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -146,8 +148,14 @@ public class MainAttributesFragment extends MainFragmentWrapper {
             mRootView = inflater.inflate(R.layout.fragment_main_attributes_before, container, false);
         }
 
+        // obtain the screen size in its current orientation
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        Point screenSize = new Point();
+        display.getSize(screenSize);
+
         // handle the Show Hidden checkbox
         CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_showHidden);
+        if (screenSize.x < 600) { cb.setText("Show\nhidden"); }
         cb.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged (CompoundButton buttonView, boolean isChecked) {
