@@ -23,7 +23,7 @@ import opensource.zeocompanion.database.CompanionDatabaseContract;
 import opensource.zeocompanion.database.CompanionEventDoingsRec;
 import opensource.zeocompanion.utility.Utilities;
 
-// this Fragment allows the end-user to maintain the database table CompanionEventDoings
+// fragment class that creates the UI for managing event doings
 public class CustomizeActivityDoingsFragment extends Fragment implements EditTextDialogFragment.OnExitTextFragListener {
     // member variables
     private View mRootView = null;
@@ -177,6 +177,19 @@ public class CustomizeActivityDoingsFragment extends Fragment implements EditTex
         });
 
         return mRootView;
+    }
+
+    // Called when the fragment's view has been detached from the fragment
+    @Override
+    public void onDestroyView () {
+        mListView_Adapter.clear();
+        mListView_List.clear();
+        mListView_List = null;
+        mListView.setAdapter(null);
+        mListView_Adapter = null;
+        mListView = null;
+        //Log.d(_CTAG + ".onDestroyView", "==========FRAG ON-DESTROYVIEW=====");
+        super.onDestroyView();
     }
 
     // callback handler for the final text from the EditTextDialogFragment for adding or changing a record

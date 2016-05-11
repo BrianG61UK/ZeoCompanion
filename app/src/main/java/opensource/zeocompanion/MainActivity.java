@@ -128,8 +128,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    // called then the Activity is first created or upon return of some other Activity back to this activity;;
-    // note this Activity and its fragments will NOT get re-created upon an orientation change
+    // called then the Activity is first created or upon return of some other Activity back to this activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -425,7 +424,7 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
                 Intent intent4 = new Intent(MainActivity.this, CustomizeActivity.class);
-                intent4.putExtra("startTab", 2);
+                intent4.putExtra("startTab", 3);
                 startActivity(intent4);
                 return true;
 

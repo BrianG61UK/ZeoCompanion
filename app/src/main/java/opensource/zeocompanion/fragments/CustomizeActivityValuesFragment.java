@@ -11,9 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +21,8 @@ import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.database.CompanionAttributeValuesRec;
 import opensource.zeocompanion.utility.Utilities;
 
+// fragment class that creates the UI for managing values for an attribute;
+// this fragment is normally shown "split-screen" on only 1/2 the available display
 public class CustomizeActivityValuesFragment extends Fragment implements EditTextDialogFragment.OnExitTextFragListener {
     // member variables
     private View mRootView = null;
@@ -150,8 +150,14 @@ public class CustomizeActivityValuesFragment extends Fragment implements EditTex
     // Called when the fragment's view has been detached from the fragment
     @Override
     public void onDestroyView () {
-        super.onDestroyView();
+        mListView_Values_Adapter.clear();
+        mListView_Values_List.clear();
+        mListView_Values_List = null;
+        mListView_Values.setAdapter(null);
+        mListView_Values_Adapter = null;
+        mListView_Values = null;
         //Log.d(_CTAG + ".onDestroyView", "==========FRAG ON-DESTROYVIEW=====");
+        super.onDestroyView();
     }
 
     // invoked by the CustomizeActivityAttribsFragment; passed parameter can be null to signal display nothing

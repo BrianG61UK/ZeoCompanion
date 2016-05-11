@@ -26,14 +26,18 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
+import opensource.zeocompanion.activities.CustomizeActivity;
 import opensource.zeocompanion.database.CompanionAttributeValuesRec;
 import opensource.zeocompanion.database.CompanionAttributesRec;
 import opensource.zeocompanion.database.CompanionDatabaseContract;
 import opensource.zeocompanion.utility.Utilities;
 
+// fragment class that creates the UI for managing attributes;
+// this fragment is normally shown "split-screen" on only 1/2 the available display
 public class CustomizeActivityAttribsFragment extends Fragment implements CustomizeActivityAttribsEditDialogFragment.OnAttribEditFragListener {
     // member variables
     private View mRootView = null;
+    private CustomizeActivity mActivity = null;
     private int mMode = 0;
     private ListView mListView_Attribs = null;
     private CAF_Attribs_Adapter mListView_Attribs_Adapter = null;
@@ -103,6 +107,7 @@ public class CustomizeActivityAttribsFragment extends Fragment implements Custom
                     }
                 }
                 mListView_Attribs_Adapter.notifyDataSetChanged();
+                mActivity.informAttributesChanged();
             }
         }
     };
@@ -127,6 +132,7 @@ public class CustomizeActivityAttribsFragment extends Fragment implements Custom
             mMode = getArguments().getInt(ARG_PARAM1);
             _CTAG = _CTAG + mMode;
         }
+        mActivity = (CustomizeActivity)getActivity();
     }
 
     // create the Fragment's view
@@ -137,23 +143,6 @@ public class CustomizeActivityAttribsFragment extends Fragment implements Custom
         View containerView = mRootView.findViewById(R.id.values_container);
         int newContainerID = generateViewId();
         containerView.setId(newContainerID);
-
-        // TODO V1.1 ATTRIBUTE RE-ORDERING: this segment of code will be moved to a separate Fragment
-        // setup a listener for end-user presses of the Attributes up button;
-        // make sure something is selected in the ListView, then invoke a move item up/down handler
-        /*mRootView.findViewById(R.id.button_attrib_up).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                moveAttributeUpDown(true);
-            }
-        });
-
-        // setup a listener for end-user presses of the Attributes down button;
-        // make sure something is selected in the ListView, then invoke a move item up/down handler
-        mRootView.findViewById(R.id.button_attrib_down).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                moveAttributeUpDown(false);
-            }
-        });*/
 
         // if working with the Custom Attributes, show and listen to the add/delete buttons
         if (mMode == 1) {
@@ -299,8 +288,14 @@ public class CustomizeActivityAttribsFragment extends Fragment implements Custom
     // Called when the fragment's view has been detached from the fragment
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
+        mListView_Attribs_Adapter.clear();
+        mListView_Attribs_List.clear();
+        mListView_Attribs_List = null;
+        mListView_Attribs.setAdapter(null);
+        mListView_Attribs_Adapter = null;
+        mListView_Attribs = null;
         //Log.d(_CTAG + ".onDestroyView", "==========FRAG ON-DESTROYVIEW=====");
+        super.onDestroyView();
     }
 
     // the below View API method is available only in SDK 17 and higher
@@ -334,54 +329,6 @@ public class CustomizeActivityAttribsFragment extends Fragment implements Custom
         }
     }
 
-    // TODO V1.1 ATTRIBUTE RE-ORDERING: Note this code or perhaps a drag/drop version will be moved into a separate fragment
-    /*private void moveAttributeUpDown(boolean moveUp) {
-        // get the selected record
-        if (mLastSelectedItem_attribs < 0) { Toast.makeText(getActivity(), "No Attribute item is selected", Toast.LENGTH_SHORT).show(); return; }
-        CompanionAttributesRec aRec1 = mListView_Attribs_List.get(mLastSelectedItem_attribs);
-        if (aRec1.mDisplay_order < 0) { Toast.makeText(getActivity(), "No Attribute item is selected", Toast.LENGTH_SHORT).show(); return; }
-
-        // determine our range within the list for the selected record's sleepStage
-        int posSectionStart = -1;
-        int posSectionEnd = -1;
-        for (int pos = 0; pos < mListView_Attribs_List.size(); pos++) {
-            CompanionAttributesRec existing = mListView_Attribs_List.get(pos);
-            if (existing.mDisplay_order < 0) {
-                if (aRec1.mAppliesToStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_AFTER) {
-                    if (existing.mAppliesToStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_AFTER) { posSectionStart = pos; }
-                    else if (existing.mAppliesToStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) { posSectionEnd = pos; break; }
-                } else {
-                    if (existing.mAppliesToStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) { posSectionStart = pos; break; }
-                }
-            }
-        }
-        if (aRec1.mAppliesToStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) { posSectionEnd = mListView_Attribs_List.size(); }
-
-        // has the selected item reached the limits of the range?
-        int delta = 1;
-        if (moveUp) {
-            delta = -1;
-            if (mLastSelectedItem_attribs <= posSectionStart + 1) { return; }   // yes, cannot move up any further
-        } else {
-            if (mLastSelectedItem_attribs >= posSectionEnd - 1) { return; }   // yes, cannot move down any further
-        }
-
-        // everything is okay, change the display orders and save the results to the database
-        CompanionAttributesRec aRec2 = mListView_Attribs_List.get(mLastSelectedItem_attribs + delta);
-        int dispOrder = aRec1.mDisplay_order;
-        aRec1.mDisplay_order = aRec2.mDisplay_order;
-        aRec2.mDisplay_order = dispOrder;
-        aRec1.saveToDB(ZeoCompanionApplication.mDatabaseHandler);
-        aRec2.saveToDB(ZeoCompanionApplication.mDatabaseHandler);
-
-        // swap their positions in the List
-        mListView_Attribs_List.set(mLastSelectedItem_attribs, aRec2);
-        mListView_Attribs_List.set(mLastSelectedItem_attribs + delta, aRec1);
-        mListView_Attribs_Adapter.notifyDataSetChanged();
-        mLastSelectedItem_attribs = mLastSelectedItem_attribs + delta;
-        mListView_Attribs.setSelection(mLastSelectedItem_attribs);
-    }*/
-
     // callback handler for the final text from the CustomizeActivityAttribsEditDialogFragment for adding or changing a record;
     // this is only allowed in Mode 1 with Custom fields
     public void editedResults(String theNewAttributeText, String theNewShortText, int theNewSleepStage, String action, String theOrigAttributeText, String theOrigShortText, int theOrigSleepStage) {
@@ -414,6 +361,7 @@ public class CustomizeActivityAttribsFragment extends Fragment implements Custom
             mLastSelectedItem_attribs = mListView_Attribs_List.size()-1;
             mListView_Attribs.setSelection(mLastSelectedItem_attribs);
             showValuesList();
+            mActivity.informAttributesChanged();
             return;
         }
 
@@ -441,6 +389,7 @@ public class CustomizeActivityAttribsFragment extends Fragment implements Custom
                     CompanionAttributeValuesRec.renameAllWithAttribute(ZeoCompanionApplication.mDatabaseHandler, oldRec.rAttributeDisplayName, newRec.rAttributeDisplayName);
                     oldRec.rAttributeDisplayName = newRec.rAttributeDisplayName;      // rename the existing record in the ListView list
                     mListView_Attribs_Adapter.notifyDataSetChanged();
+                    mActivity.informAttributesChanged();
                     return;
                 }
             }
