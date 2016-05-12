@@ -53,6 +53,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.MediaScannerConnection;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -498,6 +499,8 @@ public class ZeoCompanionApplication extends Application {
             wrt.write("AppVerName " + BuildConfig.VERSION_NAME + " AppVerCode " + BuildConfig.VERSION_CODE);
             if (mDatabaseHandler != null) { wrt.write(" with DBver " +mDatabaseHandler.mVersion); }
             wrt.write("\n");
+            wrt.write("Android Version " + android.os.Build.VERSION.RELEASE + " API " + android.os.Build.VERSION.SDK_INT + "\n");
+            wrt.write("Platform Manf " + Build.MANUFACTURER + " Model " + Build.MODEL + "\n");
             if (method != null) {
                 if (!method.isEmpty()) {  wrt.write(method + "\n"); }
             }
@@ -560,6 +563,8 @@ public class ZeoCompanionApplication extends Application {
             wrt.write("Appver " + BuildConfig.VERSION_NAME);
             if (mDatabaseHandler != null) { wrt.write(" with DBver " +mDatabaseHandler.mVersion); }
             wrt.write("\n");
+            wrt.write("Android Version " + android.os.Build.VERSION.RELEASE + " API " + android.os.Build.VERSION.SDK_INT + "\n");
+            wrt.write("Platform Manf " + Build.MANUFACTURER + " Model " + Build.MODEL + "\n");
             if (method != null) {
                 if (!method.isEmpty()) {  wrt.write(method + "\n"); }
             }
