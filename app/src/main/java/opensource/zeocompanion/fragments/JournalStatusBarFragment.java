@@ -1,5 +1,6 @@
 package opensource.zeocompanion.fragments;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.media.Ringtone;
@@ -25,6 +26,7 @@ import opensource.zeocompanion.zeo.ZeoAppHandler;
 public class JournalStatusBarFragment extends Fragment {
     private View mRootView = null;
     private boolean mBlinkRedZeoApp = false;
+    private boolean mViewDisabled = false;
     private Animation mBlinkRedZeoApp_Anim = null;
 
     private static final String _CTAG = "JSF";
@@ -61,12 +63,14 @@ public class JournalStatusBarFragment extends Fragment {
             }
         });
 
+        mViewDisabled = false;
         return mRootView;
     }
 
     // Called when the fragment's view has been detached from the fragment
     @Override
     public void onDestroyView () {
+        mViewDisabled = true;   // prevent the JSB handler methods from altering the JSB when its view is gone which can happen in edge cases
         super.onDestroyView();
         //Log.d(_CTAG + ".onDestroyView", "==========FRAG ON-DESTROYVIEW=====");
     }
@@ -75,11 +79,14 @@ public class JournalStatusBarFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        mViewDisabled = false;
         updateAppStatus();  // waiting for most everything in the App to be started
     }
 
     // called by various handlers if the Zeo App or the Journal status have changed, or if the daypoint has changed
     public void updateAppStatus() {
+        if (mViewDisabled) { return; }  // JSB view has been destroyed; ignore this call
+
         // get current screen orientation information; this call's results change depending upon orientation
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         Point screenSize = new Point();
@@ -120,8 +127,11 @@ public class JournalStatusBarFragment extends Fragment {
                     zeoDarkIM.setImageResource(R.drawable.button_blank_red_dark_icon);
                     zeoBrightIM.setImageResource(R.drawable.button_blank_red_bright_icon);
                     if (mBlinkRedZeoApp_Anim == null) {
-                        Animation mBlinkRedZeoApp_Anim = AnimationUtils.loadAnimation(getContext(), R.anim.blink_led_continuous);
-                        zeoDarkIM.startAnimation(mBlinkRedZeoApp_Anim);
+                        Context c = getContext();   // edge case caused an abort because Context went null when JSB detacted from MainActivity
+                        if (c != null) {
+                            Animation mBlinkRedZeoApp_Anim = AnimationUtils.loadAnimation(c, R.anim.blink_led_continuous);
+                            zeoDarkIM.startAnimation(mBlinkRedZeoApp_Anim);
+                        }
                     }
                 } else {
                     if (mBlinkRedZeoApp_Anim != null) {
@@ -170,12 +180,15 @@ public class JournalStatusBarFragment extends Fragment {
 
     // set the entire JSB visible or not visible
     public void setVisible(boolean isVisible) {
+        if (mViewDisabled) { return; }  // JSB view has been destroyed; ignore this call
         if (isVisible) { getView().setVisibility(View.VISIBLE); }
         else { getView().setVisibility(View.GONE); }
     }
 
     // pulse the Zeo App LED; gets triggered by every probe of the Zeo App (regardless of change of state or not)
     public void pulseZeoAppLED() {
+        if (mViewDisabled) { return; }  // JSB view has been destroyed; ignore this call
+
         // check for conditions that would trigger a flashing red LED
         boolean lastBlinkRedZeoApp = mBlinkRedZeoApp;
         int result = ZeoCompanionApplication.mZeoAppHandler.checkforZeoAppAlarm();
@@ -184,12 +197,15 @@ public class JournalStatusBarFragment extends Fragment {
 
         // only play a notification sound if this is at startup (not overnight)
         if (result == -1) {
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
-            boolean playNotification = sp.getBoolean("journal_notification_if_norecord", true);
-            if (playNotification) {
-                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                Ringtone r = RingtoneManager.getRingtone(getContext(), notification);
-                r.play();
+            Context c = getContext();   // edge case caused an abort because Context went null when JSB detacted from MainActivity
+            if (c != null) {
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+                boolean playNotification = sp.getBoolean("journal_notification_if_norecord", true);
+                if (playNotification) {
+                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    Ringtone r = RingtoneManager.getRingtone(c, notification);
+                    r.play();
+                }
             }
         }
 
@@ -198,9 +214,12 @@ public class JournalStatusBarFragment extends Fragment {
 
         // if not blinking, then do a probe pulse
         if (!mBlinkRedZeoApp) {
-            Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.pulse_led_once);
-            ImageView iv = (ImageView)mRootView.findViewById(R.id.imageView_zeoState_dark);
-            iv.startAnimation(anim);    // this animation is a one-shot and thus does not need to be programatically cancelled
+            Context c = getContext();   // edge case caused an abort because Context went null when JSB detacted from MainActivity
+            if (c != null) {
+                Animation anim = AnimationUtils.loadAnimation(c, R.anim.pulse_led_once);
+                ImageView iv = (ImageView)mRootView.findViewById(R.id.imageView_zeoState_dark);
+                iv.startAnimation(anim);    // this animation is a one-shot and thus does not need to be programatically cancelled
+            }
         }
     }
 }
