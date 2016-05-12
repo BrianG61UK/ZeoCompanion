@@ -10,8 +10,10 @@ import android.preference.Preference;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import java.lang.reflect.Field;
@@ -42,7 +44,7 @@ public class TimePreference extends DialogPreference implements Preference.OnPre
     protected View onCreateDialogView() {
         picker = new TimePicker(getContext());
         picker.setIs24HourView(android.text.format.DateFormat.is24HourFormat(getContext()));
-        seTimePickertTextColor(picker, Color.WHITE);
+        setTimePickertTextColor(picker, Color.WHITE);
         return picker;
     }
 
@@ -116,19 +118,41 @@ public class TimePreference extends DialogPreference implements Preference.OnPre
         return true;
     }
 
-    private void seTimePickertTextColor(TimePicker picker, int color) {
+    // note the default time-picker changes in Android 5.x to a clock;
+    // appears to be no programmatic support for choosing the mode
+    private void setTimePickertTextColor(TimePicker picker, int color) {
         Resources system = Resources.getSystem();
         int hour_numberpicker_id = system.getIdentifier("hour", "id", "android");
-        int minute_numberpicker_id = system.getIdentifier("minute", "id", "android");
-        int ampm_numberpicker_id = system.getIdentifier("amPm", "id", "android");
+        NumberPicker hour_numberpicker = (NumberPicker)picker.findViewById(hour_numberpicker_id);
+        if (hour_numberpicker != null) {
+            int minute_numberpicker_id = system.getIdentifier("minute", "id", "android");
+            int ampm_numberpicker_id = system.getIdentifier("amPm", "id", "android");
+            NumberPicker minute_numberpicker = (NumberPicker) picker.findViewById(minute_numberpicker_id);
+            NumberPicker ampm_numberpicker = (NumberPicker) picker.findViewById(ampm_numberpicker_id);
 
-        NumberPicker hour_numberpicker = (NumberPicker) picker.findViewById(hour_numberpicker_id);
-        NumberPicker minute_numberpicker = (NumberPicker) picker.findViewById(minute_numberpicker_id);
-        NumberPicker ampm_numberpicker = (NumberPicker) picker.findViewById(ampm_numberpicker_id);
+            set_NP_textColor(hour_numberpicker, color);
+            set_NP_textColor(minute_numberpicker, color);
+            set_NP_textColor(ampm_numberpicker, color);
+        } else {
+            int hour_textView_id = system.getIdentifier("hours", "id", "android");
+            TextView hour_textView = (TextView)picker.findViewById(hour_textView_id);
+            if (hour_textView != null) {
+                int separator_textView_id = system.getIdentifier("separator", "id", "android");
+                TextView separator_textView = (TextView)picker.findViewById(separator_textView_id);
+                int minute_textView_id = system.getIdentifier("minutes", "id", "android");
+                TextView minute_textView = (TextView)picker.findViewById(minute_textView_id);
+                int am_textView_id = system.getIdentifier("am_label", "id", "android");
+                TextView am_textView = (TextView)picker.findViewById(am_textView_id);
+                int pm_textView_id = system.getIdentifier("pm_label", "id", "android");
+                TextView pm_textView = (TextView)picker.findViewById(pm_textView_id);
 
-        set_NP_textColor(hour_numberpicker, color);
-        set_NP_textColor(minute_numberpicker, color);
-        set_NP_textColor(ampm_numberpicker, color);
+                hour_textView.setTextColor(color);
+                separator_textView.setTextColor(color);
+                minute_textView.setTextColor(color);
+                am_textView.setTextColor(color);
+                pm_textView.setTextColor(color);
+            }
+        }
     }
 
     private void set_NP_textColor(NumberPicker number_picker, int color){
