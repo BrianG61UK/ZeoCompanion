@@ -41,6 +41,9 @@ public class DirectEmailerOutbox {
         public String rAttachmentPath = null;
         public String rShortErrorMessage = null;
         public String rLongErrorMessage = null;
+
+        // the following is a control that is not stored in the record on-disk
+        public boolean mResent = false;
     }
 
     // constructor

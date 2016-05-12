@@ -87,7 +87,9 @@ public class OutboxActivityFragment extends Fragment implements EditTextDialogFr
         @Override
         public void onClick(View button) {
             DirectEmailerOutbox.OutboxEntry rec = (DirectEmailerOutbox.OutboxEntry)button.getTag();
-            Utilities.showYesNoDialog(getContext(), "Confirm", "Are you sure you want to permanently delete this Outbox entry", "Delete", "Cancel", mYesNoListener, 1, rec.rFilePath, null);
+            if (rec != null) {
+                Utilities.showYesNoDialog(getContext(), "Confirm", "Are you sure you want to permanently delete this Outbox entry", "Delete", "Cancel", mYesNoListener, 1, rec.rFilePath, null);
+            }
         }
     };
 
@@ -109,6 +111,8 @@ public class OutboxActivityFragment extends Fragment implements EditTextDialogFr
                 if (!rec.rToAll) { de.configureToAddress(rec.rToAddress); }
                 de.setResultsCallback(mEmailResult, rec.rFilePath, true);
                 de.start();
+                rec.mResent = true;
+                mListView_Adapter.notifyDataSetChanged();
             }
         }
     };
@@ -177,7 +181,7 @@ public class OutboxActivityFragment extends Fragment implements EditTextDialogFr
         refresh();
     }
 
-    // inform the Main Activity so it can changes its menus; must be done via messaging
+    // inform the Main Activity so it can changes its menus in case all Outbox entries are now gone; must be done via messaging
     private void informMainActivity() {
         if (MainActivity.instance != null) {
             Message msg = new Message();
@@ -228,8 +232,16 @@ public class OutboxActivityFragment extends Fragment implements EditTextDialogFr
             tv.setText(str);
 
             Button bt1 = (Button)rowView.findViewById(R.id.rowbutton_delete);
-            bt1.setTag(rec);
-            bt1.setOnClickListener(mDeleteButtonListener);
+            if (rec.mResent) {
+                bt1.setVisibility(View.INVISIBLE);
+                bt1.setTag(null);
+                bt1.setOnClickListener(null);
+
+            } else {
+                bt1.setVisibility(View.VISIBLE);
+                bt1.setTag(rec);
+                bt1.setOnClickListener(mDeleteButtonListener);
+            }
 
             Button bt2 = (Button)rowView.findViewById(R.id.rowbutton_resend);
             bt2.setTag(rec);
