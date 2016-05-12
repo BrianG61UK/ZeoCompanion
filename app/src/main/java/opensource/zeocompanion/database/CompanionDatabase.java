@@ -446,11 +446,16 @@ public class CompanionDatabase extends SQLiteOpenHelper {
     // perform an insert or replace; works for all database tables;
     // returns the rowID that was inserted or replaced
     public long insertOrReplaceRecs(String table, ContentValues values) {
-        return insertOrReplaceRecs(table, values, false);
+        if (mInvalidDB) { return -1; }
+        SQLiteDatabase db = getWritableDatabase();
+        return insertOrReplaceRecs(db, table, values, false);
     }
     public long insertOrReplaceRecs(String table, ContentValues values, boolean noAlert) {
         if (mInvalidDB) { return -1; }
         SQLiteDatabase db = getWritableDatabase();
+        return insertOrReplaceRecs(db, table, values, noAlert);
+    }
+    public long insertOrReplaceRecs(SQLiteDatabase db, String table, ContentValues values, boolean noAlert) {
         long rowID = -1;
         try {
             rowID = db.replaceOrThrow(table, "", values);
@@ -625,9 +630,10 @@ public class CompanionDatabase extends SQLiteOpenHelper {
                     CompanionSleepEpisodesRec rec = new CompanionSleepEpisodesRec(cursor);
                     if (rec.rAmendedFlags != 0) {
                         rec.rAmendedFlags = 0;
-                        rec.saveToDB();
+                        rec.saveToDB(db, true);
                     }
                 } while (cursor.moveToNext());
+                cursor.close();
                 return true;
             }
         } catch (SQLException e) {

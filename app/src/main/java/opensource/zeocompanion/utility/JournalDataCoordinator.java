@@ -49,7 +49,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
     // the ZeoAppHandler will have been resynchronized before this handler
     public void resynchronize() {
         // first toss out anything that is now too old
-        //Log.d(_CTAG+".resynchronize","STARTING");
+        Log.d(_CTAG+".resynchronize","STARTING");
         long timeNow = System.currentTimeMillis();
         long time24HoursAgo = timeNow - 86400000L;
         if (mDaypoint_CSEs[0] != null) {
@@ -217,7 +217,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
         }
 
         // Zeo App is not idle and has no Zeo Sleep Record yet (this should only occur in STARTING mode);
-        // a STARTING-only CSE is not saved in the database but should be present in the daypoint CSEs unless the App crashed
+        // a STARTING-only CSE is not saved in the database but should be present in the daypoint CSEs unless the App was restarted
         if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State <= ZeoAppHandler.ZAH_ZEOAPP_STATE_STARTING) {
             for (int dp = -1; dp <= 1; dp++) {
                 if (mDaypoint_CSEs[dp + 1] != null) {

@@ -2,6 +2,7 @@ package opensource.zeocompanion.database;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -187,66 +188,75 @@ public class CompanionSleepEpisodesRec {
     // save the record to the database; if not already existing it will be added; if already existing it will be updated;
     // if the CSV strings have been unpacked, they will be automatically repacked
     public void saveToDB() {
-        try {   // master Exception catcher
-            if (mEvents_array != null) { packEventCSVstring(); }
-            if (mAttribs_Fixed_array != null || mAttribs_Vari_array != null) { packInfoCSVstrings(); }
-            ContentValues values = new ContentValues();
-            if (rID != 0)  values.put(CompanionDatabaseContract.CompanionSleepEpisodes._ID, rID);
-            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_START_OF_RECORD_TIMESTAMP, rStartOfRecord_Timestamp);
-            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_END_OF_RECORD_TIMESTAMP, rEndOfRecord_Timestamp);
-            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_STATES_FLAG, rStatesFlag);
-            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ZEO_SLEEP_EPISODE_ID, rZeoSleepEpisode_ID);
-            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_ZEO_STARTING_TIMESTAMP, rZeoEventStarting_Timestamp);
-            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_ZEO_RECORDING_TIMESTAMP, rZeoEventRecording_Timestamp);
-            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_ZEO_ENDING_TIMESTAMP, rZeoEventEnding_Timestamp);
-            //values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_CNT_AWAKENINGS, rCountAwakenings); // not used
-            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_GOT_INTO_BED_TIMESTAMP, rEvent_GotIntoBed_Timestamp);
-            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_TRYING_TO_SLEEP_TIMESTAMP, rEvent_TryingToSleep_Timestamp);
-            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_OUT_OF_BED_DONE_SLEEPING_TIMESTAMP, rEvent_OutOfBedDoneSleeping_Timestamp);
-
-            if (rEvents_CSV_string == null) { values.putNull(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENTS_CSV_STRING); }
-            else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENTS_CSV_STRING, rEvents_CSV_string); }
-            if (rAttributes_Fixed_CSV_string == null) { values.putNull(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ATTRIBS_FIXED_CSV_STRING); }
-            else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ATTRIBS_FIXED_CSV_STRING, rAttributes_Fixed_CSV_string); }
-            if (rAttributes_Vari_CSV_string == null) { values.putNull(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ATTRIBS_VARI_CSV_STRING); }
-            else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ATTRIBS_VARI_CSV_STRING, rAttributes_Vari_CSV_string); }
-
-            if (ZeoCompanionApplication.mDatabaseHandler.mVersion > 1) {
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMENDED, rAmendedFlags);
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_START_OF_NIGHT, rAmend_StartOfNight);
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_END_OF_NIGHT, rAmend_EndOfNight);
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_AWAKENINGS, rAmend_CountAwakenings);
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TIME_TO_Z, (int)(rAmend_Time_to_Z_min * 2.0));
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TOTAL_Z, (int)(rAmend_Time_Total_Z_min * 2.0));
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TIME_IN_WAKE, (int)(rAmend_Time_Awake_min * 2.0));
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TIME_IN_REM, (int)(rAmend_Time_REM_min * 2.0));
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TIME_IN_LIGHT, (int)(rAmend_Time_Light_min * 2.0));
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TIME_IN_DEEP, (int)(rAmend_Time_Deep_min * 2.0));
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_ZQ_SCORE, rAmend_ZQ_Score);
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_LIGHT_CHANGED_TO_DEEP, (int)(rAmend_LightChangedToDeep_min * 2.0));
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DEEP_SUM, rAmend_DeepSum);
-
-                if (rAmend_Display_Hypnogram == null) { values.putNull(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DISPLAY_HYPNOGRAM);
-                } else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DISPLAY_HYPNOGRAM, rAmend_Display_Hypnogram); }
-                if (rAmend_Base_Hypnogram == null) { values.putNull(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_BASE_HYPNOGRAM); }
-                else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_BASE_HYPNOGRAM, rAmend_Base_Hypnogram); }
-            }
-            if (ZeoCompanionApplication.mDatabaseHandler.mVersion >= 4) {
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_HIGH, rZeoHeadbandBattery_High);
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_LOW, rZeoHeadbandBattery_Low);
-                values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DISPLAY_HYPNOGRAM_STARTTIME, rAmend_Display_Hypnogram_Starttime);
-            }
-
-            long result = ZeoCompanionApplication.mDatabaseHandler.insertOrReplaceRecs(CompanionDatabase.CompanionSleepEpisodes_TABLE_NAME, values);
-            if (result > 0) {   // errors are already handled by insertOrReplaceRecs
-                rID = result;
-                Log.d(_CTAG + ".saveToDB", "ID=" + rID + ", ZeoID=" + rZeoSleepEpisode_ID);
-                Log.d(_CTAG + ".saveToDB", "Events Zs="+rZeoEventStarting_Timestamp+"; In="+rEvent_GotIntoBed_Timestamp+"; Zr="+rZeoEventRecording_Timestamp+"; Go="+rEvent_GotIntoBed_Timestamp+"; Ze="+rZeoEventEnding_Timestamp+"; Do="+rEvent_OutOfBedDoneSleeping_Timestamp+"; String=" + rEvents_CSV_string);
-                Log.d(_CTAG + ".saveToDB", "FixedAttrStr=" + rAttributes_Fixed_CSV_string);
-            }
-        } catch (Exception e) {
-            ZeoCompanionApplication.postToErrorLog(_CTAG+".saveToDB", e, "CSE ID="+rID);    // automatically posts a Log.e
+        ContentValues values = saveToDB_build();
+        long result = ZeoCompanionApplication.mDatabaseHandler.insertOrReplaceRecs(CompanionDatabase.CompanionSleepEpisodes_TABLE_NAME, values);
+        if (result > 0) {   // errors are already handled by insertOrReplaceRecs
+            rID = result;
+            Log.d(_CTAG + ".saveToDB", "ID=" + rID + ", ZeoID=" + rZeoSleepEpisode_ID);
+            Log.d(_CTAG + ".saveToDB", "Events Zs="+rZeoEventStarting_Timestamp+"; In="+rEvent_GotIntoBed_Timestamp+"; Zr="+rZeoEventRecording_Timestamp+"; Go="+rEvent_GotIntoBed_Timestamp+"; Ze="+rZeoEventEnding_Timestamp+"; Do="+rEvent_OutOfBedDoneSleeping_Timestamp+"; String=" + rEvents_CSV_string);
+            Log.d(_CTAG + ".saveToDB", "FixedAttrStr=" + rAttributes_Fixed_CSV_string);
         }
+    }
+    public void saveToDB(SQLiteDatabase db, boolean noAlert) {
+        ContentValues values = saveToDB_build();
+        long result = ZeoCompanionApplication.mDatabaseHandler.insertOrReplaceRecs(db, CompanionDatabase.CompanionSleepEpisodes_TABLE_NAME, values, noAlert);
+        if (result > 0) {   // errors are already handled by insertOrReplaceRecs
+            rID = result;
+            Log.d(_CTAG + ".saveToDB_db", "ID=" + rID + ", ZeoID=" + rZeoSleepEpisode_ID);
+            Log.d(_CTAG + ".saveToDB_db", "Events Zs="+rZeoEventStarting_Timestamp+"; In="+rEvent_GotIntoBed_Timestamp+"; Zr="+rZeoEventRecording_Timestamp+"; Go="+rEvent_GotIntoBed_Timestamp+"; Ze="+rZeoEventEnding_Timestamp+"; Do="+rEvent_OutOfBedDoneSleeping_Timestamp+"; String=" + rEvents_CSV_string);
+            Log.d(_CTAG + ".saveToDB_db", "FixedAttrStr=" + rAttributes_Fixed_CSV_string);
+        }
+    }
+    public ContentValues saveToDB_build() {
+        if (mEvents_array != null) { packEventCSVstring(); }
+        if (mAttribs_Fixed_array != null || mAttribs_Vari_array != null) { packInfoCSVstrings(); }
+        ContentValues values = new ContentValues();
+        if (rID != 0)  values.put(CompanionDatabaseContract.CompanionSleepEpisodes._ID, rID);
+        values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_START_OF_RECORD_TIMESTAMP, rStartOfRecord_Timestamp);
+        values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_END_OF_RECORD_TIMESTAMP, rEndOfRecord_Timestamp);
+        values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_STATES_FLAG, rStatesFlag);
+        values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ZEO_SLEEP_EPISODE_ID, rZeoSleepEpisode_ID);
+        values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_ZEO_STARTING_TIMESTAMP, rZeoEventStarting_Timestamp);
+        values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_ZEO_RECORDING_TIMESTAMP, rZeoEventRecording_Timestamp);
+        values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_ZEO_ENDING_TIMESTAMP, rZeoEventEnding_Timestamp);
+        //values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_CNT_AWAKENINGS, rCountAwakenings); // not used
+        values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_GOT_INTO_BED_TIMESTAMP, rEvent_GotIntoBed_Timestamp);
+        values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_TRYING_TO_SLEEP_TIMESTAMP, rEvent_TryingToSleep_Timestamp);
+        values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENT_OUT_OF_BED_DONE_SLEEPING_TIMESTAMP, rEvent_OutOfBedDoneSleeping_Timestamp);
+
+        if (rEvents_CSV_string == null) { values.putNull(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENTS_CSV_STRING); }
+        else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_EVENTS_CSV_STRING, rEvents_CSV_string); }
+        if (rAttributes_Fixed_CSV_string == null) { values.putNull(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ATTRIBS_FIXED_CSV_STRING); }
+        else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ATTRIBS_FIXED_CSV_STRING, rAttributes_Fixed_CSV_string); }
+        if (rAttributes_Vari_CSV_string == null) { values.putNull(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ATTRIBS_VARI_CSV_STRING); }
+        else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ATTRIBS_VARI_CSV_STRING, rAttributes_Vari_CSV_string); }
+
+        if (ZeoCompanionApplication.mDatabaseHandler.mVersion > 1) {
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMENDED, rAmendedFlags);
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_START_OF_NIGHT, rAmend_StartOfNight);
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_END_OF_NIGHT, rAmend_EndOfNight);
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_AWAKENINGS, rAmend_CountAwakenings);
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TIME_TO_Z, (int)(rAmend_Time_to_Z_min * 2.0));
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TOTAL_Z, (int)(rAmend_Time_Total_Z_min * 2.0));
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TIME_IN_WAKE, (int)(rAmend_Time_Awake_min * 2.0));
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TIME_IN_REM, (int)(rAmend_Time_REM_min * 2.0));
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TIME_IN_LIGHT, (int)(rAmend_Time_Light_min * 2.0));
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_TIME_IN_DEEP, (int)(rAmend_Time_Deep_min * 2.0));
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_ZQ_SCORE, rAmend_ZQ_Score);
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_LIGHT_CHANGED_TO_DEEP, (int)(rAmend_LightChangedToDeep_min * 2.0));
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DEEP_SUM, rAmend_DeepSum);
+
+            if (rAmend_Display_Hypnogram == null) { values.putNull(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DISPLAY_HYPNOGRAM);
+            } else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DISPLAY_HYPNOGRAM, rAmend_Display_Hypnogram); }
+            if (rAmend_Base_Hypnogram == null) { values.putNull(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_BASE_HYPNOGRAM); }
+            else { values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_BASE_HYPNOGRAM, rAmend_Base_Hypnogram); }
+        }
+        if (ZeoCompanionApplication.mDatabaseHandler.mVersion >= 4) {
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_HIGH, rZeoHeadbandBattery_High);
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_HEADBAND_BATTERY_LOW, rZeoHeadbandBattery_Low);
+            values.put(CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_AMEND_DISPLAY_HYPNOGRAM_STARTTIME, rAmend_Display_Hypnogram_Starttime);
+        }
+        return values;
     }
 
     // remove the indicated SleepEpisode record from the database
