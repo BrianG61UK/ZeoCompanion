@@ -29,6 +29,7 @@ public class ImageExporter {
     private String mImageDirectory = null;
     private String mName = null;
     private boolean mAmendedPlaceFirst = false;
+    private long mSequenceNumber = 0;
 
     // member constants and other static content
     private static final String _CTAG = "IEU";
@@ -296,8 +297,9 @@ public class ImageExporter {
                 str = str + "Standard";
                 break;
         }
-        str = str + "_" + mSDF3.format(new Date()) + ".png";
+        str = str + "_" + mSDF3.format(new Date()) + "_" + mSequenceNumber + ".png";
         File f = new File(exportsDir.getAbsolutePath() + File.separator + str);
+        mSequenceNumber++;
 
         // create the new empty file
         String errString = "";

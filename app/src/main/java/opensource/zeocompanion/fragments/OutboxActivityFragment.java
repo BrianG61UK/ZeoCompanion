@@ -223,7 +223,7 @@ public class OutboxActivityFragment extends Fragment implements EditTextDialogFr
 
             DirectEmailerOutbox.OutboxEntry rec = mArrayList.get(position);
             TextView tv = (TextView)rowView.findViewById(R.id.rowtextView_info);
-            String str = mOutboxcAdapter_dateFormat.format(new Date(rec.rTimestamp)) + " \n";
+            String str = "\n\n" + mOutboxcAdapter_dateFormat.format(new Date(rec.rTimestamp)) + " \n";
             if (rec.rToAll) { str = str + "To: (all), "; }
             else { str = str + "To: "+rec.rToAddress+", "; }
             str = str + "Subject: " + rec.rSubject;

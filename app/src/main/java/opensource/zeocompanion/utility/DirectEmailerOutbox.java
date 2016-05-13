@@ -24,8 +24,8 @@ import opensource.zeocompanion.activities.SharingActivity;
 // maintains the direct email outbox; outbox only contains pending emails that failed to send
 public class DirectEmailerOutbox {
     // member variables
-    Context mContext = null;
-    long mSequenceNumber = 0;
+    private Context mContext = null;
+    private long mSequenceNumber = 0;
 
     // member constants and other static content
     private static final String _CTAG = "OBU";
@@ -52,18 +52,35 @@ public class DirectEmailerOutbox {
     // called daily by the AlarmManager to check for automatic export via Direct Email
     public void dailyCheck() {
         // determine if the Daily Check should continue
-        Log.d(_CTAG + ".dailyCheck", "Daily check triggered");
+        //Log.d(_CTAG + ".dailyCheck", "Daily check triggered");
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         boolean enabled = prefs.getBoolean("email_auto_enable", false);
         if (!enabled) { return; }
 
-        // select any new records since the lastmost highest timestamp (plus one second)
-        long timestampLastAutoExported = prefs.getLong("email_auto_timestamp_last_exported", 0) + 1000;
+        // are there records that need to be auto-exported?
         ArrayList<JournalDataCoordinator.IntegratedHistoryRec> iRecs = new ArrayList<JournalDataCoordinator.IntegratedHistoryRec>();
-        ZeoCompanionApplication.mCoordinator.getAllIntegratedHistoryRecsFromDate(iRecs, timestampLastAutoExported);
+        long timestampLastAutoExported = prefs.getLong("email_auto_timestamp_last_exported", 0);
+        if (timestampLastAutoExported == 0) {
+            // first time doing an auto-export; are there any records within the last 24 hour?
+            Log.d(_CTAG+".dailyCheck","First Time");
+            timestampLastAutoExported = System.currentTimeMillis() - 86400000L;
+            ZeoCompanionApplication.mCoordinator.getAllIntegratedHistoryRecsFromDate(iRecs, timestampLastAutoExported);
+            if (iRecs.isEmpty()) {
+                // nope; just store away the timestamp for the next auto-export trigger
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putLong("email_auto_timestamp_last_exported", timestampLastAutoExported);
+                editor.commit();
+                return;
+            }
+            // yes, export only those within the last 24 hours
+        } else {
+            // select any new records since the lastmost highest timestamp (plus one second)
+            timestampLastAutoExported = timestampLastAutoExported + 1000;
+            ZeoCompanionApplication.mCoordinator.getAllIntegratedHistoryRecsFromDate(iRecs, timestampLastAutoExported);
+        }
         if (iRecs.isEmpty()) {
             // nothing new to export
-            Log.d(_CTAG+".dailyCheck","Daily check found nothing new to export");
+            //Log.d(_CTAG+".dailyCheck","Daily check found nothing new to export");
             return;
         }
         boolean sendCSV = prefs.getBoolean("email_auto_send_csv", true);
@@ -85,7 +102,7 @@ public class DirectEmailerOutbox {
             }
         }
 
-        // send an Image via Direct Email
+        // send Images via Direct Email
         subject = "ZeoCompanion Image auto export";
         body = subject + "; see attachment.";
         if (sendImage) {
@@ -149,7 +166,7 @@ public class DirectEmailerOutbox {
 
         // create the outbox header file itself
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
-        String str = "Outbox_"+mSequenceNumber+"_"+ df.format(new Date()) + ".txt";
+        String str = "Outbox_" + mSequenceNumber + "_" + df.format(new Date()) + ".txt";
         mSequenceNumber++;
         File theOutboxFile = new File(outboxFilesDir.getAbsolutePath() + File.separator + str);
 

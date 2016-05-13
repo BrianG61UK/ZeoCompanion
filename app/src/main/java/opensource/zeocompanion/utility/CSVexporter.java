@@ -32,6 +32,7 @@ public class CSVexporter {
     private boolean mIncludeValueText = true;
     private String mCSVdirectory = null;
     private String mName = null;
+    private long mSequenceNumber = 0;
 
     // member constants and other static content
     private static final String _CTAG = "CEU";
@@ -236,8 +237,9 @@ public class CSVexporter {
                 str = str + "SS-ZeoDB-Epochs";
                 break;
         }
-        str = str + "_" + mSDF3.format(new Date()) + ".csv";
+        str = str + "_" + mSDF3.format(new Date()) + "_" + mSequenceNumber + ".csv";
         File f = new File(exportsDir.getAbsolutePath() + File.separator + str);
+        mSequenceNumber++;
 
         // create the new empty file
         String errString = "";
