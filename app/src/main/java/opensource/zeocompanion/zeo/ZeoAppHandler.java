@@ -23,6 +23,7 @@ import opensource.zeocompanion.database.CompanionDatabaseContract;
 // primary Handler for interacting with the Zeo App
 public class ZeoAppHandler {
     // member variables
+    public int mZeoApp_Prior_State = ZAH_ZEOAPP_STATE_UNKNOWN;
     public int mZeoApp_State = ZAH_ZEOAPP_STATE_UNKNOWN;
     public long mZeoApp_State_timestamp = 0L;
     public long mZeoApp_active_SleepEpisode_ID = 0L;
@@ -376,7 +377,7 @@ public class ZeoAppHandler {
     public boolean probeAppState() {
         boolean theReturn = false;
         //Log.d(_CTAG+".probeAppState", "-->Probing the ZeoApp");
-        int priorState = mZeoApp_State; // keep for Log.d
+        mZeoApp_Prior_State = mZeoApp_State;
         int newState = ZAH_ZEOAPP_STATE_UNKNOWN;
         mZeoHeadband_battery_lastProbed = 0;
 
@@ -512,7 +513,7 @@ public class ZeoAppHandler {
         }
 
         if (theReturn) {
-            String str = "ZeoApp state changed: State: Prior=" + priorState + ", New=" + mZeoApp_State + "; curr: ID=" + mZeoApp_active_SleepEpisode_ID;
+            String str = "ZeoApp state changed: State: Prior=" + mZeoApp_Prior_State + ", New=" + mZeoApp_State + "; curr: ID=" + mZeoApp_active_SleepEpisode_ID;
             Log.d(_CTAG+".probeAppState", str);
         }
         return theReturn;

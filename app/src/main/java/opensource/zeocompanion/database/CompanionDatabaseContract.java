@@ -181,10 +181,11 @@ public final class CompanionDatabaseContract {
                 COLUMN_AMEND_BASE_HYPNOGRAM
         };
 
-        public static final int SLEEP_EPISODE_STATESFLAG_JOURNAL_EXPLICITSTART = 0x01;
-        public static final int SLEEP_EPISODE_STATESFLAG_ZEO_EXPLICITRECORD = 0x02;
-        public static final int SLEEP_EPISODE_STATESFLAG_JOURNAL_EXPLICITEND = 0x10;
-        public static final int SLEEP_EPISODE_STATESFLAG_ZEO_EXPLICITEND = 0x20;
+        public static final int SLEEP_EPISODE_STATESFLAG_JOURNAL_EXPLICITSTART = 0x0001;
+        public static final int SLEEP_EPISODE_STATESFLAG_ZEO_EXPLICITRECORD = 0x0002;
+        public static final int SLEEP_EPISODE_STATESFLAG_JOURNAL_EXPLICITEND = 0x0010;
+        public static final int SLEEP_EPISODE_STATESFLAG_ZEO_EXPLICITEND = 0x0020;
+        public static final int SLEEP_EPISODE_STATESFLAG_ZEO_DEADREC = 0x0100;
 
         public static final int SLEEP_EPISODE_NONEVENT_HANDLED = -1;
         public static final int SLEEP_EPISODE_EVENT_GOT_INTO_BED = 10;

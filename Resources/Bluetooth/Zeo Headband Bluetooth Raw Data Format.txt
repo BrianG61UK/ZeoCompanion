@@ -1,4 +1,4 @@
-Zeo Headband Bluetooth Protocol for Zeo-Mobile
+﻿Zeo Headband Bluetooth Protocol for Zeo-Mobile
 Document dated: 5 May 2016
 
 
@@ -47,6 +47,7 @@ Contents
 	Timestamp(sec)	Interaction	Message and selected data
 	--------------	-----------	-------------------------
 	***Headband removed from power cord***
+	***Zeo App changed to Starting***
 
 	0000.000000	HB->Tablet	CHANGE_STATE_REPORT: EVENT_UNDOCKED
 	0000.497715	HB->Tablet	CHANGE_STATE_REPORT: EVENT_SLEEP_STATE_CHANGE
@@ -68,6 +69,8 @@ Contents
 
 	***Lay down and started reading a book***
 
+	***Zeo App changed to Recording***
+
 	0117.708602	HB->Tablet	SLEEP_REPORT: Start=1456878300; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0
 	0119.702430	HB->Tablet	CHANGE_STATE_REPORT: EVENT_SLEEP_NIGHT_STARTING
 	0119.703742	HB->Tablet	CHANGE_STATE_REPORT: EVENT_SLEEP_MODE_CHANGED
@@ -76,6 +79,9 @@ Contents
 	0120.237533	HB->Tablet	STATE_REPORT: -Active_Forced, -Bluetooth_Locked, -Demo_Mode, -Docked, +On_Head, -Requires_PIN, -Was_Charged, +Was_Queried, Volts=88, VolState=ZEO_VOLTAGE_ON_BATTERY, lastAlarmReason=0, LastAlgorMode=RECORDING
 	0120.271222	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0
 	0120.429971	HB->Tablet	STATE_REPORT: -Active_Forced, -Bluetooth_Locked, -Demo_Mode, -Docked, +On_Head, -Requires_PIN, -Was_Charged, +Was_Queried, Volts=88, VolState=ZEO_VOLTAGE_ON_BATTERY, lastAlarmReason=0, LastAlgorMode=RECORDING
+
+	***Headband readjusted upon head***
+
 	0239.902637	HB->Tablet	CHANGE_STATE_REPORT: EVENT_OFF_HEAD
 	0248.880951	HB->Tablet	CHANGE_STATE_REPORT: EVENT_ON_HEAD
 	0417.959673	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+600; TimeIn(z;t={a,r,l,d})=0;0={0,0,0,0}; ZQ=0 
@@ -107,6 +113,7 @@ Contents
 	5218.034517	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+5400; TimeIn(z;t={a,r,l,d})=107;65={0,7,56,2}; ZQ=5
 
 	***Plugged headband into power cord***
+	***Zeo App changed to Ending***
 
 	5227.011880	HB->Tablet	CHANGE_STATE_REPORT: EVENT_DOCKED
 	5227.510689	HB->Tablet	CHANGE_STATE_REPORT: EVENT_SLEEP_MODE_CHANGED
@@ -114,6 +121,8 @@ Contents
 	5228.045918	HB->Tablet	STATE_REPORT: -Active_Forced, -Bluetooth_Locked, -Demo_Mode, +Docked, -On_Head, -Requires_PIN, -Was_Charged, +Was_Queried, Volts=0, VolState=ZEO_VOLTAGE_CHARGING, lastAlarmReason=0, LastAlgorMode=ENDING
 	5228.046665	Tablet->HB	COMMAND_REQUEST: ZEO_COMMAND_SLEEP_SEND
 	5228.105762	HB->Tablet	SLEEP_REPORT: Start=1456878300,Night=+302,End=+5400; TimeIn(z;t={a,r,l,d})=107;65={0,7,56,2}; ZQ=5
+
+	***Zeo App changed to Idle***
 	$END
 
 	The Display Histogram (every 5 min) that resulted from this interaction was:

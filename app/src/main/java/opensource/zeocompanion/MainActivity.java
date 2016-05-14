@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 case ZeoCompanionApplication.MESSAGE_MAIN_ZAH_STATE_CHANGE:
                     // the ZAH indicates that the Zeo App has state changed
                     //Log.d(_CTAG + ".mHandler", "Received message that ZAH has detected a Zeo App state change");
+                    mSectionsPagerAdapter.informOneFragmentsBySSToRefresh(TAB_SUMMARY);
                     mJStatusBar.updateAppStatus();
                     mJStatusBar.pulseZeoAppLED();
                     break;
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case ZeoCompanionApplication.MESSAGE_MAIN_UPDATE_ALL:
                     // the JDC has shifted daypoints, and needs the MainActivity fragments to re-assess whether they are read/write or now read-only
+                    // and what content they are showing
                     //Log.d(_CTAG + ".mHandler", "Received message to update All from a handler");
                     mSectionsPagerAdapter.informAllFragmentsDaypointChanged();
                     mJStatusBar.updateAppStatus();
