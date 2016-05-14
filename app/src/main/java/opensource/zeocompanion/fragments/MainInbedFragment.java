@@ -143,6 +143,7 @@ public class MainInbedFragment extends MainFragmentWrapper {
         //Log.d(_CTAG + ".onResume", "==========FRAG ON-RESUME=====");
         // this logic helps prevent "ghost" clicks of the spinner when tabbing through the MainActivity FragmentPagerAdapter
         EvtSpinner theSpinner = (EvtSpinner)mRootView.findViewById(R.id.spinner_doing);
+        theSpinner.setOnTouchListener(mListener);
         theSpinner.setOnItemSelectedListener(mListener);
     }
 
@@ -153,6 +154,7 @@ public class MainInbedFragment extends MainFragmentWrapper {
         //Log.d(_CTAG+".onPause","==========FRAG ON-PAUSE=====");
         // this logic helps prevent "ghost" clicks of the spinner when tabbing through the MainActivity FragmentPagerAdapter
         EvtSpinner theSpinner = (EvtSpinner)mRootView.findViewById(R.id.spinner_doing);
+        theSpinner.setOnTouchListener(null);
         theSpinner.setOnItemSelectedListener(null);
         mListener = null;
     }
