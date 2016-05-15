@@ -596,6 +596,7 @@ public class HypnogramView extends GraphView {
             case 1:
                 // compact
                 render.setHorizontalLabelsVisible(false);
+                break;
             case 2:
                 // detailed
                 render.setHorizontalLabelsVisible(true);
