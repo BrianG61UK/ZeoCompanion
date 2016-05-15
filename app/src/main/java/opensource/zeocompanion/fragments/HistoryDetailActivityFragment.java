@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+
+import com.myzeo.android.api.data.ZeoDataContract;
 import com.obscuredPreferences.ObscuredPrefs;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -105,6 +107,24 @@ public class HistoryDetailActivityFragment extends Fragment {
             // Inflate the layout for this fragment
             mRootView = inflater.inflate(R.layout.fragment_history_detail, container, false);
             mBigHypnoFrag = new HistoryDetailScrollHypnoDialogFragment();
+
+            // if the ZSE or the CSE in the iRec are still active, then do a reload of them both because their contents may have changed
+            // after the History Tab built its list of records
+            boolean reloadNeeded = false;
+            if (ZeoCompanionApplication.mIrec_HDAonly != null) {
+                if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord != null) {
+                    if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rEndReason == ZeoDataContract.SleepRecord.END_REASON_ACTIVE) {
+                        reloadNeeded = true;
+                    }
+                }
+                if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {
+                    if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.getStatusCode() != CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_STATUSCODE_DONE &&
+                            ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.getStatusCode() != CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_STATUSCODE_SOFTDONE) {
+                        reloadNeeded = true;
+                    }
+                }
+                if (reloadNeeded) { ZeoCompanionApplication.mCoordinator.refreshIntegratedHistoryRec(ZeoCompanionApplication.mIrec_HDAonly); }
+            }
 
             // determine whether the record's CSE portion is amended and unpack the events and attributes
             mIsAmended = false;

@@ -414,6 +414,7 @@ public class ZeoAppHandler {
             if (newState <= ZAH_ZEOAPP_STATE_IDLE && mZeoApp_State == ZAH_ZEOAPP_STATE_RECORDING) {
                 // we missed the ZeoApp's ending state; simulate it then we'll get to IDLE state at the next probe
                 newState = ZAH_ZEOAPP_STATE_ENDING;
+                Log.d(_CTAG+".probeAppState", "Substituting Ending");
             }
 
             if (newState == ZAH_ZEOAPP_STATE_IDLE) {

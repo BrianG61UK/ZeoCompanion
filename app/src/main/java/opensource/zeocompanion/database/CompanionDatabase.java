@@ -665,6 +665,55 @@ public class CompanionDatabase extends SQLiteOpenHelper {
         return cursor;
     }
 
+    // get existing sleep episode records that are later than the specified timestamp, sorted in descending timestamp order
+    public Cursor getAllCompanionSleepEpisodesRecsLinkedToZSEid(long ZSE_id) {
+        if (mInvalidDB) { return null; }
+        SQLiteDatabase db = getReadableDatabase();
+        String sortOrder = CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_START_OF_RECORD_TIMESTAMP + " DESC";
+        Cursor cursor = null;
+        try {
+            cursor = db.query(
+                    CompanionSleepEpisodes_TABLE_NAME,   // table name
+                    CompanionDatabaseContract.CompanionSleepEpisodes.PROJECTION,   // columns to get
+                    CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_ZEO_SLEEP_EPISODE_ID + "=?",  // columns for optional WHERE clause
+                    new String[]{String.valueOf(ZSE_id)},                                                // values for optional WHERE clause
+                    null,   // optional row groups
+                    null,   // filter by row groups
+                    sortOrder);    // sort order
+        } catch (SQLException e) {
+            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getAllCompanionSleepEpisodesRecsLinkedToZSEid", e, "For DB Table " + CompanionSleepEpisodes_TABLE_NAME + " ZSE ID=" + ZSE_id);
+            if (cursor != null) { cursor.close(); cursor = null; }
+        }
+        return cursor;
+    }
+
+    // get one specific Zeo Sleep record within the Zeo App's database
+    public CompanionSleepEpisodesRec getSpecifiedCompanionSleepEpisodeRecOfID(long id) {
+        if (mInvalidDB) { return null; }
+        SQLiteDatabase db = getReadableDatabase();
+        String sortOrder = CompanionDatabaseContract.CompanionSleepEpisodes.COLUMN_START_OF_RECORD_TIMESTAMP + " DESC";
+        Cursor cursor = null;
+        try {
+            cursor =  db.query(
+                    CompanionSleepEpisodes_TABLE_NAME,    // data manager, database and table name
+                    CompanionDatabaseContract.CompanionSleepEpisodes.PROJECTION,          // columns to get
+                    CompanionDatabaseContract.CompanionSleepEpisodes._ID + "=?",       // columns for optional WHERE clause
+                    new String[]{String.valueOf(id)},       // values for optional WHERE clause
+                    null,
+                    null,
+                    sortOrder); // sort order
+            if (cursor == null) { return null; }
+            if (!cursor.moveToFirst()) { cursor.close(); return null; }
+            CompanionSleepEpisodesRec newRec = new CompanionSleepEpisodesRec(cursor);
+            cursor.close();
+            return newRec;
+        } catch (Exception e) {
+            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getSpecifiedCompanionSleepEpisodeRecOfID", e, "ID="+id);   // automatically posts a Log.e
+            if (cursor != null) { cursor.close(); }
+        }
+        return null;
+    }
+
     // get all Attribute definition records; sorted in ascending display order
     public Cursor getAllAttributeRecsSortedInvSleepStageDisplayOrder() {
         if (mInvalidDB) { return null; }
