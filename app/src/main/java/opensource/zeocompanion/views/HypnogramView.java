@@ -100,7 +100,7 @@ public class HypnogramView extends GraphView {
         mShowAsMode = 2;
         GridLabelRenderer render = this.getGridLabelRenderer();
         render.setPadding(10);
-        render.setHorizontalLabelsVisible(true);
+        render.setHorizontalLabelsVisible(false);   // this will be overrided in setDataset() call
         render.setVerticalLabelsVisible(true);
         render.setVerticalLabelsColor(Color.WHITE);
         render.setHorizontalLabelsColor(Color.WHITE);
@@ -186,7 +186,7 @@ public class HypnogramView extends GraphView {
 
         GridLabelRenderer render = this.getGridLabelRenderer();
         render.setPadding(10);
-        render.setHorizontalLabelsVisible(true);
+        render.setHorizontalLabelsVisible(false);   // this will be overrided in setDataset() call
         render.setVerticalLabelsVisible(true);
         render.setTextSize(36);
         render.setHorizontalAxisTitleTextSize(36);
@@ -289,7 +289,7 @@ public class HypnogramView extends GraphView {
         mShowAsMode = 3;
         GridLabelRenderer render = this.getGridLabelRenderer();
         render.setPadding(10);
-        render.setHorizontalLabelsVisible(true);
+        render.setHorizontalLabelsVisible(false);   // this will be overrided in setDataset() call
         render.setVerticalLabelsVisible(true);
         render.setLabelsSpace(10);
         render.setGridStyle(GridLabelRenderer.GridStyle.VERTICAL);
@@ -593,8 +593,12 @@ public class HypnogramView extends GraphView {
         // determine length of the hypnogram
         double maxX = ((double)(mEpochInSec * mDataPoints_len) + ((double)(mEpochInSec / 2))) / 3600.0;
         switch (mShowAsMode) {
+            case 1:
+                // compact
+                render.setHorizontalLabelsVisible(false);
             case 2:
                 // detailed
+                render.setHorizontalLabelsVisible(true);
                 if (fixAtStdSize && maxX < 10.167) { maxX = 10.167; }
                 int maxEnd1 = ((int)Math.floor(maxX)) - 1;
                 if (maxEnd1 < 1) { maxEnd1 = 1; }
@@ -604,6 +608,7 @@ public class HypnogramView extends GraphView {
                 break;
             case 3:
                 // expanded-scrollable
+                render.setHorizontalLabelsVisible(true);
                 WindowManager windowManager = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
                 Display display = windowManager.getDefaultDisplay();
                 Point screenSize = new Point();
@@ -617,6 +622,7 @@ public class HypnogramView extends GraphView {
                 break;
             case 4:
                 // shared detailed
+                render.setHorizontalLabelsVisible(true);
                 if (fixAtStdSize && maxX < 10.167) { maxX = 10.167; }
                 maxX = Math.ceil(maxX);
                 int maxEnd2 = (int)maxX - 1;

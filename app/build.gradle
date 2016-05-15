@@ -24,6 +24,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.config
         }
+        zeoappsimulated {
+            debuggable true
+            jniDebuggable false
+            renderscriptDebuggable false
+            minifyEnabled false
+            applicationIdSuffix '.sim'
+            versionNameSuffix '-sim'
+            zipAlignEnabled true
+        }
+        debug {
+            debuggable true
+        }
     }
     productFlavors {
     }

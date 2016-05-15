@@ -199,7 +199,9 @@ public class MainHistoryFragment extends MainFragmentWrapper {
                 if (iRec.theZAH_SleepRecord.mHasExtended && iRec.theZAH_SleepRecord.rDisplayHypnogramStartTime > 0) {
                     displayStart1 = iRec.theZAH_SleepRecord.rDisplayHypnogramStartTime;
                 }
-                theHypno.setDataset(displayStart1, 300, 300, iRec.theZAH_SleepRecord.rDisplay_Hypnogram, true, null);
+                if (iRec.theZAH_SleepRecord.rDisplay_Hypnogram_Count > 1) {
+                    theHypno.setDataset(displayStart1, 300, 300, iRec.theZAH_SleepRecord.rDisplay_Hypnogram, true, null);
+                }
                 break;
             case 2:
                 // CSE hypnogram
@@ -207,7 +209,9 @@ public class MainHistoryFragment extends MainFragmentWrapper {
                 if (iRec.theCSErecord.rAmend_Display_Hypnogram_Starttime > 0) {
                     displayStart2 = iRec.theCSErecord.rAmend_Display_Hypnogram_Starttime;
                 }
-                theHypno.setDataset(displayStart2, 300, 300, iRec.theCSErecord.rAmend_Display_Hypnogram, true, null);
+                if (iRec.theCSErecord.rAmend_Display_Hypnogram.length > 1) {
+                    theHypno.setDataset(displayStart2, 300, 300, iRec.theCSErecord.rAmend_Display_Hypnogram, true, null);
+                }
                 break;
         }
 

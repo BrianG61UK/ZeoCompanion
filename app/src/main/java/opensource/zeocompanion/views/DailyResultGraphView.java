@@ -74,7 +74,7 @@ public class DailyResultGraphView extends GraphView {
         double maxY = 0.0;
         for (int i = 0; i < mDatasetLen; i++) {
             DRG_dataSet item = theData.get(i);
-            double pct = 100.0;
+            double pct = 0.0;
             if (item.mValueToDivide != 0) { pct = item.mValue / item.mValueToDivide * 100.0; }
             theDataPoints[i] = new DataPoint(i, i, pct);
             if (pct > maxY) { maxY = pct; }

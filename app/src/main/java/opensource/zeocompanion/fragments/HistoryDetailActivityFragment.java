@@ -83,6 +83,12 @@ public class HistoryDetailActivityFragment extends Fragment {
         }
     };
 
+    private View.OnClickListener m30SecHypnoClickListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            mBigHypnoFrag.show(getFragmentManager(), "DiagBHF");
+        }
+    };
+
     // constructor
     public HistoryDetailActivityFragment() {}
 
@@ -149,14 +155,6 @@ public class HistoryDetailActivityFragment extends Fragment {
                     mShowAmended = false;
                 }
             }
-
-            // create a listener for presses on the 30-second hypnogram in order to invoke the detailed popup
-            HypnogramView theHypno2 = (HypnogramView) mRootView.findViewById(R.id.graph_hypnogram_detailed);
-            theHypno2.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    mBigHypnoFrag.show(getFragmentManager(), "DiagBHF");
-                }
-            });
 
             // setup the checkbox to toggle between Zeo and amended views;
             // setup a listener for presses of the checkbox
@@ -338,6 +336,7 @@ public class HistoryDetailActivityFragment extends Fragment {
                     theHypno1_graph.setVisibility(View.GONE);
                     theHypno2_graph.setVisibility(View.GONE);
                     theHypno2_tv.setVisibility(View.GONE);
+                    theHypno2_graph.setOnClickListener(null);
                     break;
                 case 1:
                     // Zeo record
@@ -351,16 +350,21 @@ public class HistoryDetailActivityFragment extends Fragment {
                     if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.mHasExtended && ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rDisplayHypnogramStartTime > 0) {
                         displayStart1 = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rDisplayHypnogramStartTime;
                     }
-                    if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {
-                        theHypno1_graph.setDataset(displayStart1, 300, 300, ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rDisplay_Hypnogram, true, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.mEvents_array);
-                    } else {
-                        theHypno1_graph.setDataset(displayStart1, 300, 300, ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rDisplay_Hypnogram, true, null);
+                    if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rDisplay_Hypnogram_Count > 1) {
+                        if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {
+                            theHypno1_graph.setDataset(displayStart1, 300, 300, ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rDisplay_Hypnogram, true, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.mEvents_array);
+                        } else {
+                            theHypno1_graph.setDataset(displayStart1, 300, 300, ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rDisplay_Hypnogram, true, null);
+                        }
                     }
                     theHypno2_graph.showAsDetailed();
-                    if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {
-                        theHypno2_graph.setDataset(displayStart1, 30, showAsEpoch, ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rBase_Hypnogram, true, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.mEvents_array);
-                    } else {
-                        theHypno2_graph.setDataset(displayStart1, 30, showAsEpoch, ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rBase_Hypnogram, true, null);
+                    if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rBase_Hypnogram_Count > 1) {
+                        if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {
+                            theHypno2_graph.setDataset(displayStart1, 30, showAsEpoch, ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rBase_Hypnogram, true, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.mEvents_array);
+                        } else {
+                            theHypno2_graph.setDataset(displayStart1, 30, showAsEpoch, ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rBase_Hypnogram, true, null);
+                        }
+                        theHypno2_graph.setOnClickListener(m30SecHypnoClickListener);
                     }
                     break;
                 case 2:
@@ -373,9 +377,14 @@ public class HistoryDetailActivityFragment extends Fragment {
                     if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Display_Hypnogram_Starttime > 0) {
                         displayStart2 = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Display_Hypnogram_Starttime;
                     }
-                    theHypno1_graph.setDataset(displayStart2, 300, 300, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Display_Hypnogram, true, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.mEvents_array);
+                    if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Display_Hypnogram.length > 1) {
+                        theHypno1_graph.setDataset(displayStart2, 300, 300, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Display_Hypnogram, true, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.mEvents_array);
+                    }
                     theHypno2_graph.showAsDetailed();
-                    theHypno2_graph.setDataset(displayStart2, 30, showAsEpoch, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Base_Hypnogram, true, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.mEvents_array);
+                    if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Base_Hypnogram.length > 1) {
+                        theHypno2_graph.setDataset(displayStart2, 30, showAsEpoch, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Base_Hypnogram, true, ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.mEvents_array);
+                        theHypno2_graph.setOnClickListener(m30SecHypnoClickListener);
+                    }
                     break;
             }
 
@@ -388,10 +397,16 @@ public class HistoryDetailActivityFragment extends Fragment {
                 tvc22.setVisibility(View.VISIBLE);
 
                 double pctSleep = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Total_Z_min / goalTotalSleepMin * 100.0;
-                double pctAwake = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Awake_min / (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Total_Z_min + ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Awake_min) * 100.0;
-                double pctREM = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_REM_min / ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Total_Z_min * 100.0;
-                double pctLight = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Light_min / ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Total_Z_min * 100.0;
-                double pctDeep = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Deep_min / ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Total_Z_min * 100.0;
+                double pctAwake = 0.0;
+                double pctREM = 0.0;
+                double pctLight = 0.0;
+                double pctDeep = 0.0;
+                if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Total_Z_min > 0.0) {
+                    pctAwake = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Awake_min / (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Total_Z_min + ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Awake_min) * 100.0;
+                    pctREM = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_REM_min / ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Total_Z_min * 100.0;
+                    pctLight = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Light_min / ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Total_Z_min * 100.0;
+                    pctDeep = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Deep_min / ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_Total_Z_min * 100.0;
+                }
 
                 long stillAwake = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rStartOfNight + (((long)ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rTime_to_Z_min) * 60000);
                 double totalDurMin = (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rEndOfNight - ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rStartOfNight) / 60000;
@@ -474,10 +489,16 @@ public class HistoryDetailActivityFragment extends Fragment {
                 } else { str = str + "\n"; }
                 if (mIsAmended) {
                     double pctSleep = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min / goalTotalSleepMin * 100.0;
-                    double pctAwake = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Awake_min / (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min + ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Awake_min) * 100.0;
-                    double pctREM = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_REM_min / ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min * 100.0;
-                    double pctLight = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Light_min / ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min * 100.0;
-                    double pctDeep = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Deep_min / ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min * 100.0;
+                    double pctAwake = 0.0;
+                    double pctREM = 0.0;
+                    double pctLight = 0.0;
+                    double pctDeep = 0.0;
+                    if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min > 0.0) {
+                        pctAwake = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Awake_min / (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min + ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Awake_min) * 100.0;
+                        pctREM = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_REM_min / ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min * 100.0;
+                        pctLight = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Light_min / ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min * 100.0;
+                        pctDeep = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Deep_min / ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min * 100.0;
+                    }
 
                     str = str +     "  " + Utilities.showTimeInterval(ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Awake_min, true) + " (" + String.format("%.1f", pctAwake) + "%)\n";
                     str = str +     "  " + Utilities.showTimeInterval(ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rAmend_Time_Total_Z_min, true) + " (" + String.format("%.1f", pctSleep) + "%)\n";
