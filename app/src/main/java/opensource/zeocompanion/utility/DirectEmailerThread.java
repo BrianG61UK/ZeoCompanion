@@ -8,6 +8,7 @@ import android.util.Log;
 import com.obscuredPreferences.ObscuredPrefs;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -130,6 +131,9 @@ public class DirectEmailerThread extends Thread {
         }
 
         // create the email properties for the email subsystem
+        System.setProperty("mail.mime.encodefilename","false");
+        System.setProperty("mail.mime.encodeparameters","false");
+        System.setProperty("mail.mime.foldtext","false");
         Properties emailProps = new Properties();
         emailProps.put("mail.smtp.host",serverAddr);
         emailProps.put("mail.smtp.port", serverPort);
@@ -174,6 +178,7 @@ public class DirectEmailerThread extends Thread {
             msg.setFrom(new InternetAddress(toAddress));
             msg.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(toAddress));
             msg.setSubject(mSubject);
+            msg.setSentDate(new Date(System.currentTimeMillis()));
 
             if (mAttachment == null) {
                 msg.setText(mBody);
@@ -182,6 +187,7 @@ public class DirectEmailerThread extends Thread {
                 messageBodyPart.setContent(mBody, "text/plain");
                 MimeBodyPart attachPart = new MimeBodyPart();
                 attachPart.attachFile(mAttachment.getAbsoluteFile());
+                attachPart.setFileName( mAttachment.getName());
                 Multipart multipart = new MimeMultipart();
                 multipart.addBodyPart(messageBodyPart);
                 multipart.addBodyPart(attachPart);
