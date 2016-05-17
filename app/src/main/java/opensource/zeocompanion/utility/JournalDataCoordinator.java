@@ -618,7 +618,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
     public int getJournalDaypoint() { return mDaypoint; }
 
     // get a string for what should be shown next to the Tomorrow button according to the current Daypoint
-    public String getZeoTomorrowDaypointStateString() {
+    public String getTomorrowDaypointStateString() {
         switch (mDaypoint) {
             case -1:
                 return getTodayDaypointStatus_internal()+"\n"+getDaypointTimes_internal(1);
@@ -647,7 +647,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
     }
 
     // get a string for what should be shown next to the Yesterday button according to the current Daypoint
-    public String getZeoYesterdayDaypointStateString() {
+    public String getYesterdayDaypointStateString() {
         switch (mDaypoint) {
             case -1:
                 return "";  // we are at the Yesterday Daypoint, so there is nothing to show here
@@ -691,74 +691,6 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
     public int getJournalDaypointStateCode() {
         if (mDaypoint_CSEs[mDaypoint+1] == null) { return -1; }
         return (mDaypoint_CSEs[mDaypoint+1].getStatusCode());
-    }
-
-    // called by the Journal Fragments to know whether each one is enabled or not according to the current Daypoint
-    public String isFragmentDaypointEnabled(int sleepStage) {
-        switch (sleepStage) {
-            case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE:
-                switch (mDaypoint) {
-                    case -1:
-                        if (mDaypoint_CSEs[0] == null) { return "No immediately prior sleep session is available"; }
-                        return null;
-                    case 0:
-                        return null;
-                    case 1:
-                        return "Entry of Before Attributes for future sleep sessions is not allowed";
-                }
-                break;
-            case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_INBED:
-            case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_GOING:
-            case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_DURING:
-                switch (mDaypoint) {
-                    case -1:
-                        if (mDaypoint_CSEs[0] == null) { return "No immediately prior sleep session is available"; }
-                        return "Entry of Events for past sleep sessions is not allowed";
-                    case 0:
-                        return null;
-                    case 1:
-                        return "Entry of Going or During Events for future sleep sessions is not allowed";
-                }
-                break;
-            case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_AFTER:
-                switch (mDaypoint) {
-                    case -1:
-                        if (mDaypoint_CSEs[0] == null) { return "No immediately prior sleep session is available"; }
-                        return null;
-                    case 0:
-                        return null;
-                    case 1:
-                        return "Entry of After Events or Attributes for future sleep sessions is not allowed";
-                }
-                break;
-        }
-        return null;
-    }
-
-    // called only by the Attributes Fragment in AFTER sleep stage, the JDC indicates whether the Done Sleeping button should be shown or not
-    public boolean isFragmentDaypointButtonDoneSleepingEnabled() {
-        switch (mDaypoint) {
-            case -1:
-                if (mDaypoint_CSEs[0] == null) { return false; }
-                return false;
-            case 0:
-                return true;
-            case 1:
-                return false;
-        }
-        return true;
-    }
-
-    // the Journal Status Bar fragment's Yesterday/Last/Previous button has been pressed
-    public void daypointYesterdayButtonPressed() {
-        if (mDaypoint > -1) { mDaypoint--; }
-        sendDoAllUpdateMsgToUI();
-    }
-
-    // the Journal Status Bar fragment's Tomorrow/Next button has been pressed
-    public void daypointTomorrowButtonPressed() {
-        if (mDaypoint < 0) { mDaypoint++; }
-        sendDoAllUpdateMsgToUI();
     }
 
     // generates a overday Journal status for only "Today" daypoint
@@ -841,6 +773,74 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
             str = str + "-" + mJSB_sdf2.format(dt2);
         }
         return str;
+    }
+
+    // called by the Journal Fragments to know whether each one is enabled or not according to the current Daypoint
+    public String isFragmentDaypointEnabled(int sleepStage) {
+        switch (sleepStage) {
+            case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE:
+                switch (mDaypoint) {
+                    case -1:
+                        if (mDaypoint_CSEs[0] == null) { return "No immediately prior sleep session is available"; }
+                        return null;
+                    case 0:
+                        return null;
+                    case 1:
+                        return "Entry of Before Attributes for future sleep sessions is not allowed";
+                }
+                break;
+            case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_INBED:
+            case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_GOING:
+            case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_DURING:
+                switch (mDaypoint) {
+                    case -1:
+                        if (mDaypoint_CSEs[0] == null) { return "No immediately prior sleep session is available"; }
+                        return "Entry of Events for past sleep sessions is not allowed";
+                    case 0:
+                        return null;
+                    case 1:
+                        return "Entry of Going or During Events for future sleep sessions is not allowed";
+                }
+                break;
+            case CompanionDatabaseContract.SLEEP_EPISODE_STAGE_AFTER:
+                switch (mDaypoint) {
+                    case -1:
+                        if (mDaypoint_CSEs[0] == null) { return "No immediately prior sleep session is available"; }
+                        return null;
+                    case 0:
+                        return null;
+                    case 1:
+                        return "Entry of After Events or Attributes for future sleep sessions is not allowed";
+                }
+                break;
+        }
+        return null;
+    }
+
+    // called only by the Attributes Fragment in AFTER sleep stage, the JDC indicates whether the Done Sleeping button should be shown or not
+    public boolean isFragmentDaypointButtonDoneSleepingEnabled() {
+        switch (mDaypoint) {
+            case -1:
+                if (mDaypoint_CSEs[0] == null) { return false; }
+                return false;
+            case 0:
+                return true;
+            case 1:
+                return false;
+        }
+        return true;
+    }
+
+    // the Journal Status Bar fragment's Yesterday/Last/Previous button has been pressed
+    public void daypointYesterdayButtonPressed() {
+        if (mDaypoint > -1) { mDaypoint--; }
+        sendDoAllUpdateMsgToUI();
+    }
+
+    // the Journal Status Bar fragment's Tomorrow/Next button has been pressed
+    public void daypointTomorrowButtonPressed() {
+        if (mDaypoint < 0) { mDaypoint++; }
+        sendDoAllUpdateMsgToUI();
     }
 
     // when a sleep session has ended (either by Zeo or by Journal) then change the Daypoint to Yesterday, and

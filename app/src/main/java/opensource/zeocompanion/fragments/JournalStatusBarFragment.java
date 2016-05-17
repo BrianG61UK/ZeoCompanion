@@ -93,7 +93,7 @@ public class JournalStatusBarFragment extends Fragment {
         display.getSize(screenSize);
         int screenWidthDp = (int)((float)screenSize.x / ZeoCompanionApplication.mScreenDensity);
 
-        TextView in = (TextView)mRootView.findViewById(R.id.textView_info);
+        TextView todayTV = (TextView)mRootView.findViewById(R.id.textView_info);
         TextView yesterdayTV = (TextView)mRootView.findViewById(R.id.textView_yesterday);
         TextView tomorrowTV = (TextView)mRootView.findViewById(R.id.textView_tomorrow);
         Button yesterdayBut = (Button)mRootView.findViewById(R.id.button_yesterday);
@@ -105,14 +105,14 @@ public class JournalStatusBarFragment extends Fragment {
 
         int daypoint = ZeoCompanionApplication.mCoordinator.getJournalDaypoint();
 
-        in.setText(ZeoCompanionApplication.mCoordinator.getTodayDaypointString());
+        yesterdayTV.setText(ZeoCompanionApplication.mCoordinator.getYesterdayDaypointStateString());
+        todayTV.setText(ZeoCompanionApplication.mCoordinator.getTodayDaypointString());
+        tomorrowTV.setText(ZeoCompanionApplication.mCoordinator.getTomorrowDaypointStateString());
 
         switch (daypoint) {
             case -1:
                 yesterdayBut.setVisibility(View.INVISIBLE);
-                yesterdayTV.setText(ZeoCompanionApplication.mCoordinator.getZeoYesterdayDaypointStateString());
                 tomorrowBut.setVisibility(View.VISIBLE);
-                tomorrowTV.setText(ZeoCompanionApplication.mCoordinator.getZeoTomorrowDaypointStateString());
                 zeoDarkIM.setImageResource(R.drawable.button_blank_gray_dark_icon);
                 zeoBrightIM.setImageResource(R.drawable.button_blank_gray_bright_icon);
                 journalDarkIM.setImageResource(R.drawable.button_blank_gray_dark_icon);
@@ -120,9 +120,7 @@ public class JournalStatusBarFragment extends Fragment {
                 break;
             case 0:
                 yesterdayBut.setVisibility(View.VISIBLE);
-                yesterdayTV.setText(ZeoCompanionApplication.mCoordinator.getZeoYesterdayDaypointStateString());
                 tomorrowBut.setVisibility(View.INVISIBLE);
-                tomorrowTV.setText(ZeoCompanionApplication.mCoordinator.getZeoTomorrowDaypointStateString());
                 if (mBlinkRedZeoApp) {
                     zeoDarkIM.setImageResource(R.drawable.button_blank_red_dark_icon);
                     zeoBrightIM.setImageResource(R.drawable.button_blank_red_bright_icon);
@@ -157,9 +155,7 @@ public class JournalStatusBarFragment extends Fragment {
                 break;
             case 1:
                 yesterdayBut.setVisibility(View.VISIBLE);
-                yesterdayTV.setText(ZeoCompanionApplication.mCoordinator.getZeoYesterdayDaypointStateString());
                 tomorrowBut.setVisibility(View.INVISIBLE);
-                tomorrowTV.setText(ZeoCompanionApplication.mCoordinator.getZeoTomorrowDaypointStateString());
                 zeoDarkIM.setImageResource(R.drawable.button_blank_gray_dark_icon);
                 zeoBrightIM.setImageResource(R.drawable.button_blank_gray_bright_icon);
                 journalDarkIM.setImageResource(R.drawable.button_blank_gray_dark_icon);
