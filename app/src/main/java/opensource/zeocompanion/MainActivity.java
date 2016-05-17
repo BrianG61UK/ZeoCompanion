@@ -547,7 +547,7 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.action_about:
                 // show an "About" alert dialog
-                String str = "ZeoCompanion App Version " + BuildConfig.VERSION_NAME + " Build " + BuildConfig.VERSION_CODE;
+                String str = "Companion for Zeo App Version " + BuildConfig.VERSION_NAME + " Build " + BuildConfig.VERSION_CODE;
                 str = str + "\nDatabase Version " + ZeoCompanionApplication.mDatabaseHandler.mVersion;
                 int qty = ZeoCompanionApplication.mEmailOutbox.getQtyEntries();
                 if (qty > 0) { str = str + "\nEmail Outbox unsent emails=" + qty; }
