@@ -1010,10 +1010,6 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
 
     // create a summary for the supplied CSE record
     public void createSummaryList(CompanionSleepEpisodesRec theCSE, ArrayList<String> theArray) {
-        int[] sleepStages = {CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE, CompanionDatabaseContract.SLEEP_EPISODE_STAGE_INBED,
-                CompanionDatabaseContract.SLEEP_EPISODE_STAGE_GOING, CompanionDatabaseContract.SLEEP_EPISODE_STAGE_DURING,
-                CompanionDatabaseContract.SLEEP_EPISODE_STAGE_AFTER };
-
         try {   // master Exception catcher
             theArray.clear();
             String str = "Sleep Journal-ID# ";
@@ -1044,36 +1040,55 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                 return;
             }
 
-            for (int sleepStage: sleepStages) {
-                String sleepStageStr = CompanionDatabaseContract.getSleepStageString(sleepStage);
-                if (theCSE.mAttribs_Fixed_array != null) {
-                    if (!theCSE.mAttribs_Fixed_array.isEmpty()) {
-                        for (CompanionSleepEpisodeInfoParsedRec existing1 : theCSE.mAttribs_Fixed_array) {
-                            if (existing1 != null) {
-                                if (existing1.rSleepStage == sleepStage) {
-                                    theArray.add(sleepStageStr + ": " + existing1.getSummaryString());
-                                }
+            String sleepStageStr = CompanionDatabaseContract.getSleepStageString(CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE);
+            if (theCSE.mAttribs_Fixed_array != null) {
+                if (!theCSE.mAttribs_Fixed_array.isEmpty()) {
+                    for (CompanionSleepEpisodeInfoParsedRec existing1 : theCSE.mAttribs_Fixed_array) {
+                        if (existing1 != null) {
+                            if (existing1.rSleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) {
+                                theArray.add(sleepStageStr + ": " + existing1.getSummaryString());
                             }
                         }
                     }
                 }
+            }
 
-                if (theCSE.mAttribs_Vari_array != null) {
-                    if (!theCSE.mAttribs_Vari_array.isEmpty()) {
-                        for (CompanionSleepEpisodeInfoParsedRec existing2 : theCSE.mAttribs_Vari_array) {
-                            if (existing2.rSleepStage == sleepStage) {
-                                theArray.add(sleepStageStr + ": " + existing2.getSummaryString());
+            if (theCSE.mAttribs_Vari_array != null) {
+                if (!theCSE.mAttribs_Vari_array.isEmpty()) {
+                    for (CompanionSleepEpisodeInfoParsedRec existing2 : theCSE.mAttribs_Vari_array) {
+                        if (existing2.rSleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) {
+                            theArray.add(sleepStageStr + ": " + existing2.getSummaryString());
+                        }
+                    }
+                }
+            }
+
+            if (theCSE.mEvents_array != null) {
+                if (!theCSE.mEvents_array.isEmpty()) {
+                    for (CompanionSleepEpisodeEventsParsedRec existing3 : theCSE.mEvents_array) {
+                        theArray.add("\t" + existing3.getSummaryString());
+                    }
+                }
+            }
+
+            sleepStageStr = CompanionDatabaseContract.getSleepStageString(CompanionDatabaseContract.SLEEP_EPISODE_STAGE_AFTER);
+            if (theCSE.mAttribs_Fixed_array != null) {
+                if (!theCSE.mAttribs_Fixed_array.isEmpty()) {
+                    for (CompanionSleepEpisodeInfoParsedRec existing1 : theCSE.mAttribs_Fixed_array) {
+                        if (existing1 != null) {
+                            if (existing1.rSleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_AFTER) {
+                                theArray.add(sleepStageStr + ": " + existing1.getSummaryString());
                             }
                         }
                     }
                 }
+            }
 
-                if (theCSE.mEvents_array != null) {
-                    if (!theCSE.mEvents_array.isEmpty()) {
-                        for (CompanionSleepEpisodeEventsParsedRec existing3 : theCSE.mEvents_array) {
-                            if (existing3.rSleepStage == sleepStage) {
-                                theArray.add("\t" + existing3.getSummaryString());
-                            }
+            if (theCSE.mAttribs_Vari_array != null) {
+                if (!theCSE.mAttribs_Vari_array.isEmpty()) {
+                    for (CompanionSleepEpisodeInfoParsedRec existing2 : theCSE.mAttribs_Vari_array) {
+                        if (existing2.rSleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_AFTER) {
+                            theArray.add(sleepStageStr + ": " + existing2.getSummaryString());
                         }
                     }
                 }
