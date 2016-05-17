@@ -1545,7 +1545,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                         long endAwake_sec = (int)((si2.rTryingToSleep - startTimestamp) / 1000L);
                         int start = (int)(startAwake_sec / 30L);
                         if (start < 0) { start = 0; }
-                        else if (start >= amendedBase.length) { start = amendedBase.length- 1; }
+                        else if (start >= amendedBase.length) { start = amendedBase.length - 1; }
                         int end = (int)(endAwake_sec / 30L);
                         if (end < 0) { end = 0; }
                         else if (end >= amendedBase.length) { end = amendedBase.length - 1; }
@@ -1592,7 +1592,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                     if (amendedBase.length > 0) {
                         long stillAwake_sec = (int)((eRec.rTimestamp - startTimestamp) / 1000L);
                         boolean didOne = false;
-                        int end = (int) (stillAwake_sec / 30L) - 1;     // for the 30-sec, the calculated start & end are one bar forward thus the -1
+                        int end = (int)(stillAwake_sec / 30L);
                         if (end < 0) { end = 0; }
                         else if (end >= amendedBase.length) { end = amendedBase.length - 1; }
                         loop2: while (end >= 0) {

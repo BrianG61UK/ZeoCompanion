@@ -529,7 +529,7 @@ public class HypnogramView extends GraphView {
                         if (eRec.rTimestamp >= mDisplayStart_Timestamp) {
                             if (eRec.rEventNo >= CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_GOING_TO_SLEEP &&
                                     eRec.rEventNo < CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_DONE_SLEEPING) {
-                                double interval_hour = offset + (eRec.rTimestamp - mDisplayStart_Timestamp) / 3600000.0;
+                                double interval_hour = (double)(eRec.rTimestamp - mDisplayStart_Timestamp) / 3600000.0;
                                 double evtCode = 5.0 + ((double) eRec.rEventNo / 100.0);
                                 if (evtCode > maxEvtCode) { maxEvtCode = evtCode; }
                                 evtDataPoints[c] = new DataPoint(c, interval_hour, evtCode);
