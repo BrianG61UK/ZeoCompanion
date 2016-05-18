@@ -32,7 +32,7 @@ public class CompanionDatabase extends SQLiteOpenHelper {
     // member constants and other static content
     private static final String _CTAG = "DBH";
     public static final String DATABASE_NAME = "ZeoCompanionDatabase.db";
-    private static final int DATABASE_VERSION = 4;  // WARNING: changing this value will cause invocation of onUpdate for existing databases in existing Devices
+    private static final int DATABASE_VERSION = 5;  // WARNING: changing this value will cause invocation of onUpdate for existing databases in existing Devices
 
     public static final int DBH_ERROR_NONE = 0;
     public static final int DBH_ERROR_SQL_ERROR = -100;
@@ -197,6 +197,12 @@ public class CompanionDatabase extends SQLiteOpenHelper {
             resetAllAmendedFlags(db);
 
             mVersion = 4;
+            Log.i(_CTAG + ".onUpgrade", "Database successfully upgraded to version "+mVersion);
+        }
+
+        if (oldVersion <= 4) {
+            // no changes to the existing schema are needed; version 5 just indicates the database may have 4 new Zeo App database replication tables
+            mVersion = 5;
             Log.i(_CTAG + ".onUpgrade", "Database successfully upgraded to version "+mVersion);
         }
 

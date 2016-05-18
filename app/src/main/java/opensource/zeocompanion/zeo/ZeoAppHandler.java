@@ -747,6 +747,10 @@ public class ZeoAppHandler {
             replicate_ZeoAlarmAlertEvents(existingTables);
             replicate_ZeoAlarmTimeoutEvents(existingTables);
             replicate_ZeoAlarmSnoozeEvents(existingTables);
+            replicate_ZeoActigraphyRecords(existingTables);
+            replicate_ZeoAlarms(existingTables);
+            replicate_ZeoHeadbandAsserts(existingTables);
+            replicate_ZeoHeadbandResets(existingTables);
         }
 
         // Thread context: ReplicateZeoDatabase thread
@@ -798,6 +802,42 @@ public class ZeoAppHandler {
         }
 
         // Thread context: ReplicateZeoDatabase thread
+        // replicate the ActigraphyRecords Zeo App table
+        private void replicate_ZeoActigraphyRecords(String[] existingTables) {
+            String sortOrder = CompanionDatabaseContract.ZeoActigraphyRecords._ID + " ASC ";
+            Uri contentURI = ZeoDataContract.BASE_CONTENT_URI.buildUpon().appendPath("actigraphy_records").build();
+            doReplicateOneTable(contentURI,  CompanionDatabaseContract.ZeoActigraphyRecords.TABLE_NAME,
+                    CompanionDatabaseContract.ZeoActigraphyRecords.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoActigraphyRecords.SQL_DEFINITION, existingTables);
+        }
+
+        // Thread context: ReplicateZeoDatabase thread
+        // replicate the Alarms Zeo App table
+        private void replicate_ZeoAlarms(String[] existingTables) {
+            String sortOrder = CompanionDatabaseContract.ZeoAlarms._ID + " ASC ";
+            Uri contentURI = ZeoDataContract.BASE_CONTENT_URI.buildUpon().appendPath("alarms").build();
+            doReplicateOneTable(contentURI,  CompanionDatabaseContract.ZeoAlarms.TABLE_NAME,
+                    CompanionDatabaseContract.ZeoAlarms.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoAlarms.SQL_DEFINITION, existingTables);
+        }
+
+        // Thread context: ReplicateZeoDatabase thread
+        // replicate the HeadbandAsserts Zeo App table
+        private void replicate_ZeoHeadbandAsserts(String[] existingTables) {
+            String sortOrder = CompanionDatabaseContract.ZeoHeadbandAsserts._ID + " ASC ";
+            Uri contentURI = ZeoDataContract.BASE_CONTENT_URI.buildUpon().appendPath("headband_asserts").build();
+            doReplicateOneTable(contentURI,  CompanionDatabaseContract.ZeoHeadbandAsserts.TABLE_NAME,
+                    CompanionDatabaseContract.ZeoHeadbandAsserts.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoHeadbandAsserts.SQL_DEFINITION, existingTables);
+        }
+
+        // Thread context: ReplicateZeoDatabase thread
+        // replicate the HeadbandResets Zeo App table
+        private void replicate_ZeoHeadbandResets(String[] existingTables) {
+            String sortOrder = CompanionDatabaseContract.ZeoHeadbandResets._ID + " ASC ";
+            Uri contentURI = ZeoDataContract.BASE_CONTENT_URI.buildUpon().appendPath("headband_resets").build();
+            doReplicateOneTable(contentURI,  CompanionDatabaseContract.ZeoHeadbandResets.TABLE_NAME,
+                    CompanionDatabaseContract.ZeoHeadbandResets.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoHeadbandResets.SQL_DEFINITION, existingTables);
+        }
+
+        // Thread context: ReplicateZeoDatabase thread
         // replicate the indicated table's contents from the Zeo App to the ZeoCompanion's database; existingTables can be null
         private void doReplicateOneTable(Uri zeoContentURI, String neededTable, String[] projection, String sortOrder, String sqlDefinition, String[] existingTables) {
             Cursor cursorZeo = null;
@@ -809,8 +849,15 @@ public class ZeoAppHandler {
                         null,       // columns for optional WHERE clause
                         null,         // values for optional WHERE clause
                         sortOrder); // sort order
-                if (cursorZeo == null) { return; }  // nope
-                if (!cursorZeo.moveToFirst()) { cursorZeo.close(); return; } // nope
+                if (cursorZeo == null) {
+                    Log.d(_CTAG + ".doRepl1Tbl", "Table " + neededTable + " returned null for query");
+                    return;
+                }  // nope
+                if (!cursorZeo.moveToFirst()) {  // nope
+                    Log.d(_CTAG + ".doRepl1Tbl", "Table " + neededTable + " has no records");
+                    cursorZeo.close();
+                    return;
+                }
 
                 // yes; ensure the replicated table exists in our database
                 boolean found = false;

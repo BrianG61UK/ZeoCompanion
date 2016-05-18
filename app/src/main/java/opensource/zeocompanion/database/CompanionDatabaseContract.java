@@ -62,7 +62,11 @@ public final class CompanionDatabaseContract {
             ZeoSleepRecords.TABLE_NAME,
             ZeoAlarmAlertEvents.TABLE_NAME,
             ZeoAlarmSnoozeEvents.TABLE_NAME,
-            ZeoAlarmTimeoutEvents.TABLE_NAME
+            ZeoAlarmTimeoutEvents.TABLE_NAME,
+            ZeoActigraphyRecords.TABLE_NAME,
+            ZeoAlarms.TABLE_NAME,
+            ZeoHeadbandAsserts.TABLE_NAME,
+            ZeoHeadbandResets.TABLE_NAME
     };
 
     public static abstract class CompanionSleepEpisodes implements BaseColumns {
@@ -75,8 +79,8 @@ public final class CompanionDatabaseContract {
         public static final String COLUMN_ZEO_SLEEP_EPISODE_ID = "zeo_sleep_episode_id";    // long integer
         public static final String COLUMN_EVENT_ZEO_STARTING_TIMESTAMP = "evt_zeoStart_timestamp";  // long integer
         public static final String COLUMN_EVENT_ZEO_RECORDING_TIMESTAMP = "evt_zeoRecord_timestamp";  // long integer
-        public static final String COLUMN_HEADBAND_BATTERY_HIGH = "zeo_headband_battery_high";  // integer
-        public static final String COLUMN_HEADBAND_BATTERY_LOW = "zeo_headband_battery_low";  // long integer
+        public static final String COLUMN_HEADBAND_BATTERY_HIGH = "zeo_headband_battery_high";  // integer  // added in database Version 4
+        public static final String COLUMN_HEADBAND_BATTERY_LOW = "zeo_headband_battery_low";  // long integer   // added in database Version 4
         public static final String COLUMN_EVENT_ZEO_ENDING_TIMESTAMP = "evt_zeoEnd_timestamp";  // long integer
         public static final String COLUMN_CNT_AWAKENINGS = "cnt_awakenings";  // integer
         public static final String COLUMN_EVENT_GOT_INTO_BED_TIMESTAMP = "evt_GIB_timestamp";  // long integer
@@ -85,10 +89,10 @@ public final class CompanionDatabaseContract {
         public static final String COLUMN_EVENTS_CSV_STRING = "evt_csv_str";  // string
         public static final String COLUMN_ATTRIBS_FIXED_CSV_STRING = "att_fixed_csv_str";  // string
         public static final String COLUMN_ATTRIBS_VARI_CSV_STRING = "att_vari_csv_str";  // string
-        public static final String COLUMN_AMENDED = "amended";  // boolean
+        public static final String COLUMN_AMENDED = "amended";  // boolean      // all the COLUMN_AMEND* fields below added in database Version 2
         public static final String COLUMN_AMEND_START_OF_NIGHT = "amend_start_of_night";    // long integer
         public static final String COLUMN_AMEND_END_OF_NIGHT = "amend_end_of_night";    // long integer
-        public static final String COLUMN_AMEND_DISPLAY_HYPNOGRAM_STARTTIME = "amend_display_hypnogram_starttime";    // long integer
+        public static final String COLUMN_AMEND_DISPLAY_HYPNOGRAM_STARTTIME = "amend_display_hypnogram_starttime";    // long integer   // added in database Version 4
         public static final String COLUMN_AMEND_AWAKENINGS = "amend_awakenings";    // integer
         public static final String COLUMN_AMEND_TIME_TO_Z = "amend_time_to_z";  // integer
         public static final String COLUMN_AMEND_TOTAL_Z = "amend_total_z";  //  integer
@@ -959,5 +963,185 @@ public final class CompanionDatabaseContract {
                 COLUMN_TIMESTAMP,
                 COLUMN_MESSAGE
         };
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    // all of the following are implemented in version 5 of the database
+    ////////////////////////////////////////////////////////////////////
+    // Note: it does not appear that the Zeo Android App ever places information into this table;
+    // the Bluetooth Protocol does not appear to send this information as a part of normal operation
+    public static abstract class ZeoActigraphyRecords implements BaseColumns {
+        // _ID long integer
+        public static final String TABLE_NAME = "actigraphy_records";
+        public static final String COLUMN_HEADBAND_ID = "headband_id";
+        public static final String COLUMN_SLEEP_EVENT_ID = "sleep_event_id";
+        public static final String COLUMN_CREATED_ON = "created_on";
+        public static final String COLUMN_UPDATED_ON = "updated_on";
+        public static final String COLUMN_UPLOADED_ON = "uploaded_on";
+        public static final String COLUMN_START_OF_NIGHT = "start_of_night";
+        public static final String COLUMN_END_OF_NIGHT = "end_of_night";
+        public static final String COLUMN_MAGNITUDES = "magnitudes";
+        public static final String COLUMN_RESTLESS_TIME = "restless_time";
+        public static final String COLUMN_TIMES_DISRUPTED = "times_disrupted";
+        public static final String COLUMN_TOTAL_REST = "total_rest";
+
+        public static final String SQL_DEFINITION = TABLE_NAME + " (" +
+                _ID + " INTEGER PRIMARY KEY," +
+                COLUMN_HEADBAND_ID + " INTEGER, " +
+                COLUMN_SLEEP_EVENT_ID + " INTEGER, " +
+                COLUMN_CREATED_ON + " INTEGER DEFAULT 0," +
+                COLUMN_UPDATED_ON + " INTEGER DEFAULT 0," +
+                COLUMN_UPLOADED_ON + " INTEGER," +
+                COLUMN_START_OF_NIGHT + " INTEGER," +
+                COLUMN_END_OF_NIGHT + " INTEGER," +
+                COLUMN_MAGNITUDES + " BLOB," +
+                COLUMN_RESTLESS_TIME + " INTEGER," +
+                COLUMN_TIMES_DISRUPTED + " INTEGER," +
+                COLUMN_TOTAL_REST + " INTEGER," +
+                "UNIQUE ("+COLUMN_START_OF_NIGHT+"))";
+        // FOREIGN KEY(sleep_event_id) REFERENCES sleep_events(_id) ON DELETE CASCADE ON UPDATE CASCADE)
+
+        public static final String[] PROJECTION_FULL = {
+                _ID,
+                COLUMN_HEADBAND_ID,
+                COLUMN_SLEEP_EVENT_ID,
+                COLUMN_CREATED_ON,
+                COLUMN_UPDATED_ON,
+                COLUMN_UPLOADED_ON,
+                COLUMN_START_OF_NIGHT,
+                COLUMN_END_OF_NIGHT,
+                COLUMN_MAGNITUDES,
+                COLUMN_RESTLESS_TIME,
+                COLUMN_TIMES_DISRUPTED,
+                COLUMN_TOTAL_REST
+        };
+    }
+
+    public static abstract class ZeoAlarms implements BaseColumns {
+        // _ID long integer
+        public static final String TABLE_NAME = "alarms";
+        public static final String COLUMN_CREATED_ON = "created_on";
+        public static final String COLUMN_UPDATED_ON = "updated_on";
+        public static final String COLUMN_ALARM_HOUR = "alarm_hour";
+        public static final String COLUMN_ALARM_MINUTE = "alarm_minute";
+        public static final String COLUMN_ALARM_DAYS_OF_WEEK = "alarm_days_of_week";
+        public static final String COLUMN_ALARM_TIMESTAMP = "alarm_timestamp";
+        public static final String COLUMN_LAST_ALERT_TIMESTAMP = "last_alert_timestamp";
+        public static final String COLUMN_ALARM_ENABLED = "alarm_enabled";
+        public static final String COLUMN_ALARM_AUDIO = "alarm_audio";
+        public static final String COLUMN_ALARM_SMART_WAKE = "alarm_smart_wake";
+        public static final String COLUMN_ALARM_WAKE_WINDOW = "alarm_wake_window";
+        public static final String COLUMN_ALARM_SNOOZE_DURATION = "alarm_snooze_duration";
+        public static final String COLUMN_ALARM_TIMEOUT = "alarm_timeout";
+        public static final String COLUMN_ALARM_VIBRATE = "alarm_vibrate";
+        public static final String COLUMN_ALARM_MESSAGE = "alarm_message";
+
+        public static final String SQL_DEFINITION = TABLE_NAME + " (" +
+                _ID + " INTEGER PRIMARY KEY," +
+                COLUMN_CREATED_ON + " INTEGER DEFAULT 0," +
+                COLUMN_UPDATED_ON + " INTEGER DEFAULT 0," +
+                COLUMN_ALARM_HOUR + " INTEGER," +
+                COLUMN_ALARM_MINUTE + " INTEGER," +
+                COLUMN_ALARM_DAYS_OF_WEEK + " INTEGER," +
+                COLUMN_ALARM_TIMESTAMP + " INTEGER," +
+                COLUMN_LAST_ALERT_TIMESTAMP + " INTEGER," +
+                COLUMN_ALARM_ENABLED + " BOOLEAN," +
+                COLUMN_ALARM_AUDIO + " TEXT," +
+                COLUMN_ALARM_SMART_WAKE + " BOOLEAN," +
+                COLUMN_ALARM_WAKE_WINDOW + " INTEGER," +
+                COLUMN_ALARM_SNOOZE_DURATION + " INTEGER," +
+                COLUMN_ALARM_TIMEOUT + " INTEGER," +
+                COLUMN_ALARM_VIBRATE + " BOOLEAN," +
+                COLUMN_ALARM_MESSAGE + " TEXT" +
+                ")";
+        // FOREIGN KEY(sleep_event_id) REFERENCES sleep_events(_id) ON DELETE CASCADE ON UPDATE CASCADE)
+
+        public static final String[] PROJECTION_FULL = {
+                _ID,
+                COLUMN_CREATED_ON,
+                COLUMN_UPDATED_ON,
+                COLUMN_ALARM_HOUR,
+                COLUMN_ALARM_MINUTE,
+                COLUMN_ALARM_DAYS_OF_WEEK,
+                COLUMN_ALARM_TIMESTAMP,
+                COLUMN_LAST_ALERT_TIMESTAMP,
+                COLUMN_ALARM_ENABLED,
+                COLUMN_ALARM_AUDIO,
+                COLUMN_ALARM_SMART_WAKE,
+                COLUMN_ALARM_WAKE_WINDOW,
+                COLUMN_ALARM_SNOOZE_DURATION,
+                COLUMN_ALARM_TIMEOUT,
+                COLUMN_ALARM_VIBRATE,
+                COLUMN_ALARM_MESSAGE
+        };
+    }
+
+    public static abstract class ZeoHeadbandAsserts implements BaseColumns {
+        // _ID long integer
+        public static final String TABLE_NAME = "headband_asserts";
+        public static final String COLUMN_HEADBAND_ID = "headband_id";
+        public static final String COLUMN_CREATED_ON = "created_on";
+        public static final String COLUMN_UPDATED_ON = "updated_on";
+        public static final String COLUMN_ASSERT_FUNCTION = "assert_function";
+        public static final String COLUMN_ASSERT_LINE = "assert_line";
+
+        public static final String SQL_DEFINITION = TABLE_NAME + " (" +
+                _ID + " INTEGER PRIMARY KEY," +
+                COLUMN_HEADBAND_ID + " INTEGER, " +
+                COLUMN_CREATED_ON + " INTEGER DEFAULT 0," +
+                COLUMN_UPDATED_ON + " INTEGER DEFAULT 0," +
+                COLUMN_ASSERT_FUNCTION + " TEXT," +
+                COLUMN_ASSERT_LINE + " INTEGER," +
+                "UNIQUE ("+COLUMN_CREATED_ON+"))";
+        // FOREIGN KEY (headband_id) REFERENCES headbands(_id) ON DELETE CASCADE ON UPDATE CASCADE)
+
+        public static final String[] PROJECTION_FULL = {
+                _ID,
+                COLUMN_HEADBAND_ID,
+                COLUMN_CREATED_ON,
+                COLUMN_UPDATED_ON,
+                COLUMN_ASSERT_FUNCTION,
+                COLUMN_ASSERT_LINE
+        };
+    }
+
+    // Note: it does not appear that the Zeo Android App ever places information into this table;
+    // the Bluetooth protocol does send this information to the App, but the App never actually stores it
+    public static abstract class ZeoHeadbandResets implements BaseColumns {
+        // _ID long integer
+        public static final String TABLE_NAME = "headband_resets";
+        public static final String COLUMN_HEADBAND_ID = "headband_id";
+        public static final String COLUMN_CREATED_ON = "created_on";
+        public static final String COLUMN_UPDATED_ON = "updated_on";
+        public static final String COLUMN_RESET_CAUSE = "reset_cause";
+        public static final String COLUMN_RESET_COUNT = "reset_count";
+
+        public static final String SQL_DEFINITION = TABLE_NAME + " (" +
+                _ID + " INTEGER PRIMARY KEY," +
+                COLUMN_HEADBAND_ID + " INTEGER, " +
+                COLUMN_CREATED_ON + " INTEGER DEFAULT 0," +
+                COLUMN_UPDATED_ON + " INTEGER DEFAULT 0," +
+                COLUMN_RESET_CAUSE + " INTEGER," +
+                COLUMN_RESET_COUNT + " INTEGER," +
+                "UNIQUE ("+COLUMN_CREATED_ON+"))";
+        // FOREIGN KEY (headband_id) REFERENCES headbands(_id) ON DELETE CASCADE ON UPDATE CASCADE)
+
+        public static final String[] PROJECTION_FULL = {
+                _ID,
+                COLUMN_HEADBAND_ID,
+                COLUMN_CREATED_ON,
+                COLUMN_UPDATED_ON,
+                COLUMN_RESET_CAUSE,
+                COLUMN_RESET_COUNT
+        };
+
+        public static final int ZEOHEADBAND_RESET_CAUSE_NONE = 0;
+        public static final int ZEOHEADBAND_RESET_CAUSE_BROWNOUT = 1;
+        public static final int ZEOHEADBAND_RESET_CAUSE_EXTERNAL = 2;
+        public static final int ZEOHEADBAND_RESET_CAUSE_INTERNAL = 3;
+        public static final int ZEOHEADBAND_RESET_CAUSE_LOCKUP = 4;
+        public static final int ZEOHEADBAND_RESET_CAUSE_POWERUP = 5;
+        public static final int ZEOHEADBAND_RESET_CAUSE_WATCHDOG = 6;
+        public static final int ZEOHEADBAND_RESET_CAUSE_MAX = 7;
     }
 }
