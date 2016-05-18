@@ -63,7 +63,7 @@ public class ZeoMobileHB_BluetoothHandler {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
-    // thread context:  MainActivity
+    // thread context:  HeadbandActivity
     public int initialize() {
         // now ensure bluetooth is enabled on the Android device
         if (mBluetoothAdapter == null) { return ERROR_NO_BT_ADAPTOR; }
@@ -79,7 +79,7 @@ public class ZeoMobileHB_BluetoothHandler {
         return ERROR_NONE;
     }
 
-    // thread context:  MainActivity
+    // thread context:  HeadbandActivity
     public int getState() {
         if (mBluetoothAdapter == null) { return STATE_ADAPT_DISABLED; }
         if (!mBluetoothAdapter.isEnabled()) {
@@ -99,12 +99,12 @@ public class ZeoMobileHB_BluetoothHandler {
         return STATE_DISCONNECTED;
     }
 
-    // thread context:  MainActivity
+    // thread context:  HeadbandActivity
     public void setPendingOff() {
         mAdaptPending = false;
     }
 
-    // thread context:  MainActivity
+    // thread context:  HeadbandActivity
     public int connectToHeadband() {
         if (mBluetoothAdapter == null) { return ERROR_NO_BT_ADAPTOR; }
         if (!mBluetoothAdapter.isEnabled()) { return ERROR_BT_NOT_ENABLED; }
@@ -157,7 +157,7 @@ public class ZeoMobileHB_BluetoothHandler {
         return ERROR_NONE;
     }
 
-    // thread context:  MainActivity
+    // thread context:  HeadbandActivity
     // this comes from the BroadcastReceiver() in the MainActivity
     public boolean reassessBluetoothState(Intent intent){
         // received a global bluetooth notification message
@@ -201,7 +201,7 @@ public class ZeoMobileHB_BluetoothHandler {
         return false;
     }
 
-    // thread context:  MainActivity
+    // thread context:  HeadbandActivity
     public void disconnectHeadband() {
         // disconnect the IO then disconnect any pending connect attempts
         if (mIOThread != null) { mIOThread.disconnect(); mIOThread = null; }
@@ -377,7 +377,7 @@ public class ZeoMobileHB_BluetoothHandler {
         }
     }
 
-    // thread context:  MainActivity
+    // thread context:  HeadbandActivity
     public String getErrorMessageString(int theError) {
         switch (theError) {
             case ERROR_NONE:
@@ -405,7 +405,7 @@ public class ZeoMobileHB_BluetoothHandler {
         }
     }
 
-    // thread context:  MainActivity
+    // thread context:  HeadbandActivity
     public void send_message_to_HB(ZeoMobileHB_Msg theMsg) {
         theMsg.setSeqNo(mNextSendSeqNo);
         mNextSendSeqNo++;

@@ -16,7 +16,7 @@ public class BluetoothServerThread extends Thread {
     public boolean mThreadIsPreparing = true;
     public boolean mThreadIsRunning = false;
 
-    // thread context:  Activity
+    // thread context:  HeadbandActivity
     public BluetoothServerThread(ZeoMobileHB_BluetoothHandler zeoMobileHBBluetoothHandler, String theName, UUID theUUID) {
         mZeoMobileHBBluetoothHandler = zeoMobileHBBluetoothHandler;
         BluetoothServerSocket tmp = null;
@@ -62,7 +62,7 @@ public class BluetoothServerThread extends Thread {
     }
 
     /** Will cancel the listening socket, and cause the thread to finish */
-    // thread context:  Activity
+    // thread context:  HeadbandActivity
     public void disconnect() {
         if (mmServerSocket != null) {
             try {mmServerSocket.close(); } catch (IOException e) {}

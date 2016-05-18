@@ -16,7 +16,7 @@ public class BluetoothClientThread extends Thread {
     private BluetoothDevice mmDevice = null;
     private ZeoMobileHB_BluetoothHandler mZeoMobileHBBluetoothHandler = null;
 
-    // thread context:  Activity
+    // thread context:  HeadbandActivity
     public BluetoothClientThread(ZeoMobileHB_BluetoothHandler zeoMobileHBBluetoothHandler, BluetoothDevice device, UUID theUUID) {
         BluetoothSocket tmp = null;
         mZeoMobileHBBluetoothHandler = zeoMobileHBBluetoothHandler;
@@ -74,7 +74,7 @@ public class BluetoothClientThread extends Thread {
     }
 
     /** Will cancel an in-progress connection, and close the socket */
-    // thread context:  Activity
+    // thread context:  HeadbandActivity
     public void cancel() {
         try {
             mmSocket.close();

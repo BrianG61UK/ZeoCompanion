@@ -13,8 +13,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-
-import opensource.zeocompanion.MainActivity;
 import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.bluetooth.ZeoMobileHB_Msg;

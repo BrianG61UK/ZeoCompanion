@@ -18,7 +18,7 @@ public class BluetoothIOThread extends Thread {
     public boolean mThreadIsPreparing = true;
     public boolean mThreadIsRunning = false;
 
-    // thread context:  MainActivity
+    // thread context:  HeadbandActivity
     public BluetoothIOThread(ZeoMobileHB_BluetoothHandler theHandler, BluetoothSocket theSocket) {
         mHandler = theHandler;
         mmSocket = theSocket;
@@ -65,7 +65,7 @@ public class BluetoothIOThread extends Thread {
     }
 
     /* Call this from the main activity to send data to the remote device */
-    // thread context:  MainActivity
+    // thread context:  HeadbandActivity
     public void write(byte[] bytes) {
         if (mmOutStream != null) {
             try {
@@ -75,7 +75,7 @@ public class BluetoothIOThread extends Thread {
     }
 
     /* Call this from the main activity to shutdown the connection */
-    // thread context:  Activity
+    // thread context:  HeadbandActivity
     public void disconnect() {
         // must disconnect the IO streams first
         if (mmInStream != null) {
@@ -92,7 +92,7 @@ public class BluetoothIOThread extends Thread {
         }
     }
 
-    // thread context:  Activity
+    // thread context:  HeadbandActivity
     public String getDeviceName() {
         if (mmSocket == null) return "*none*";
         return mmSocket.getRemoteDevice().getName();
