@@ -18,6 +18,7 @@ import com.myzeo.android.api.data.ZeoDataContract.Headband;
 import com.myzeo.android.api.data.ZeoDataContract.SleepRecord;
 import com.obscuredPreferences.ObscuredPrefs;
 import opensource.zeocompanion.ZeoCompanionApplication;
+import opensource.zeocompanion.database.CompanionDatabase;
 import opensource.zeocompanion.database.CompanionDatabaseContract;
 
 // primary Handler for interacting with the Zeo App
@@ -876,37 +877,43 @@ public class ZeoAppHandler {
                 }
 
                 // perform the replication of any new records not already copied
-                int cntr = 0;
-                long[] companionIDs = ZeoCompanionApplication.mDatabaseHandler.getAllRecIDsZeoTable(neededTable, sortOrder);    // can be null
-                if (companionIDs == null) {
+                int addCntr = 0;
+                int updateCntr = 0;
+                CompanionDatabase.IDandUpdated[] companionIDandUpdateds = ZeoCompanionApplication.mDatabaseHandler.getAllRecIDsZeoTable(neededTable, sortOrder);    // can be null
+                if (companionIDandUpdateds == null) {
+                    // there are no pre-existing replicated records; so replicate all records
                     do {
                         ZeoCompanionApplication.mDatabaseHandler.putRecIntoZeoTable(neededTable, cursorZeo);
-                        cntr++;
+                        addCntr++;
                     } while (cursorZeo.moveToNext());
+                    Log.d(_CTAG + ".doRepl1Tbl", "Added " + addCntr + " first-time records for table " + neededTable);
                 } else {
+                    // there are one or more pre-existing records; replicate new ones or recently modified ones
+                    int colId = cursorZeo.getColumnIndex(BaseColumns._ID);
+                    int colUpdatedOn = cursorZeo.getColumnIndex("updated_on");
                     do {
-                        int col = cursorZeo.getColumnIndex(BaseColumns._ID);
-                        if (col >= 0) {
-                            long id = cursorZeo.getLong(col);
-                            found = false;
-                            for (long anID: companionIDs) {
-                                if (id == anID) {
-                                    found = true;
-                                    break;
+                        long id = cursorZeo.getLong(colId);
+                        found = false;
+                        boolean isModified = false;
+                        for (CompanionDatabase.IDandUpdated anIDandUpdatedOn: companionIDandUpdateds) {
+                            if (id == anIDandUpdatedOn.rID) {
+                                found = true;
+                                long updatedOn = cursorZeo.getLong(colUpdatedOn);
+                                if (updatedOn != anIDandUpdatedOn.rUpdatedOn) {
+                                    isModified = true;
                                 }
+                                break;  // end the for loop
                             }
-                        } else {
-                            disableReplication();
-                            ZeoCompanionApplication.postToErrorLog(_CTAG+".doReplicateOneTable", "cursorZeo.getColumnIndex(BaseColumns._ID) returned "+col, "For DB Table: "+neededTable + "and row "+cursorZeo.getPosition());    // automatically posts a Log.e
-                            return;
                         }
-                        if (!found) {
+                        if (!found || isModified) {
                             ZeoCompanionApplication.mDatabaseHandler.putRecIntoZeoTable(neededTable, cursorZeo);
-                            cntr++;
+                            if (isModified) { updateCntr++; }
+                            else { addCntr++; }
                         }
                     } while (cursorZeo.moveToNext());
+                    Log.d(_CTAG + ".doRepl1Tbl", "Added " + addCntr + " records and updated " + updateCntr + " records for table " + neededTable);
                 }
-                Log.d(_CTAG + ".doRepl1Tbl", "Added " + cntr + " records to table " + neededTable);
+
             } catch (Exception e) {
                 disableReplication();
                 ZeoCompanionApplication.postToErrorLog(_CTAG+".doReplicateOneTable", e, "For DB Table: "+neededTable);    // automatically posts a Log.e

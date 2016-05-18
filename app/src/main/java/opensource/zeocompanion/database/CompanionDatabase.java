@@ -1059,10 +1059,14 @@ public class CompanionDatabase extends SQLiteOpenHelper {
 
     // Thread context: ReplicateZeoDatabase thread
     // get the record ID's of all records in the indicated table from the ZeoCompanion database
-    public long[] getAllRecIDsZeoTable(String theTable, String sortOrder) {
+    public class IDandUpdated {
+        public long rID = -1L;
+        public long rUpdatedOn = 0L;
+    }
+    public IDandUpdated[] getAllRecIDsZeoTable(String theTable, String sortOrder) {
         if (mInvalidDB) { return null; }
         SQLiteDatabase db = getReadableDatabase();
-        String[] columns = { BaseColumns._ID };
+        String[] columns = { BaseColumns._ID + ",updated_on" };
         Cursor cursor = null;
         try {
             cursor = db.query(
@@ -1073,16 +1077,22 @@ public class CompanionDatabase extends SQLiteOpenHelper {
                     null,   // optional row groups
                     null,   // filter by row groups
                     sortOrder);    // sort order
-            if (cursor == null) { return null; }
-            if (cursor.moveToFirst()) {
-                long[] retArray = new long[cursor.getCount()];
-                int p = 0;
-                do {
-                    retArray[p] = cursor.getLong(0);
-                    p++;
-                } while (cursor.moveToNext());
-                cursor.close();
-                return retArray;
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    // there is one or more existing records
+                    IDandUpdated[] retArray = new IDandUpdated[cursor.getCount()];
+                    int colID = cursor.getColumnIndex(BaseColumns._ID);
+                    int colUpdatedOn = cursor.getColumnIndex("updated_on");
+                    int p = 0;
+                    do {
+                        retArray[p] = new IDandUpdated();
+                        retArray[p].rID = cursor.getLong(colID);
+                        retArray[p].rUpdatedOn = cursor.getLong(colUpdatedOn);
+                        p++;
+                    } while (cursor.moveToNext());
+                    cursor.close();
+                    return retArray;
+                }
             }
         } catch (SQLException e) {
             ZeoCompanionApplication.mZeoAppHandler.disableReplication();
