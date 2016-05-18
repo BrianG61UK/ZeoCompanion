@@ -49,6 +49,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -170,9 +171,6 @@ public class ZeoCompanionApplication extends Application {
     // receiver for timeouts of recurring daily Alarm for automatic emailing;
     // these run in the main thread
     public static class AlarmReceiver extends BroadcastReceiver {
-        // member constants and other static content
-        private static final String _CTAG = "ARU";
-
         // constructor
         public AlarmReceiver() { super(); }
 
@@ -181,6 +179,7 @@ public class ZeoCompanionApplication extends Application {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action == null) { return; }
+            Log.d("APP.AR.onReceive","Action="+action);
             if (action.equals(ACTION_ALARMMGR_WAKEUP_RTC)) {
                 // Alarm Manager has given the daily wakeup
                 if (mEmailOutbox != null) { mEmailOutbox.dailyCheck(); }
@@ -188,6 +187,17 @@ public class ZeoCompanionApplication extends Application {
             }
         }
     }
+
+    // receive system-wide broadcasts about changes in Zeo Headband state
+    private final BroadcastReceiver mZeoAppReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action == null) { return; }
+            Log.d("APP.ZAR.onReceive","Action="+action);
+            mZeoAppHandler.zeoAppBroadcastReceived(intent);
+        }
+    };
 
     // Thread Context: can be called from utility threads, so cannot perform UI actions like Toast
     // setup a master application-wide abort handler usable by all threads
@@ -244,6 +254,15 @@ public class ZeoCompanionApplication extends Application {
         // setup to receive preference changes that affect the AlarmManager; then configure the AlarmManager
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(mPrefsChangeListener);
         configAlarmManagerToPrefs();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("com.myzeo.android.headband.action.HEADBAND_UNDOCKED");
+        filter.addAction("com.myzeo.android.headband.action.HEADBAND_DOCKED");
+        filter.addAction("com.myzeo.android.headband.action.HEADBAND_BATTERY_DEAD");
+        filter.addAction("com.myzeo.android.headband.action.HEADBAND_BUTTON_PRESS");
+        filter.addAction("com.myzeo.android.headband.action.HEADBAND_DISCONNECTED");
+        filter.addAction("com.myzeo.android.headband.action.HEADBAND_CONNECTED");
+        registerReceiver(mZeoAppReceiver, filter);
     }
 
     // return the App's context

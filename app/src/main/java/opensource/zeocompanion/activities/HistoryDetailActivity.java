@@ -51,6 +51,7 @@ public class HistoryDetailActivity extends AppCompatActivity {
         ZeoCompanionApplication.mIrec_SAonly = null;
     }
 
+    // setup the action bar to have a back arrow
     private void setupActionBar() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

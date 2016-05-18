@@ -1,6 +1,8 @@
 package opensource.zeocompanion.zeo;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -370,6 +372,27 @@ public class ZeoAppHandler {
                 if (mAtNonJournal) { mZeoAppProbeDelayMS = mZeoAppProbeDelayMS + 15000; }   // faster on non-journal tabs
                 else { mZeoAppProbeDelayMS = mZeoAppProbeDelayMS + 5000; }                  // slower on journal tabs
             }
+        }
+    }
+
+    // received a broadcast message from the Zeo App; only the messages below are provided by the Zeo App;
+    // this message will be received even if the ZeoCompanion App is in the background
+    // extras include: "headband_id", "headband_address", "headband_nickname"
+    public void zeoAppBroadcastReceived(Intent intent) {
+        String action = intent.getAction();
+        if (action == null) { return; }
+        if (action.equals("com.myzeo.android.headband.action.HEADBAND_UNDOCKED")) {
+            // ???
+        } else if (action.equals("com.myzeo.android.headband.action.HEADBAND_DOCKED")) {
+            // ???
+        } else if (action.equals("com.myzeo.android.headband.action.HEADBAND_BATTERY_DEAD")) {
+            // ???
+        } else if (action.equals("com.myzeo.android.headband.action.HEADBAND_BUTTON_PRESS")) {
+            // ???
+        } else if (action.equals("com.myzeo.android.headband.action.HEADBAND_DISCONNECTED")) {
+            // ???
+        } else if (action.equals("com.myzeo.android.headband.action.HEADBAND_CONNECTED")) {
+            // ???
         }
     }
 

@@ -8,6 +8,7 @@ import opensource.zeocompanion.R;
 // Activity for showing and managing the alerts
 public class AlertsActivity extends AppCompatActivity {
 
+    // called then the Activity is first created or upon return of some other Activity back to this activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

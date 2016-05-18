@@ -19,13 +19,14 @@ import opensource.zeocompanion.bluetooth.ZeoMobileHB_Msg;
 import opensource.zeocompanion.fragments.HeadbandActivityFragment;
 import opensource.zeocompanion.zeo.ZAH_HeadbandRecord;
 
+// Activity for providing the Headband Commander
 public class HeadbandActivity extends AppCompatActivity {
     // note: the Headband Activity and its Fragments will not be destroyed/recreated upon rotation
     public static final String _CTAG = "HBA";
     public static final int ACTIVITY_RESULT_REQUEST_ENABLE_BT = 100;
 
     // receive system-wide broadcasts about changes in Bluetooth state
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBluetoothReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             HeadbandActivityFragment frag= (HeadbandActivityFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_headband);
@@ -45,7 +46,7 @@ public class HeadbandActivity extends AppCompatActivity {
         }
     };
 
-
+    // called then the Activity is first created or upon return of some other Activity back to this activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(_CTAG + ".onCreate", "=====ON-CREATE=====");
@@ -61,9 +62,10 @@ public class HeadbandActivity extends AppCompatActivity {
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        registerReceiver(mReceiver, filter);
+        registerReceiver(mBluetoothReceiver, filter);
     }
 
+    // setup the action bar to have a back arrow
     private void setupActionBar() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -72,13 +74,15 @@ public class HeadbandActivity extends AppCompatActivity {
         }
     }
 
+    // called when the App is being terminated
     @Override
     public void onDestroy() {
         Log.d(_CTAG + ".onDestroy", "=====ON-DESTROY=====");
         super.onDestroy();
-        unregisterReceiver(mReceiver);
+        unregisterReceiver(mBluetoothReceiver);
     }
 
+    // obtain the active headband's record in the Zeo App database
     public ZAH_HeadbandRecord getActiveHeadbandRecord() {
         return ZeoCompanionApplication.mZeoAppHandler.getActiveHeadbandRecord();
     }
