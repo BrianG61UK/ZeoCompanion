@@ -110,6 +110,7 @@ public class ZeoCompanionApplication extends Application {
     public static final int APP_HINTS_DURING_FRAGMENT = 0x0010;
     public static final int APP_HINTS_SUMMARY_FRAGMENT = 0x0020;
     public static final int APP_HINTS_HISTORY_FRAGMENT = 0x0040;
+    public static final int APP_HINTS_BACKUP = 0x0080;
 
     // inter-process messaging constants used by various Activities and Handlers
     public static final int MESSAGE_HEADBAND_HBFRAG_LOW = 9000;
@@ -372,13 +373,20 @@ public class ZeoCompanionApplication extends Application {
         if (r == -2) { return "Permission for App to write to external storage has not been granted; please grant the permission"; }
         else if (r != 0) { return "No writable external storage is available"; }
 
-        // get the name preference
-        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String name = mPrefs.getString("profile_name", "");
+        // get the name and folder preference
+        SharedPreferences sPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String name = sPrefs.getString("profile_name", "");
+        String folder = sPrefs.getString("backup_directory", "Android/data/opensource.zeocompanion/internals");
 
         // ensure the destination directory structure is present
-        File internalsDir = new File(mBaseExtStorageDir + File.separator + "internals");
-        internalsDir.mkdirs();
+        File backupsDir = null;
+        if (folder != null) {
+            backupsDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + folder);
+        }
+        else {
+            backupsDir = new File(mBaseExtStorageDir + File.separator + "internals");
+        }
+        backupsDir.mkdirs();
 
         // compose source and destination File instances
         File source = getDatabasePath(CompanionDatabase.DATABASE_NAME);
@@ -389,7 +397,8 @@ public class ZeoCompanionApplication extends Application {
         newName = newName + "_DBVer" + mDatabaseHandler.mVersion +
                 "_AppVer" + BuildConfig.VERSION_NAME + "_" +
                 mFileDateFormatter.format(new Date()) + ".db";
-        File dest = new File(internalsDir.getPath() + File.separator + includePrefix + newName);
+        File dest = new File(backupsDir.getPath() + File.separator + includePrefix + newName);
+        Log.d(_CTAG+".saveCopyOfDB","Dest="+dest.getAbsolutePath());
 
         // perform the copy
         try {
@@ -408,11 +417,21 @@ public class ZeoCompanionApplication extends Application {
         if (r == -2) { return new CompanionDatabase.ValidateDatabaseResults("Permission for App to write to external storage has not been granted; please grant the permission"); }
         else if (r != 0) { return new CompanionDatabase.ValidateDatabaseResults("No writable external storage is available"); }
 
+        // get the folder preference
+        SharedPreferences sPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String folder = sPrefs.getString("backup_directory", "Android/data/opensource.zeocompanion/internals");
 
         // compose source File instances and ensure it actually exists on-disk
-        File internalsDir = new File(mBaseExtStorageDir + File.separator + "internals");
-        internalsDir.mkdirs();
-        File source = new File(internalsDir + File.separator + theSourceFile);
+        File backupsDir = null;
+        if (folder != null) {
+            backupsDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + folder);
+        }
+        else {
+            backupsDir = new File(mBaseExtStorageDir + File.separator + "internals");
+        }
+        backupsDir.mkdirs();
+
+        File source = new File(backupsDir + File.separator + theSourceFile);
         if (!source.exists()) { return new CompanionDatabase.ValidateDatabaseResults("File does not exist or the folder path does not exist: " + source.getAbsolutePath()); }
 
         // perform validation of the database itself
@@ -426,10 +445,20 @@ public class ZeoCompanionApplication extends Application {
         if (r == -2) { return "Permission for App to write to external storage has not been granted; please grant the permission"; }
         else if (r != 0) { return "No writable external storage is available"; }
 
-        // get source and destination for the copy
-        File internalsDir = new File(mBaseExtStorageDir + File.separator + "internals");
-        internalsDir.mkdirs();
-        File source = new File(internalsDir + File.separator + theSourceFile);
+        // get the folder preference
+        SharedPreferences sPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String folder = sPrefs.getString("backup_directory", "Android/data/opensource.zeocompanion/internals");
+
+        // compose source File instances and ensure it actually exists on-disk
+        File backupsDir = null;
+        if (folder != null) {
+            backupsDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + folder);
+        }
+        else {
+            backupsDir = new File(mBaseExtStorageDir + File.separator + "internals");
+        }
+        backupsDir.mkdirs();
+        File source = new File(backupsDir + File.separator + theSourceFile);
         File dest = getDatabasePath(CompanionDatabase.DATABASE_NAME);
 
         // perform the copy

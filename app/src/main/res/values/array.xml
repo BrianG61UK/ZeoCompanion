@@ -31,5 +31,10 @@
         <item>Download</item>
         <item>Pictures</item>
     </string-array>
+    <string-array name="backupDirectory">
+        <item>Android/data/opensource.zeocompanion/internals</item>
+        <item>Backups/ZeoCompanion</item>
+        <item>Documents</item>
+    </string-array>
 
 </resources>

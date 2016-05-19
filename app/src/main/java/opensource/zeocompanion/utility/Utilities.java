@@ -92,13 +92,12 @@ public class Utilities {
     // show a simple file chooser dialog; only shows files within one directory (no subdirectories);
     // only a cancel button and a list of selectable file names within the directory
     public interface ShowFileSelectDialogInterface {
-        public abstract void showFileSelectDialogChosenFile(String theFileName, String subfolder);
+        public abstract void showFileSelectDialogChosenFile(String theFileName, String sourceDir);
     }
-    public static void showFileSelectDialog(Context context, String message, final String subFolder, final ShowFileSelectDialogInterface callback) {
+    public static void showFileSelectDialog(Context context, String message, final File sourceDir, final ShowFileSelectDialogInterface callback) {
         // get source folder files
-        File internalsDir = new File(ZeoCompanionApplication.mBaseExtStorageDir + File.separator + subFolder);
-        internalsDir.mkdirs();
-        final String fileList[] = internalsDir.list(new FilenameFilter() {
+        sourceDir.mkdirs();
+        final String fileList[] = sourceDir.list(new FilenameFilter() {
             public boolean accept(File dir, String filename) {
                 return filename.endsWith(".db");
             }
@@ -108,7 +107,7 @@ public class Utilities {
         builder.setTitle(message);
         builder.setItems(fileList, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                callback.showFileSelectDialogChosenFile(fileList[which], subFolder);
+                callback.showFileSelectDialogChosenFile(fileList[which], sourceDir.getAbsolutePath());
                 dialog.cancel();
             }
         });

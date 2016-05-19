@@ -10,6 +10,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.opengl.GLES10;
 import android.opengl.GLSurfaceView;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -31,6 +32,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
+
+import java.io.File;
 import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -458,8 +461,13 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_backupDB:
                 // copy the ZeoCompanion's database to external storage for use by the end-user
                 String msg1 = ((ZeoCompanionApplication)getApplication()).saveCopyOfDB("");
-                if (msg1.isEmpty()) { Toast.makeText(this, "ZeoCompanion DB successfully backed up to Device External Storage", Toast.LENGTH_LONG).show(); }
-                else { Utilities.showAlertDialog(this, "Error", msg1, "Okay"); }
+                if (msg1.isEmpty()) {
+                    Toast.makeText(this, "ZeoCompanion DB successfully backed up to Device External Storage", Toast.LENGTH_LONG).show();
+                    if ((ZeoCompanionApplication.mFirstTimeHintsShown & ZeoCompanionApplication.APP_HINTS_BACKUP) == 0) {
+                        ZeoCompanionApplication.hintShown(ZeoCompanionApplication.APP_HINTS_BACKUP);
+                        Utilities.showAlertDialog(this, "Hint", "Hint: You MUST move this backup database off this Android Device for the backup to be secure. If you uninstall this App, this backup will also be deleted if left on the Device. Please consider and implement Android-wide backups, USB file copying, etc.", "Okay");
+                    }
+                } else { Utilities.showAlertDialog(this, "Error", msg1, "Okay"); }
                 return true;
 
             case R.id.action_restoreDB:
@@ -484,7 +492,7 @@ public class MainActivity extends AppCompatActivity {
 
                 final Utilities.ShowFileSelectDialogInterface selectedFileListener = new Utilities.ShowFileSelectDialogInterface() {
                     @Override
-                    public void showFileSelectDialogChosenFile(String theFileName, String subfolder) {
+                    public void showFileSelectDialogChosenFile(String theFileName, String ignored) {
                         CompanionDatabase.ValidateDatabaseResults result = ((ZeoCompanionApplication)getApplication()).restoreCopyOfDB_prep(theFileName);
                         if (!result.mResultMsg.isEmpty()) {
                             Utilities.showAlertDialog(MainActivity.this, "Error", result.mResultMsg, "Okay");
@@ -508,12 +516,21 @@ public class MainActivity extends AppCompatActivity {
                             }
                             msg = msg +  " file name \'" + theFileName + "\'.";
                             msg = msg + "\nThis action is NON-REVERSABLE! All new data collected in the current database on your device since this backup was made will be lost. This restore will have no effect on the Zeo App's database.";
-                            Utilities.showYesNoDialog(MainActivity.this, "Confirm", msg, "Restore", "Cancel", yesNoResponseListener2, 2, theFileName, subfolder);
+                            Utilities.showYesNoDialog(MainActivity.this, "Confirm", msg, "Restore", "Cancel", yesNoResponseListener2, 2, theFileName, ignored);
                         }
                     }
                 };
 
-                Utilities.showFileSelectDialog(this, "Pick Database Name To Restore", "internals", selectedFileListener);
+                // compose source File instances and ensure it actually exists on-disk
+                String folder = mPrefs.getString("backup_directory", "Android/data/opensource.zeocompanion/internals");
+                File backupsDir = null;
+                if (folder != null) {
+                    backupsDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + folder);
+                }
+                else {
+                    backupsDir = new File(ZeoCompanionApplication.mBaseExtStorageDir + File.separator + "internals");
+                }
+                Utilities.showFileSelectDialog(this, "Pick Database Name To Restore", backupsDir, selectedFileListener);
                 return true;
 
             case R.id.action_factoryDefaults:
