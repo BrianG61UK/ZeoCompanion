@@ -71,7 +71,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-
 import opensource.zeocompanion.database.CompanionAlertRec;
 import opensource.zeocompanion.database.CompanionDatabase;
 import opensource.zeocompanion.database.CompanionSystemRec;
@@ -255,6 +254,7 @@ public class ZeoCompanionApplication extends Application {
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(mPrefsChangeListener);
         configAlarmManagerToPrefs();
 
+        // listen to broadcast messages from the Zeo Android App
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.myzeo.android.headband.action.HEADBAND_UNDOCKED");
         filter.addAction("com.myzeo.android.headband.action.HEADBAND_DOCKED");
