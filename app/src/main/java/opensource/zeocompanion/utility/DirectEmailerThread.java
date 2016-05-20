@@ -69,7 +69,7 @@ public class DirectEmailerThread extends Thread {
 
     // thread context:  Activity
     // configure the to-email-address rather than sending to all email addresses;
-    // this is only called via the Outbox to resend a failed email
+    // this is called via the Outbox to resend a failed email or from a database backup auto-email
     public void configureToAddress(String toAddress) {
         mToAddressOverride = toAddress;
     }

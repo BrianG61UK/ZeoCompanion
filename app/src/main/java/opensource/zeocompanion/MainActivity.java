@@ -460,14 +460,14 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.action_backupDB:
                 // copy the ZeoCompanion's database to external storage for use by the end-user
-                String msg1 = ((ZeoCompanionApplication)getApplication()).saveCopyOfDB("");
-                if (msg1.isEmpty()) {
+                ZeoCompanionApplication.BackupReturnResults results = ((ZeoCompanionApplication)getApplication()).saveCopyOfDB("");
+                if (results.rAnErrorMessage.isEmpty()) {
                     Toast.makeText(this, "ZeoCompanion DB successfully backed up to Device External Storage", Toast.LENGTH_LONG).show();
                     if ((ZeoCompanionApplication.mFirstTimeHintsShown & ZeoCompanionApplication.APP_HINTS_BACKUP) == 0) {
                         ZeoCompanionApplication.hintShown(ZeoCompanionApplication.APP_HINTS_BACKUP);
                         Utilities.showAlertDialog(this, "Hint", "Hint: You MUST move this backup database off this Android Device for the backup to be secure. If you uninstall this App, this backup will also be deleted if left on the Device. Please consider and implement Android-wide backups, USB file copying, etc.", "Okay");
                     }
-                } else { Utilities.showAlertDialog(this, "Error", msg1, "Okay"); }
+                } else { Utilities.showAlertDialog(this, "Error", results.rAnErrorMessage, "Okay"); }
                 return true;
 
             case R.id.action_restoreDB:

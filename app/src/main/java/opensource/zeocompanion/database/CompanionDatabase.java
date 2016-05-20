@@ -80,9 +80,9 @@ public class CompanionDatabase extends SQLiteOpenHelper {
         Log.d(_CTAG + ".onUpgrade", "=====ON-UPGRADE=====");
         Log.i(_CTAG + ".onUpgrade", "Starting upgrade database from version " + oldVersion + " to version " + newVersion);
         mVersion = oldVersion;
-        String msg1 = ((ZeoCompanionApplication)mContext).saveCopyOfDB("preUpgradeVer_");
-        if (!msg1.isEmpty()) {
-            ZeoCompanionApplication.postToErrorLog(_CTAG + ".onUpgrade", msg1, "Upgrade " + oldVersion + " to " + newVersion + ": saveCopyOfDB failed");    // automatically posts a Log.e
+        ZeoCompanionApplication.BackupReturnResults results = ((ZeoCompanionApplication)mContext).saveCopyOfDB("preUpgradeVer_");
+        if (!results.rAnErrorMessage.isEmpty()) {
+            ZeoCompanionApplication.postToErrorLog(_CTAG + ".onUpgrade", results.rAnErrorMessage, "Upgrade " + oldVersion + " to " + newVersion + ": saveCopyOfDB failed");    // automatically posts a Log.e
         }
 
         if (oldVersion <= 1) {

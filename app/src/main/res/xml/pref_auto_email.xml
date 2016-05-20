@@ -26,4 +26,26 @@
         android:summary="Send an image summary file attachment"
         android:defaultValue="false" />
 
+    <SwitchPreference
+        android:key="email_auto_send_database"
+        android:dependency="email_auto_enable"
+        android:title="Send Database"
+        android:summary="Send the entire ZeoCompanion database as a backup"
+        android:defaultValue="false" />
+
+    <ListPreference
+        android:key="email_auto_send_database_repetition"
+        android:dependency="email_auto_send_database"
+        android:title="Send Database: Repetition interval"
+        android:summary="Send backup database: %s"
+        android:defaultValue="Weekly"
+        android:entries="@array/databaseBackupRepetition"
+        android:entryValues="@array/databaseBackupRepetition" />
+
+    <com.android.EditTextPreferenceEncrypt
+        android:key="email_auto_send_database_dest"
+        android:dependency="email_auto_send_database"
+        android:title="Send Database: To email address"
+        android:summary="Required: Destination email address only for the database backup: %s" />
+
 </PreferenceScreen>

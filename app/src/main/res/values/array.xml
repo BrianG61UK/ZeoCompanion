@@ -36,5 +36,9 @@
         <item>Backups/ZeoCompanion</item>
         <item>Documents</item>
     </string-array>
+    <string-array name="databaseBackupRepetition">
+        <item>Daily</item>
+        <item>Weekly</item>
+    </string-array>
 
 </resources>

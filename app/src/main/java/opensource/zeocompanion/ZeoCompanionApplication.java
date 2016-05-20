@@ -75,6 +75,7 @@ import opensource.zeocompanion.database.CompanionAlertRec;
 import opensource.zeocompanion.database.CompanionDatabase;
 import opensource.zeocompanion.database.CompanionSystemRec;
 import opensource.zeocompanion.utility.DirectEmailerOutbox;
+import opensource.zeocompanion.utility.DirectEmailerThread;
 import opensource.zeocompanion.utility.JournalDataCoordinator;
 import opensource.zeocompanion.zeo.ZeoAppHandler;
 
@@ -96,6 +97,7 @@ public class ZeoCompanionApplication extends Application {
     public static DirectEmailerOutbox mEmailOutbox = null;
     private static Context mOurContext = null;
     public static File mBaseExtStorageDir = null;
+    public static ZeoCompanionApplication mApp = null;
 
     // these two are a "cheat" to allow passing of an IntegratedHistoryRec
     // from the MainActivity to either the HistoryDetailActivity or the SharingActivity
@@ -184,6 +186,7 @@ public class ZeoCompanionApplication extends Application {
                 // Alarm Manager has given the daily wakeup
                 if (mEmailOutbox != null) { mEmailOutbox.dailyCheck(); }
                 if (mZeoAppHandler != null) { mZeoAppHandler.dailyCheck(); }
+                ZeoCompanionApplication.mApp.dailyCheck();
             }
         }
     }
@@ -222,6 +225,7 @@ public class ZeoCompanionApplication extends Application {
         Thread.setDefaultUncaughtExceptionHandler(mMasterAbortHandler);
 
         // initializations
+        mApp = this;
         mOurContext = this;
         ObscuredPrefs.init(this);
 
@@ -293,21 +297,9 @@ public class ZeoCompanionApplication extends Application {
         editor.commit();
     }
 
-    // creates the App's external storage folders
-    private void createExternalStorageFolders() {
-        // is external storage available, read/write, and App has been granted permission
-        int r = checkExternalStorage();
-        if (r != 0) { return; }
-
-        // external storage is available and read/write
-        mBaseExtStorageDir.mkdirs();
-        File myExtFilesInternalsDir = new File(mBaseExtStorageDir + File.separator + "internals");
-        myExtFilesInternalsDir.mkdirs();
-        File myExtFilesOutboxDir = new File(mBaseExtStorageDir + File.separator + "outbox");
-        myExtFilesOutboxDir.mkdirs();
-        File myExtFilesExportsDir = new File(mBaseExtStorageDir + File.separator + "exports");
-        myExtFilesExportsDir.mkdirs();
-    }
+    ///////////////////////////////////////////////////////////////////
+    // Methods related to the daily alarm manager
+    ///////////////////////////////////////////////////////////////////
 
     // properly configure the Android AlarmManager depending on the preferences of the end-user;
     // used by both the DirectEmailerOutbox and the ZeoAppHandler
@@ -366,12 +358,119 @@ public class ZeoCompanionApplication extends Application {
         }
     }
 
-    // copies the ZeoCompanion database to external storage
-    public String saveCopyOfDB(String includePrefix) {
+    // called daily by the AlarmManager to check for automatic email database backups
+    public void dailyCheck() {
+        // configured to allow an auto-backup?
+        SharedPreferences sPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean autoEmailEnabled = sPrefs.getBoolean("email_auto_enable", false);
+        boolean sendDatabaseEnabled = sPrefs.getBoolean("email_auto_send_database", false);
+        if (!autoEmailEnabled || !sendDatabaseEnabled) { return; }
+
+        // yes, has the proper internal passed?
+        long newTimestamp = System.currentTimeMillis();
+        long autoBackupLastTimestamp = sPrefs.getLong("email_auto_send_database_dest_timestamp_last_sent", 0);
+        String autoBackupRepetitionInterval = sPrefs.getString("email_auto_send_database_repetition", "Weekly");
+        if (autoBackupLastTimestamp > 0) {
+            long interval = 86400000L;
+            if (autoBackupRepetitionInterval.equals("Weekly")) { interval = interval * 7L; }
+            if (autoBackupLastTimestamp + interval > newTimestamp) { return; }
+        }
+        Log.d(_CTAG+".dailyCheck","Auto-backup of ZeoCompanion database invoked");
+
+        // yes, backup the database
+        BackupReturnResults results = saveCopyOfDB("auto_"); // will not return null
+
+        // is there a destination email address?
+        String dest = "";
+        if (sPrefs.contains("email_auto_send_database_dest")) {
+            dest = ObscuredPrefs.decryptString(sPrefs.getString("email_auto_send_database_dest", ""));
+        }
+        if (dest == null) {
+            if (!results.rAnErrorMessage.isEmpty()) { results.rAnErrorMessage = results.rAnErrorMessage + ". "; }
+            results.rAnErrorMessage = results.rAnErrorMessage + "A destination email address is not configured for the database backup; the backup is only stored on-device.";
+        } else if (dest.isEmpty()) {
+            if (!results.rAnErrorMessage.isEmpty()) { results.rAnErrorMessage = results.rAnErrorMessage + ". "; }
+            results.rAnErrorMessage = results.rAnErrorMessage + "A destination email address is not configured for the database backup; the backup is only stored on-device.";
+        }
+
+        // send a database backup via direct email in a separate thread
+        String subject = "ZeoCompanion database auto backup";
+        String body = subject + "; see attachment.";
+        if (results.rTheBackupFile == null || !results.rAnErrorMessage.isEmpty()) {
+            mEmailOutbox.postToOutbox(dest, subject, body, results.rTheBackupFile, results.rAnErrorMessage, null);
+        } else {
+            DirectEmailerThread de = new DirectEmailerThread(this);
+            de.setName("DirectEmailerThread via " + _CTAG + ".dailyCheck");
+            de.configure(subject, body, results.rTheBackupFile, true);
+            de.configureToAddress(dest);
+            de.start();
+        }
+
+        // remember the current timestamp of this auto-backup
+        SharedPreferences.Editor editor = sPrefs.edit();
+        editor.putLong("email_auto_send_database_dest_timestamp_last_sent", newTimestamp);
+        editor.commit();
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // Methods related to managing the external storage in-general
+    ///////////////////////////////////////////////////////////////////
+
+    // creates the App's external storage folders
+    private void createExternalStorageFolders() {
         // is external storage available, read/write, and App has been granted permission
         int r = checkExternalStorage();
-        if (r == -2) { return "Permission for App to write to external storage has not been granted; please grant the permission"; }
-        else if (r != 0) { return "No writable external storage is available"; }
+        if (r != 0) { return; }
+
+        // external storage is available and read/write
+        mBaseExtStorageDir.mkdirs();
+        File myExtFilesInternalsDir = new File(mBaseExtStorageDir + File.separator + "internals");
+        myExtFilesInternalsDir.mkdirs();
+        File myExtFilesOutboxDir = new File(mBaseExtStorageDir + File.separator + "outbox");
+        myExtFilesOutboxDir.mkdirs();
+        File myExtFilesExportsDir = new File(mBaseExtStorageDir + File.separator + "exports");
+        myExtFilesExportsDir.mkdirs();
+    }
+
+    // force Android to let an attached PC know the file has been created
+    public static void forceShowOnPC(File theFile) {
+        MediaScannerConnection.scanFile(mOurContext, new String[]{theFile.getPath()}, null, null);
+    }
+
+    // determine if the external storage is accesible
+    public static int checkExternalStorage() {
+        // does App still have permission to write to external storage?
+        int permissionCheck = ContextCompat.checkSelfPermission(mOurContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionCheck == PackageManager.PERMISSION_DENIED) { return -2; }  // nope
+
+        // is external storage is available and read-write?
+        String state = Environment.getExternalStorageState();
+        if (!state.equals(Environment.MEDIA_MOUNTED)) { return -1; }     // not mounted or is MEDIA_MOUNTED_READ_ONLY or is in some other non-usable condition
+        return 0;
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // Methods related to backup and restore of the ZeoCompanion database
+    ///////////////////////////////////////////////////////////////////
+
+    // return class
+    public class BackupReturnResults {
+        public File rTheBackupFile = null;
+        public String rAnErrorMessage = "";
+
+        public BackupReturnResults (File theBackupFile, String anErrorMessage) {
+            rTheBackupFile = theBackupFile;
+            rAnErrorMessage = anErrorMessage;
+        }
+    }
+
+    // copies the ZeoCompanion database to external storage;
+    // do not return null
+    public BackupReturnResults saveCopyOfDB(String includePrefix) {
+        // is external storage available, read/write, and App has been granted permission
+        int r = checkExternalStorage();
+        if (r == -2) { return new BackupReturnResults(null, "Permission for App to write to external storage has not been granted; please grant the permission"); }
+        else if (r != 0) { return new BackupReturnResults(null, "No writable external storage is available"); }
 
         // get the name and folder preference
         SharedPreferences sPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -405,9 +504,9 @@ public class ZeoCompanionApplication extends Application {
             FileUtils.copyFile(source, dest);
             ZeoCompanionApplication.forceShowOnPC(dest);
         } catch (Exception e) {
-            return "Failed to backup database because of filesystem error: " + e.getMessage();
+            return new BackupReturnResults(null, "Failed to backup database because of filesystem error: " + e.getMessage());
         }
-        return "";
+        return new BackupReturnResults(dest, "");
     }
 
     // determines whether a restorage of the ZeoCompanion database from external storage is possible
@@ -479,22 +578,9 @@ public class ZeoCompanionApplication extends Application {
         return "";
     }
 
-    // force Android to let an attached PC know the file has been created
-    public static void forceShowOnPC(File theFile) {
-        MediaScannerConnection.scanFile(mOurContext, new String[]{theFile.getPath()}, null, null);
-    }
-
-    // determine if the external storage is accesible
-    public static int checkExternalStorage() {
-        // does App still have permission to write to external storage?
-        int permissionCheck = ContextCompat.checkSelfPermission(mOurContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (permissionCheck == PackageManager.PERMISSION_DENIED) { return -2; }  // nope
-
-        // is external storage is available and read-write?
-        String state = Environment.getExternalStorageState();
-        if (!state.equals(Environment.MEDIA_MOUNTED)) { return -1; }     // not mounted or is MEDIA_MOUNTED_READ_ONLY or is in some other non-usable condition
-        return 0;
-    }
+    ///////////////////////////////////////////////////////////////////
+    // Methods related to the error.log and Alerts
+    ///////////////////////////////////////////////////////////////////
 
     // Thread Context: can be called from utility threads, so cannot perform UI actions like Toast
     // write detailed exception information into an error log that the end-user can email to the developer
