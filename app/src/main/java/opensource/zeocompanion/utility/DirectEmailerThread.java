@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
+
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
@@ -130,10 +133,21 @@ public class DirectEmailerThread extends Thread {
             d3 = ObscuredPrefs.decryptString(prefs.getString("email_dest_c", ""));
         }
 
-        // create the email properties for the email subsystem
+        // prepare the email subsystem
+        // see: https://stackoverflow.com/questions/21856211/javax-activation-unsupporteddatatypeexception-no-object-dch-for-mime-type-multi#
+        // see: https://stackoverflow.com/questions/7521027/dch-class-error-with-javamail
+        MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
+        mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
+        mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
+        mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
+        mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed");
+        mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
         System.setProperty("mail.mime.encodefilename","false");
         System.setProperty("mail.mime.encodeparameters","false");
         System.setProperty("mail.mime.foldtext","false");
+        currentThread().setContextClassLoader(getClass().getClassLoader());
+
+        // create the email properties for the email subsystem
         Properties emailProps = new Properties();
         emailProps.put("mail.smtp.host",serverAddr);
         emailProps.put("mail.smtp.port", serverPort);
@@ -185,9 +199,11 @@ public class DirectEmailerThread extends Thread {
             } else {
                 MimeBodyPart messageBodyPart = new MimeBodyPart();
                 messageBodyPart.setContent(mBody, "text/plain");
+
                 MimeBodyPart attachPart = new MimeBodyPart();
                 attachPart.attachFile(mAttachment.getAbsoluteFile());
                 attachPart.setFileName( mAttachment.getName());
+
                 Multipart multipart = new MimeMultipart();
                 multipart.addBodyPart(messageBodyPart);
                 multipart.addBodyPart(attachPart);
