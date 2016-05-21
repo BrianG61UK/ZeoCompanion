@@ -1,6 +1,5 @@
 package opensource.zeocompanion.zeo;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +18,7 @@ import com.myzeo.android.api.data.ZeoDataContract;
 import com.myzeo.android.api.data.ZeoDataContract.Headband;
 import com.myzeo.android.api.data.ZeoDataContract.SleepRecord;
 import com.obscuredPreferences.ObscuredPrefs;
+import opensource.zeocompanion.BuildConfig;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.database.CompanionDatabase;
 import opensource.zeocompanion.database.CompanionDatabaseContract;
@@ -42,11 +42,17 @@ public class ZeoAppHandler {
     private long mTypicalSleepDurationMin = 0L;
     private long mTimestampLastPollKnownSleepRecordID = 0L;
     private ArrayList<ZAH_Listener> mListeners = null;
+    private Uri mBaseContentURI = null;
+    private Uri mHeadbandsContentURI = null;
+    private Uri mSleepRecordsContentURI = null;
 
     // member constants and other static content
+    private static final String _CTAG = "ZAH";
+    public static final String SIM_CONTENT_AUTHORITY = "sim.com.myzeo";
+    public static final Uri SIM_BASE_CONTENT_URI = Uri.parse("content://" + SIM_CONTENT_AUTHORITY);
     private static final long DEFAULT_ZEOAPP_PROBE_DELAY_MS = 14000L;    // 15 seconds less the 1 second that will get auto-added before the delay call
     private static final long QUICK_ZEOAPP_PROBE_DELAY_MS = 4000L;    // 5 seconds less the 1 second that will get auto-added before the delay call
-    public static final String _CTAG = "ZAH";
+
     public static final int ZAH_ERROR_NONE = 0;
     public static final int ZAH_ERROR_NOT_INSTALLED = 1;
     public static final int ZAH_ERROR_NO_PERMISSION = 2;
@@ -137,6 +143,13 @@ public class ZeoAppHandler {
     {
         mContext = context;
         mListeners = new ArrayList<ZAH_Listener>();
+        if (BuildConfig.BUILD_TYPE.contentEquals("zeoappsimulated")) {
+            mBaseContentURI = SIM_BASE_CONTENT_URI;
+        } else {
+            mBaseContentURI = ZeoDataContract.BASE_CONTENT_URI;
+        }
+        mHeadbandsContentURI = mBaseContentURI.buildUpon().appendPath("headbands").build();
+        mSleepRecordsContentURI = mBaseContentURI.buildUpon().appendPath("sleep_records").build();
 
         // progressively determine the end-user's typical or expected sleep duration
         mTypicalSleepDurationMin = 465; // 15 min less than 8 hours
@@ -162,7 +175,7 @@ public class ZeoAppHandler {
         int permissionCheck = ContextCompat.checkSelfPermission(mContext, "com.myzeo.permission.READ_SLEEP_RECORDS");
         if (permissionCheck == PackageManager.PERMISSION_DENIED) { return ZAH_ERROR_NO_PERMISSION; }
 
-        final Cursor cursor1 = mContext.getContentResolver().query(Headband.CONTENT_URI, cols_hb, null, null, null);
+        final Cursor cursor1 = mContext.getContentResolver().query(mHeadbandsContentURI, cols_hb, null, null, null);
         if (cursor1 == null) { Log.e(_CTAG+".verifyAPI","The ZeoApp Headband Table is inaccessible"); return ZAH_ERROR_NO_DB; }
         if (!cursor1.moveToFirst()) { cursor1.close(); Log.e(_CTAG + ".verifyAPI", "The ZeoApp Headband Table is empty");  return ZAH_ERROR_NO_HB_REC; }
         cursor1.close();
@@ -171,7 +184,7 @@ public class ZeoAppHandler {
                 SleepRecord.SLEEP_EPISODE_ID,
                 SleepRecord.SOURCE,
         };
-        final Cursor cursor2 = mContext.getContentResolver().query(SleepRecord.CONTENT_URI, cols_sleepRec, null, null, null);
+        final Cursor cursor2 = mContext.getContentResolver().query(mSleepRecordsContentURI, cols_sleepRec, null, null, null);
         if (cursor2 == null) { Log.e(_CTAG+".verifyAPI","The ZeoApp SleepRecord Table is inaccessible"); return ZAH_ERROR_NO_DB; }
         if (!cursor2.moveToFirst()) { cursor2.close(); return ZAH_ERROR_NO_DATA; }
         cursor2.close();
@@ -191,7 +204,7 @@ public class ZeoAppHandler {
         mZeoAppProbeDelayMS = DEFAULT_ZEOAPP_PROBE_DELAY_MS;
 
         final Cursor cursor1 = mContext.getContentResolver().query(
-                Headband.CONTENT_URI,   // data manager, database and table name
+                mHeadbandsContentURI,   // data manager, database and table name
                 ZAH_HeadbandRecord.ZAH_HEADBANDREC_EXTENDED_COLS,    // columns
                 null,   // where clause
                 null,   // values
@@ -216,7 +229,7 @@ public class ZeoAppHandler {
             String selection = SleepRecord.END_REASON + "=1";   // look for a record in "Active" state
             String sort = SleepRecord.START_OF_NIGHT + " DESC";
             final Cursor cursor2 = mContext.getContentResolver().query(
-                    SleepRecord.CONTENT_URI,    // data manager, database and table name
+                    mSleepRecordsContentURI,    // data manager, database and table name
                     ZAH_SleepRecord.ZAH_SLEEPREC_COLS,  // columns
                     selection,  // where clause
                     null,   // values
@@ -448,7 +461,7 @@ public class ZeoAppHandler {
         // first obtain the active headband record (it must be paired and connected); that record contains the ZeoApp's current state;
         // there may be more than one Zeo Headband record if the App has been paired with other headbands in the past
         final Cursor cursor1 = mContext.getContentResolver().query(
-                Headband.CONTENT_URI,   // data manager, database and table name
+                mHeadbandsContentURI,   // data manager, database and table name
                 ZAH_HeadbandRecord.ZAH_HEADBANDREC_EXTENDED_COLS,    // columns
                 null,   // where clause
                 null,   // values
@@ -515,7 +528,7 @@ public class ZeoAppHandler {
             if (!selection.isEmpty()) {
                 String sort = SleepRecord.START_OF_NIGHT + " DESC";
                 final Cursor cursor2 = mContext.getContentResolver().query(
-                        SleepRecord.CONTENT_URI,    // data manager, database and table name
+                        mSleepRecordsContentURI,    // data manager, database and table name
                         ZAH_SleepRecord.ZAH_SLEEPREC_EXTENDED_COLS,  // columns
                         selection,  // where clause
                         values,   // values
@@ -590,7 +603,7 @@ public class ZeoAppHandler {
 
     // get the most active headband record (used when the Headband Commander attempts to connect to the headband)
     public ZAH_HeadbandRecord getActiveHeadbandRecord() {
-        final Cursor cursor = mContext.getContentResolver().query(Headband.CONTENT_URI, ZAH_HeadbandRecord.ZAH_HEADBANDREC_COLS, null, null, null);
+        final Cursor cursor = mContext.getContentResolver().query(mHeadbandsContentURI, ZAH_HeadbandRecord.ZAH_HEADBANDREC_COLS, null, null, null);
         if (cursor == null) { return null; }
         if (!cursor.moveToFirst()) { cursor.close(); return null; }
 
@@ -624,7 +637,7 @@ public class ZeoAppHandler {
         Cursor cursor = null;
         try {
             cursor = mContext.getContentResolver().query(
-                    ZeoDataContract.SleepRecord.CONTENT_URI,    // data manager, database and table name
+                    mSleepRecordsContentURI,    // data manager, database and table name
                     ZAH_SleepRecord.ZAH_SLEEPREC_COLS,          // columns to get
                     where,          // columns for optional WHERE clause
                     values,        // values for optional WHERE clause
@@ -648,7 +661,7 @@ public class ZeoAppHandler {
         Cursor cursor = null;
         try {
             cursor =  mContext.getContentResolver().query(
-                    ZeoDataContract.SleepRecord.CONTENT_URI,    // data manager, database and table name
+                    mSleepRecordsContentURI,    // data manager, database and table name
                     ZAH_SleepRecord.ZAH_SLEEPREC_EXTENDED_COLS,          // columns to get
                     where,       // columns for optional WHERE clause
                     values,       // values for optional WHERE clause
@@ -672,11 +685,11 @@ public class ZeoAppHandler {
         Cursor cursor = null;
         try {
             cursor =  mContext.getContentResolver().query(
-                ZeoDataContract.SleepRecord.CONTENT_URI,    // data manager, database and table name
-                ZAH_SleepRecord.ZAH_SLEEPREC_EXTENDED_COLS,          // columns to get
-                null,       // columns for optional WHERE clause
-                null,       // values for optional WHERE clause
-                sortOrder); // sort order
+                    mSleepRecordsContentURI,    // data manager, database and table name
+                    ZAH_SleepRecord.ZAH_SLEEPREC_EXTENDED_COLS,          // columns to get
+                    null,       // columns for optional WHERE clause
+                    null,       // values for optional WHERE clause
+                    sortOrder); // sort order
         } catch (Exception e) {
             ZeoCompanionApplication.postToErrorLog(_CTAG + ".getAllZeoSleepRecs", e);   // automatically posts a Log.e
             if (cursor != null) { cursor.close(); cursor = null; }
@@ -691,7 +704,7 @@ public class ZeoAppHandler {
         Cursor cursor = null;
         try {
             cursor = mContext.getContentResolver().query(
-                    ZeoDataContract.SleepRecord.CONTENT_URI,    // data manager, database and table name
+                    mSleepRecordsContentURI,    // data manager, database and table name
                     ZAH_SleepRecord.ZAH_SLEEPREC_EXTENDED_COLS,          // columns to get
                     ZeoDataContract.SleepRecord.START_OF_NIGHT+">=?",       // columns for optional WHERE clause
                     new String[] { String.valueOf(fromTimestamp) },         // values for optional WHERE clause
@@ -709,7 +722,7 @@ public class ZeoAppHandler {
         Cursor cursor = null;
         try {
             cursor = mContext.getContentResolver().query(
-                    ZeoDataContract.SleepRecord.CONTENT_URI,    // data manager, database and table name
+                    mSleepRecordsContentURI,    // data manager, database and table name
                     cols,   // columns to get
                     null,   // columns for optional WHERE clause
                     null,   // values for optional WHERE clause
@@ -821,7 +834,7 @@ public class ZeoAppHandler {
         // replicate the Headband Zeo App table
         private void replicate_ZeoHeadbands(String[] existingTables) {
             String sortOrder = ZeoDataContract.Headband._ID + " ASC ";
-            doReplicateOneTable(ZeoDataContract.Headband.CONTENT_URI, CompanionDatabaseContract.ZeoHeadbands.TABLE_NAME,
+            doReplicateOneTable(mHeadbandsContentURI, CompanionDatabaseContract.ZeoHeadbands.TABLE_NAME,
                     CompanionDatabaseContract.ZeoHeadbands.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoHeadbands.SQL_DEFINITION, existingTables);
         }
 
@@ -829,7 +842,7 @@ public class ZeoAppHandler {
         // replicate the SleepEpisode Zeo App table
         private void replicate_ZeoSleepEvents(String[] existingTables) {
             String sortOrder = ZeoDataContract.SleepEpisode._ID + " ASC ";
-            doReplicateOneTable(ZeoDataContract.SleepEpisode.CONTENT_URI, CompanionDatabaseContract.ZeoSleepEvents.TABLE_NAME,
+            doReplicateOneTable(mBaseContentURI.buildUpon().appendPath("sleep_events").build(), CompanionDatabaseContract.ZeoSleepEvents.TABLE_NAME,
                     CompanionDatabaseContract.ZeoSleepEvents.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoSleepEvents.SQL_DEFINITION, existingTables);
         }
 
@@ -837,7 +850,7 @@ public class ZeoAppHandler {
         // replicate the SleepRecord Zeo App table
         private void replicate_ZeoSleepRecords(String[] existingTables) {
             String sortOrder = ZeoDataContract.SleepRecord._ID + " ASC ";
-            doReplicateOneTable(ZeoDataContract.SleepRecord.CONTENT_URI, CompanionDatabaseContract.ZeoSleepRecords.TABLE_NAME,
+            doReplicateOneTable(mSleepRecordsContentURI, CompanionDatabaseContract.ZeoSleepRecords.TABLE_NAME,
                     CompanionDatabaseContract.ZeoSleepRecords.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoSleepRecords.SQL_DEFINITION, existingTables);
         }
 
@@ -845,7 +858,7 @@ public class ZeoAppHandler {
         // replicate the AlarmAlertEvent Zeo App table
         private void replicate_ZeoAlarmAlertEvents(String[] existingTables) {
             String sortOrder = ZeoDataContract.AlarmAlertEvent._ID + " ASC ";
-            doReplicateOneTable(ZeoDataContract.AlarmAlertEvent.CONTENT_URI, CompanionDatabaseContract.ZeoAlarmAlertEvents.TABLE_NAME,
+            doReplicateOneTable(mBaseContentURI.buildUpon().appendPath("alarm_events").build(), CompanionDatabaseContract.ZeoAlarmAlertEvents.TABLE_NAME,
                     CompanionDatabaseContract.ZeoAlarmAlertEvents.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoAlarmAlertEvents.SQL_DEFINITION, existingTables);
         }
 
@@ -853,7 +866,7 @@ public class ZeoAppHandler {
         // replicate the AlarmTimeoutEvent Zeo App table
         private void replicate_ZeoAlarmTimeoutEvents(String[] existingTables) {
             String sortOrder = ZeoDataContract.AlarmTimeoutEvent._ID + " ASC ";
-            doReplicateOneTable(ZeoDataContract.AlarmTimeoutEvent.CONTENT_URI, CompanionDatabaseContract.ZeoAlarmTimeoutEvents.TABLE_NAME,
+            doReplicateOneTable(mBaseContentURI.buildUpon().appendPath("alarm_timeout_events").build(), CompanionDatabaseContract.ZeoAlarmTimeoutEvents.TABLE_NAME,
                     CompanionDatabaseContract.ZeoAlarmTimeoutEvents.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoAlarmTimeoutEvents.SQL_DEFINITION, existingTables);
         }
 
@@ -861,7 +874,7 @@ public class ZeoAppHandler {
         // replicate the AlarmSnoozeEvent Zeo App table
         private void replicate_ZeoAlarmSnoozeEvents(String[] existingTables) {
             String sortOrder = ZeoDataContract.AlarmSnoozeEvent._ID + " ASC ";
-            doReplicateOneTable(ZeoDataContract.AlarmSnoozeEvent.CONTENT_URI, CompanionDatabaseContract.ZeoAlarmSnoozeEvents.TABLE_NAME,
+            doReplicateOneTable(mBaseContentURI.buildUpon().appendPath("alarm_snooze_events").build(), CompanionDatabaseContract.ZeoAlarmSnoozeEvents.TABLE_NAME,
                     CompanionDatabaseContract.ZeoAlarmSnoozeEvents.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoAlarmSnoozeEvents.SQL_DEFINITION, existingTables);
         }
 
@@ -869,7 +882,7 @@ public class ZeoAppHandler {
         // replicate the ActigraphyRecords Zeo App table
         private void replicate_ZeoActigraphyRecords(String[] existingTables) {
             String sortOrder = CompanionDatabaseContract.ZeoActigraphyRecords._ID + " ASC ";
-            Uri contentURI = ZeoDataContract.BASE_CONTENT_URI.buildUpon().appendPath("actigraphy_records").build();
+            Uri contentURI = mBaseContentURI.buildUpon().appendPath("actigraphy_records").build();
             doReplicateOneTable(contentURI,  CompanionDatabaseContract.ZeoActigraphyRecords.TABLE_NAME,
                     CompanionDatabaseContract.ZeoActigraphyRecords.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoActigraphyRecords.SQL_DEFINITION, existingTables);
         }
@@ -878,7 +891,7 @@ public class ZeoAppHandler {
         // replicate the Alarms Zeo App table
         private void replicate_ZeoAlarms(String[] existingTables) {
             String sortOrder = CompanionDatabaseContract.ZeoAlarms._ID + " ASC ";
-            Uri contentURI = ZeoDataContract.BASE_CONTENT_URI.buildUpon().appendPath("alarms").build();
+            Uri contentURI = mBaseContentURI.buildUpon().appendPath("alarms").build();
             doReplicateOneTable(contentURI,  CompanionDatabaseContract.ZeoAlarms.TABLE_NAME,
                     CompanionDatabaseContract.ZeoAlarms.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoAlarms.SQL_DEFINITION, existingTables);
         }
@@ -887,7 +900,7 @@ public class ZeoAppHandler {
         // replicate the HeadbandAsserts Zeo App table
         private void replicate_ZeoHeadbandAsserts(String[] existingTables) {
             String sortOrder = CompanionDatabaseContract.ZeoHeadbandAsserts._ID + " ASC ";
-            Uri contentURI = ZeoDataContract.BASE_CONTENT_URI.buildUpon().appendPath("headband_asserts").build();
+            Uri contentURI = mBaseContentURI.buildUpon().appendPath("headband_asserts").build();
             doReplicateOneTable(contentURI,  CompanionDatabaseContract.ZeoHeadbandAsserts.TABLE_NAME,
                     CompanionDatabaseContract.ZeoHeadbandAsserts.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoHeadbandAsserts.SQL_DEFINITION, existingTables);
         }
@@ -896,7 +909,7 @@ public class ZeoAppHandler {
         // replicate the HeadbandResets Zeo App table
         private void replicate_ZeoHeadbandResets(String[] existingTables) {
             String sortOrder = CompanionDatabaseContract.ZeoHeadbandResets._ID + " ASC ";
-            Uri contentURI = ZeoDataContract.BASE_CONTENT_URI.buildUpon().appendPath("headband_resets").build();
+            Uri contentURI = mBaseContentURI.buildUpon().appendPath("headband_resets").build();
             doReplicateOneTable(contentURI,  CompanionDatabaseContract.ZeoHeadbandResets.TABLE_NAME,
                     CompanionDatabaseContract.ZeoHeadbandResets.PROJECTION_FULL, sortOrder, CompanionDatabaseContract.ZeoHeadbandResets.SQL_DEFINITION, existingTables);
         }

@@ -1010,6 +1010,10 @@ public class CompanionDatabase extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + CompanionDatabaseContract.ZeoSleepRecords.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + CompanionDatabaseContract.ZeoSleepEvents.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + CompanionDatabaseContract.ZeoHeadbands.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + CompanionDatabaseContract.ZeoActigraphyRecords.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + CompanionDatabaseContract.ZeoAlarms.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + CompanionDatabaseContract.ZeoHeadbandAsserts.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + CompanionDatabaseContract.ZeoHeadbandResets.TABLE_NAME);
     }
 
     // Thread context: ReplicateZeoDatabase thread
