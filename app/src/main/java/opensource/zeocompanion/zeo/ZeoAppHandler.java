@@ -110,13 +110,12 @@ public class ZeoAppHandler {
 
             // detect a change if any
             boolean changed = probeAppState();
+
+            // send this message to the main thread for further dissemination to any listeners
             Message msg1 = new Message();
             if (changed) { msg1.what = ZeoCompanionApplication.MESSAGE_ZAH_ZEO_STATE_CHANGED; }
             else { msg1.what = ZeoCompanionApplication.MESSAGE_ZAH_ZEO_PROBED_NO_CHANGE; }
-            if (mContinueZeoAppProbing_foreground || mContinueZeoAppProbing_broadcast > 0) {
-                // probing allowed to proceed; send this message to the main thread for further dissemination to any listeners
-                mZeoAppMonitorHandler.sendMessage(msg1);
-            }
+            mZeoAppMonitorHandler.sendMessage(msg1);
 
             // schedule the next probe unless probing is to end
             determineNextProbeDelay();
@@ -423,7 +422,7 @@ public class ZeoAppHandler {
         if (action.equals("com.myzeo.android.headband.action.HEADBAND_UNDOCKED")) {
             if (journalEnabled) {
                 // headband has just been undocked from the charger; Zeo App should be changing to Starting very soon if not already
-                mContinueZeoAppProbing_broadcast = 12;  // probe quickly for one minute
+                mContinueZeoAppProbing_broadcast = 60;  // probe quickly for five minutes since shift to Recording state can take some time
                 mZeoAppProbeDelayMS = QUICK_ZEOAPP_PROBE_DELAY_MS;
                 mCurrProbeRunnableIndex++;
                 mZeoAppMonitorHandler.post(new ProbeRunnable(mCurrProbeRunnableIndex));
@@ -431,7 +430,7 @@ public class ZeoAppHandler {
         } else if (action.equals("com.myzeo.android.headband.action.HEADBAND_DOCKED")) {
             if (journalEnabled) {
                 // headband has just been docked into the charger; Zeo App should be changing to Ending very soon if not already
-                mContinueZeoAppProbing_broadcast = 12;  // probe quickly for one minute
+                mContinueZeoAppProbing_broadcast = 24;  // probe quickly for two minutes for Ending and Idle states
                 mZeoAppProbeDelayMS = QUICK_ZEOAPP_PROBE_DELAY_MS;
                 mCurrProbeRunnableIndex++;
                 mZeoAppMonitorHandler.post(new ProbeRunnable(mCurrProbeRunnableIndex));
@@ -453,7 +452,7 @@ public class ZeoAppHandler {
     // polling does not occur at all if the Sleep Journal is disabled
     public boolean probeAppState() {
         boolean theReturn = false;
-        //Log.d(_CTAG+".probeAppState", "-->Probing the ZeoApp");
+        Log.d(_CTAG+".probeAppState", "-->Probing the ZeoApp");
         mZeoApp_Prior_State = mZeoApp_State;
         int newState = ZAH_ZEOAPP_STATE_UNKNOWN;
         mZeoHeadband_battery_lastProbed = 0;
@@ -494,10 +493,12 @@ public class ZeoAppHandler {
                 Log.d(_CTAG+".probeAppState", "Substituting Ending");
             }
 
-            if (newState == ZAH_ZEOAPP_STATE_IDLE) {
+            if (newState == ZAH_ZEOAPP_STATE_RECORDING) { mContinueZeoAppProbing_broadcast = 0; }
+            else if (newState == ZAH_ZEOAPP_STATE_IDLE) {
                 // just changed to idle, so reset the observed headband voltage values
                 mZeoHeadband_battery_maxWhileRecording = 0;
                 mZeoHeadband_battery_minWhileRecording = 0;
+                mContinueZeoAppProbing_broadcast = 0;
             }
 
             // change to the new state

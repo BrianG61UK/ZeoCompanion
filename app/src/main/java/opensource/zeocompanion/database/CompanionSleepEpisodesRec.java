@@ -303,7 +303,7 @@ public class CompanionSleepEpisodesRec {
         if (rZeoEventStarting_Timestamp > 0L) { bits = (bits | 0x00001000); }
         if (rZeoEventRecording_Timestamp > 0L) { bits = (bits | 0x00002000); }
         if (rZeoEventEnding_Timestamp > 0L) { bits = (bits | 0x00004000); }
-        if (rEvent_GotIntoBed_Timestamp > 0L && rEvent_OutOfBedDoneSleeping_Timestamp > 0L && rEvent_TryingToSleep_Timestamp > 0L) { bits = (bits | 0x00010000); checkDeeper = false; }
+        if (rEvent_GotIntoBed_Timestamp > 0L || rEvent_TryingToSleep_Timestamp > 0L || rEvent_OutOfBedDoneSleeping_Timestamp > 0L ) { bits = (bits | 0x00010000); checkDeeper = false; }
         if (rEvents_CSV_string != null) {
             if (!rEvents_CSV_string.isEmpty()) { bits = (bits | 0x00010000); checkDeeper = false; }
         }

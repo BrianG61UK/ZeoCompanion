@@ -319,8 +319,10 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
             case ZeoAppHandler.ZAH_ZEOAPP_STATE_RECORDING:
                 // Zeo App changed to the STARTING or RECORDING state; sync if possible, else record an event for only STARTING (since it usually does not have a SleepEpisode_ID assigned yet)
                 if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_active_SleepEpisode_ID != 0) {
+                    Log.d(_CTAG + ".zeoAppChg", "Change to Starting or Recording: Zeo App has Sleep Record; sync to today daypoint");
                     syncTodayDaypointToZeoRecord(true, true);
                 } else if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State == ZeoAppHandler.ZAH_ZEOAPP_STATE_STARTING)  {
+                    Log.d(_CTAG + ".zeoAppChg", "Change to Starting: Zeo App not allocated sleep record; get/make today CSE and prep it");
                     CompanionSleepEpisodesRec sRec = getTodayDaypointCSECreateIfShould();
                     if (sRec != null) { syncCSEtoZeoRecord(sRec, true, true); }
                 }
@@ -330,8 +332,12 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                 // Zeo App changed to ENDING state, record this in the proper Daypoint CSE (it could be Today or Yesterday); include preliminary end-of-sleep totals
                 int dp = getDaypointWithZeoID(ZeoCompanionApplication.mZeoAppHandler.mZeoApp_active_SleepEpisode_ID);
                 if (dp >= -1) {
+                    Log.d(_CTAG + ".zeoAppChg", "Change to Ending: sync to daypoint "+dp);
                     syncCSEtoZeoRecord(mDaypoint_CSEs[dp+1], true, true);
-                    if (dp == 0) { resetDaypointForNewSleepSession(); }
+                    if (dp == 0) {
+                        Log.d(_CTAG + ".zeoAppChg", "Change to Ending: move today to yesterday");
+                        resetDaypointForNewSleepSession();
+                    }
                 }
                 break;
 
@@ -341,12 +347,15 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                 // Zeo App changed to Idle state
                 if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_Prior_State >= ZeoAppHandler.ZAH_ZEOAPP_STATE_RECORDING) {
                     // were we in recording or ending just before this
+                    Log.d(_CTAG + ".zeoAppChg", "Change to Idle or Ending: prior was Recording or Ending");
                     CompanionSleepEpisodesRec sRec1 = getYesterdayDaypointCSE();
                     if (sRec1 != null) {
                         // do one last final sync to finalize whether the Zeo Sleep Record is dead or valid and has finalized totals from the headband
+                        Log.d(_CTAG + ".zeoAppChg", "Change to Idle or Ending: has yesterday daypoint CSE; sync to yesterday daypoint");
                         syncCSEtoZeoRecord(sRec1, true, false);
-                        if ((sRec1.rStatesFlag & CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_ZEO_DEADREC) != 0 || sRec1.isZeoOnly()) {
+                        if ((sRec1.rStatesFlag & CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_ZEO_DEADREC) != 0 && sRec1.isZeoOnly()) {
                             // Zeo rec is dead and the CSE has no info other than Zeo info; remove it from the yesterday daypoint
+                            Log.d(_CTAG + ".zeoAppChg", "Change to Idle or Ending: yesterday daypoint to be removed: CSE.deadrec="+(sRec1.rStatesFlag & CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_ZEO_DEADREC)+" and CSE.isZeoOnly="+sRec1.isZeoOnly());
                             sRec1.destroy();
                             mDaypoint_CSEs[0] = null;
                             if (mDaypoint == -1) { sendDoAllUpdateMsgToUI(); }  // if yesterday daypoint is showing, then need to have all MainActivity Fragments update themselves
@@ -358,17 +367,21 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                 // is there a today daypoint CSE?
                 CompanionSleepEpisodesRec sRec2 = getTodayDaypointCSE();
                 if (sRec2 != null) {
+                    Log.d(_CTAG + ".zeoAppChg", "Change to Idle or Ending: has today daypoint CSE");
                     // if there is a today daypoint CSE then the Zeo App likely never got to Recording
                     long mapOfContent = sRec2.getContentsBitmap();
+                    Log.d(_CTAG + ".zeoAppChg", "Change to Idle or Ending: today CSE contents=0x"+String.format("%X", mapOfContent));
                     if ((mapOfContent & 0xFFFFFFFE) == 0 || (mapOfContent & 0xFFFF60FE) == 0) {
                         // has no attributes and is unlinked, and has no events; OR
                         // has no attributes and is unlinked, and if it has any events, there is just one that is Zeo_Starting;
                         // do not need to keep this record
+                        Log.d(_CTAG + ".zeoAppChg", "Change to Idle or Ending: meets criteria for record deletion and removal from today daypoint");
                         if (sRec2.rID > 0) {
                             CompanionSleepEpisodesRec.removeFromDB(ZeoCompanionApplication.mDatabaseHandler, sRec2.rID);
                         }
                         sRec2.destroy();
                         mDaypoint_CSEs[1] = null;
+                        if (mDaypoint == 0) { sendDoAllUpdateMsgToUI(); }  // if today daypoint is showing, then need to have all MainActivity Fragments update themselves
                     }
                 }
                 break;
