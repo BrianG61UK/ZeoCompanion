@@ -1134,31 +1134,31 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
         }
     }
 
-    // get all integrated Sleep Records from both ZeoApp and ZeoCompanion databases
+    // get all integrated Sleep Records from both ZeoApp and ZeoCompanion databases; sorted newest to oldest
     public void getAllIntegratedHistoryRecs(ArrayList<IntegratedHistoryRec> theArray) {
         getAllIntegratedHistoryRecs_Internal(theArray, 0, false, false);
     }
 
-    // get all integrated Sleep Records from both ZeoApp and ZeoCompanion databases
+    // get all integrated Sleep Records from both ZeoApp and ZeoCompanion databases; sorted newest to oldest
     public void getAllIntegratedHistoryRecsFromDate(ArrayList<IntegratedHistoryRec> theArray, Date fromWhen) {
         long afterTimestamp = 0;
         if (fromWhen != null) { afterTimestamp = fromWhen.getTime(); }
         getAllIntegratedHistoryRecs_Internal(theArray, afterTimestamp, false, false);
     }
 
-    // get all integrated Sleep Records from both ZeoApp and ZeoCompanion databases
+    // get all integrated Sleep Records from both ZeoApp and ZeoCompanion databases; sorted newest to oldest
     public void getAllIntegratedHistoryRecsFromDate(ArrayList<IntegratedHistoryRec> theArray, long fromWhen) {
         getAllIntegratedHistoryRecs_Internal(theArray, fromWhen, false, false);
     }
 
-    // get only Zeo Sleep Records after the specified timestamp (used by the CSV Exporter)
+    // get only Zeo Sleep Records after the specified timestamp (used by the CSV Exporter); sorted newest to oldest
     public void getAllZeoRecsFromDate(ArrayList<IntegratedHistoryRec> theArray, Date fromWhen, boolean includeZeoDead) {
         long afterTimestamp = 0;
         if (fromWhen != null) { afterTimestamp = fromWhen.getTime(); }
         getAllIntegratedHistoryRecs_Internal(theArray, afterTimestamp, true, includeZeoDead);
     }
 
-    // internal method that performs the actual queries and integrations
+    // internal method that performs the actual queries and integrations; sorted newest to oldest
     private void getAllIntegratedHistoryRecs_Internal(ArrayList<IntegratedHistoryRec> theArray, long afterTimestamp, boolean zeoOnly, boolean includeZeoDead) {
         int journalCnt = 0;
         int zeoCnt = 0;

@@ -66,6 +66,7 @@ public class HypnogramView extends GraphView {
     public HypnogramView(Context context, AttributeSet attrs) { super(context, attrs); }
     public HypnogramView(Context context, AttributeSet attrs, int defStyle) { super(context, attrs, defStyle); }
 
+    // touch event occured on the hypnogram
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean b = mViewport.onTouchEvent(event);
@@ -407,6 +408,15 @@ public class HypnogramView extends GraphView {
         mHypnoSeriesSpacing = 10;   // expressed as a percent
     }
 
+    // prepare to create a bitmap rather than a view
+    public void prepDrawToCanvas(int width, int height) {
+        this.setLeft(0);
+        this.setRight(width);
+        this.setTop(0);
+        this.setBottom(height);
+        return;
+    }
+
     // set the data for the hypnogram; theEvents can be null;
     public void setDataset(long displayStartTimestamp, int data_is_epoch_in_sec, int alter_to_epoch_in_sec, byte[] theData, boolean fixAtStdSize, ArrayList<CompanionSleepEpisodeEventsParsedRec> theEvents) {
         mTheData = theData;
@@ -635,14 +645,6 @@ public class HypnogramView extends GraphView {
         }
     }
 
-    // prepare to create a bitmap rather than a view
-    public void prepDrawToCanvas(int width, int height) {
-        this.setLeft(0);
-        this.setRight(width);
-        this.setTop(0);
-        this.setBottom(height);
-        return;
-    }
 
     // set a scrolling and scaling callback listener
     public void setScrollScaleListener(long callbackNumber, Viewport.ScrollScaleListener listener) {
@@ -651,6 +653,7 @@ public class HypnogramView extends GraphView {
         viewport.setScrollScaleListener(listener);
     }
 
+    // set the number of X-axes label to show depending upon the current scale of the hypnogram
     public void setLabelsPerScale() {
         Viewport viewport = this.getViewport();
         GridLabelRenderer render = this.getGridLabelRenderer();
