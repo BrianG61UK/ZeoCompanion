@@ -11,7 +11,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Display;
-
 import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.fragments.CustomizeActivityAttribsFragment;

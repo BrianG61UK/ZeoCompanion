@@ -6,7 +6,7 @@
         <item>None</item>
     </string-array>
     <string-array name="mainFirstTabValues">
-        <item>Dashboard Tab</item>
+        <item>Stats Tab</item>
         <item>History Tab</item>
         <item>1st Journal Tab</item>
     </string-array>

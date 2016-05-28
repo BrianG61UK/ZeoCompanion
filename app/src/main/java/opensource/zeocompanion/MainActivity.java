@@ -3,13 +3,11 @@ package opensource.zeocompanion;
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.net.Uri;
 import android.opengl.GLES10;
-import android.opengl.GLSurfaceView;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -32,12 +30,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
-
 import java.io.File;
 import java.util.List;
-
 import javax.microedition.khronos.opengles.GL10;
-
 import opensource.zeocompanion.activities.AlertsActivity;
 import opensource.zeocompanion.activities.HeadbandActivity;
 import opensource.zeocompanion.activities.CustomizeActivity;
@@ -153,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
         // get a handle to the journal status bar fragment
         mJStatusBar = (JournalStatusBarFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_journal_status_bar);
+        mJStatusBar.setVisible(false);
 
         // create the adaptor for the UI fragments for this activity
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -680,8 +676,8 @@ public class MainActivity extends AppCompatActivity {
             if (MainActivity.mPrefs.getBoolean("journal_enable", true) && !ZeoCompanionApplication.mDatabaseHandler.mInvalidDB) {
                 // the Sleep Journal system is enabled
                 int p = 0;
-                //mPositionMap[p] = TAB_DASHBOARD;   // dashboard fragment      // TODO V1.1 Dashboard Tab
-                //p++;
+                mPositionMap[p] = TAB_DASHBOARD;   // dashboard fragment
+                p++;
                 if (MainActivity.mPrefs.getBoolean("journal_enable_before", true)) {
                     mPositionMap[p] = CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE;
                     p++;
@@ -709,11 +705,9 @@ public class MainActivity extends AppCompatActivity {
                 mActiveTabsCnt = p;
             } else {
                 // the Sleep Journal system is disabled
-                /*mPositionMap[0] = TAB_DASHBOARD;   // dashboard fragment    // TODO V1.1 Dashboard Tab
+                mPositionMap[0] = TAB_DASHBOARD;   // dashboard fragment
                 mPositionMap[1] = TAB_HISTORY;   // history fragment
-                mActiveTabsCnt = 2;*/
-                mPositionMap[1] = TAB_HISTORY;   // history fragment
-                mActiveTabsCnt = 1;
+                mActiveTabsCnt = 2;
             }
         }
 
@@ -723,10 +717,10 @@ public class MainActivity extends AppCompatActivity {
             if (MainActivity.mPrefs.getBoolean("journal_enable", true)) {
                 // the Sleep Journal system is enabled
                 int p = 0;
-                /*if (mPositionMap[p] != TAB_DASHBOARD) {    // dashboard fragment  // TODO V1.1 Dashboard Tab
+                if (mPositionMap[p] != TAB_DASHBOARD) {    // dashboard fragment
                     return true;
                 }
-                p++;*/
+                p++;
                 if (MainActivity.mPrefs.getBoolean("journal_enable_before", true)) {
                     if (mPositionMap[p] != CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) {
                         return true;
@@ -771,8 +765,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else {
                 // the Sleep Journal system is disabled
-                //if (mActiveTabsCnt != 2) return true;     // TODO V1.1 Dashboard Tab
-                if (mActiveTabsCnt != 1) return true;
+                if (mActiveTabsCnt != 2) return true;
             }
             return false;
         }
@@ -781,8 +774,8 @@ public class MainActivity extends AppCompatActivity {
         public void gotoStartingTab() {
             String firstTabStr = MainActivity.mPrefs.getString("main_first_tab", "History Tab");
             int seekTab = TAB_HISTORY;
-            //if (firstTabStr.equals("Dashboard Tab")) { seekTab = TAB_DASHBOARD; } // TODO V1.1 Dashboard Tab
-            if (firstTabStr.equals("Dashboard Tab")) { seekTab = TAB_HISTORY; }
+            if (firstTabStr.equals("Dashboard Tab") || firstTabStr.equals("Stats Tab")) { seekTab = TAB_DASHBOARD; }
+            if (firstTabStr.equals("History Tab")) { seekTab = TAB_HISTORY; }
             else if (firstTabStr.equals("1st Journal Tab")) {
                 for (int i = 0; i < mActiveTabsCnt; i++) {
                     if (mPositionMap[i] > 0) { mViewPager.setCurrentItem(i, false);  informFragmentItsShowing(i); return; }
@@ -916,12 +909,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     return "History";
                 case TAB_DASHBOARD:
-                    if (screenWidthDp < 800) {
-                        return "Dash board";
-                    } else if (screenWidthDp < 1000 && largeText && mActiveTabsCnt == TOTAL_TABS) {
-                        return "Dash board";
-                    }
-                    return "Dashboard";
+                    return "Stats";
             }
             return null;
         }
