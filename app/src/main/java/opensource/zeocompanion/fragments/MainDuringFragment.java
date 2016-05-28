@@ -149,7 +149,7 @@ public class MainDuringFragment extends MainFragmentWrapper {
     // Called when the Fragment is no longer resumed
     @Override
     public void onPause () {
-        super.onStop();
+        super.onPause();
         //Log.d(_CTAG+".onPause", "==========FRAG ON-PAUSE=====");
         // this logic helps prevent "ghost" clicks of the spinner when tabbing through the MainActivity FragmentPagerAdapter
         EvtSpinner theSpinner = (EvtSpinner)mRootView.findViewById(R.id.spinner_didSomething);
