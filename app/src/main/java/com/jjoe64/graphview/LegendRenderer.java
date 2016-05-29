@@ -43,16 +43,16 @@ public class LegendRenderer {
      * wrapped styles regarding to the
      * legend
      */
-    private final class Styles {
-        float textSize;
-        int spacing;
-        int padding;
-        int width;
-        int backgroundColor;
-        int textColor;
-        int margin;
-        LegendAlign align;
-        Point fixedPosition;
+    protected final class Styles {          // CHANGE NOTICE: alternate LegendRenderer
+        public float textSize;
+        public int spacing;
+        public int padding;
+        public int width;
+        public int backgroundColor;
+        public int textColor;
+        public int margin;
+        public LegendAlign align;
+        public Point fixedPosition;
     }
 
     /**
@@ -78,12 +78,12 @@ public class LegendRenderer {
     /**
      * wrapped styles
      */
-    private Styles mStyles;
+    protected Styles mStyles;               // CHANGE NOTICE: alternate LegendRenderer
 
     /**
      * reference to the graphview
      */
-    private final GraphView mGraphView;
+    protected final GraphView mGraphView;   // CHANGE NOTICE: alternate LegendRenderer
 
     /**
      * flag whether legend will be
@@ -94,14 +94,14 @@ public class LegendRenderer {
     /**
      * paint for the drawing
      */
-    private Paint mPaint;
+    protected Paint mPaint;                 // CHANGE NOTICE: alternate LegendRenderer
 
     /**
      * cached legend width
      * this will be filled in the drawing.
      * Can be cleared via {@link #resetStyles()}
      */
-    private int cachedLegendWidth;
+    protected int cachedLegendWidth;        // CHANGE NOTICE: alternate LegendRenderer
 
     /**
      * creates legend renderer
@@ -391,4 +391,7 @@ public class LegendRenderer {
     public void setFixedPosition(int x, int y) {
         mStyles.fixedPosition = new Point(x, y);
     }
+
+    public int getLegendRenderLayoutWidth() { return 0; }
+    public int getLegendRenderLayoutHeight() { return 0; }
 }

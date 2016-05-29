@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -269,6 +270,16 @@ public class GraphView extends View {
     }
 
     /**
+     * Add a new series to the graph. This will
+     * automatically redraw the graph.
+     * @param s the series to be added
+     */
+    public void addSeries_deferRedraw(Series s) {   // CHANGE NOTICE: re-configurable graphs
+        s.onGraphViewAttached(this);
+        mSeries.add(s);
+    }
+
+    /**
      * important: do not do modifications on the list
      * object that will be returned.
      * Use {@link #removeSeries(com.jjoe64.graphview.series.Series)} and {@link #addSeries(com.jjoe64.graphview.series.Series)}
@@ -321,6 +332,7 @@ public class GraphView extends View {
         }
     }
 
+    // CHANGE NOTICE: create bitmaps
     public void doDraw(Canvas canvas) {
         drawTitle(canvas);
         mViewport.drawFirst(canvas);
@@ -422,6 +434,7 @@ public class GraphView extends View {
         int border = getGridLabelRenderer().getStyles().padding;
         int graphheight = getHeight() - (2 * border) - getGridLabelRenderer().getLabelHorizontalHeight() - getTitleHeight() - getGridLabelRenderer().getStyles().labelsSpace;
         graphheight -= getGridLabelRenderer().getHorizontalAxisTitleHeight();
+        graphheight -= mLegendRenderer.getLegendRenderLayoutHeight();   // CHANGE NOTICE: alternate legend
         return graphheight;
     }
 
@@ -434,6 +447,7 @@ public class GraphView extends View {
         if (mSecondScale != null) {
             graphwidth -= getGridLabelRenderer().getLabelVerticalSecondScaleWidth();
         }
+        graphwidth -= mLegendRenderer.getLegendRenderLayoutWidth();   // CHANGE NOTICE: alternate legend
         return graphwidth;
     }
 
@@ -555,11 +569,18 @@ public class GraphView extends View {
     }
 
     /**
-     * Removes all series of the graph.
+     * Removes all series of the graph and re-render the graph.
      */
     public void removeAllSeries() {
         mSeries.clear();
         onDataChanged(false, false);
+    }
+
+    /**
+     * Removes all series of the graph, but defers the redrawing.  Would typically be used if clearing and immediately re-adding series to an existing graphView
+     */
+    public void removeAllSeries_deferRedraw() {     // CHANGE NOTICE: re-configurable graphs
+        mSeries.clear();
     }
 
     /**

@@ -1,39 +1,67 @@
 package opensource.zeocompanion.fragments;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.RadioButton;
 
 import com.obscuredPreferences.ObscuredPrefs;
-
 import java.util.ArrayList;
-
-import opensource.zeocompanion.MainActivity;
 import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
-import opensource.zeocompanion.activities.StatsActivity;
 import opensource.zeocompanion.utility.JournalDataCoordinator;
-import opensource.zeocompanion.views.DailyResultGraphView;
 import opensource.zeocompanion.views.TrendsGraphView;
 
-// fragment within the MainActivity that displays simple non-configurable statistical graphs
-public class MainDashboardFragment extends MainFragmentWrapper {
+// fragment within the StatsActivity that displays configurable statistical trends graph
+public class StatsActivityTrendsFragment extends Fragment {
     // member variables
     private View mRootView = null;
     private boolean mLayoutDone = false;
 
     // member constants and other static content
     private static final String _CTAG = "M1F";
+
+    // common listener for presses on the radio buttons
+    CheckBox.OnCheckedChangeListener mCheckboxChangedListener = new CheckBox.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            TrendsGraphView theDailyResults = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
+
+            // Check which checkbox was checked
+            switch(buttonView.getId()) {
+                case R.id.checkBox_deep:
+                    theDailyResults.toggleDeep(isChecked);
+                    break;
+                case R.id.checkBox_rem:
+                    theDailyResults.toggleREM(isChecked);
+                    break;
+                case R.id.checkBox_light:
+                    theDailyResults.toggleLight(isChecked);
+                    break;
+                case R.id.checkBox_awake:
+                    theDailyResults.toggleAwake(isChecked);
+                    break;
+                case R.id.checkBox_time2z:
+                    theDailyResults.toggleTimeToZ(isChecked);
+                    break;
+                case R.id.checkBox_total:
+                    theDailyResults.toggleTotalSleep(isChecked);
+                    break;
+                case R.id.checkBox_zq:
+                    theDailyResults.toggleZQ(isChecked);
+                    break;
+            }
+        }
+    };
 
     // common listener for presses on the radio buttons
     View.OnClickListener mRadioButtonOnClickListener = new View.OnClickListener() {
@@ -44,87 +72,51 @@ public class MainDashboardFragment extends MainFragmentWrapper {
 
             // Check which radio button was clicked
             switch(view.getId()) {
-                case R.id.radioButton_deep:
+                case R.id.radioButton_lines:
                     if (checked) {
-                        theDailyResults.toggleAllOff();
-                        theDailyResults.toggleDeep(true);
+                        theDailyResults.toggleBarsAndLines(false);
                     }
                     break;
-                case R.id.radioButton_rem:
+                case R.id.radioButton_barsAndLines:
                     if (checked) {
-                        theDailyResults.toggleAllOff();
-                        theDailyResults.toggleREM(true);
-                    }
-                    break;
-                case R.id.radioButton_light:
-                    if (checked) {
-                        theDailyResults.toggleAllOff();
-                        theDailyResults.toggleLight(true);
-                    }
-                    break;
-                case R.id.radioButton_awake:
-                    if (checked) {
-                        theDailyResults.toggleAllOff();
-                        theDailyResults.toggleAwake(true);
-                    }
-                    break;
-                case R.id.radioButton_time2z:
-                    if (checked) {
-                        theDailyResults.toggleAllOff();
-                        theDailyResults.toggleTimeToZ(true);
-                    }
-                    break;
-                case R.id.radioButton_total:
-                    if (checked) {
-                        theDailyResults.toggleAllOff();
-                        theDailyResults.toggleTotalSleep(true);
-                    }
-                    break;
-                case R.id.radioButton_zq:
-                    if (checked) {
-                        theDailyResults.toggleAllOff();
-                        theDailyResults.toggleZQ(true);
+                        theDailyResults.toggleBarsAndLines(true);
                     }
                     break;
             }
         }
     };
 
-    private View.OnClickListener mGraphClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            Intent intent = new Intent(getActivity(), StatsActivity.class);
-            intent.putExtra("startTab", 0);
-            startActivity(intent);
-        }
-    };
-
     // constructor
-    public MainDashboardFragment() {}
-
-    // instanciator
-    public static MainDashboardFragment newInstance() { return new MainDashboardFragment(); }
+    public StatsActivityTrendsFragment() {}
 
     // called by the framework to create the Fragment's view contents
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //Log.d(_CTAG+".onCreateView", "==========FRAG ON-CREATEVIEW=====");
-        mRootView = inflater.inflate(R.layout.fragment_main_dashboard, container, false);
+        mRootView = inflater.inflate(R.layout.fragment_stats_activity_trends, container, false);
+
+        // setup all the checkboxes
+        CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem);
+        cb.setOnCheckedChangeListener(mCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_light);
+        cb.setOnCheckedChangeListener(mCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake);
+        cb.setOnCheckedChangeListener(mCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_time2z);
+        cb.setOnCheckedChangeListener(mCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total);
+        cb.setOnCheckedChangeListener(mCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_zq);
+        cb.setOnCheckedChangeListener(mCheckboxChangedListener);
 
         // setup all the radio buttons
-        RadioButton rb = (RadioButton)mRootView.findViewById(R.id.radioButton_deep);
+        RadioButton rb = (RadioButton)mRootView.findViewById(R.id.radioButton_lines);
         rb.setChecked(true);
         rb.setOnClickListener(mRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_rem);
-        rb.setOnClickListener(mRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_light);
-        rb.setOnClickListener(mRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_awake);
-        rb.setOnClickListener(mRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_time2z);
-        rb.setOnClickListener(mRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_total);
-        rb.setOnClickListener(mRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_zq);
+        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_barsAndLines);
         rb.setOnClickListener(mRadioButtonOnClickListener);
 
         final TrendsGraphView theDailyResults = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
@@ -141,7 +133,6 @@ public class MainDashboardFragment extends MainFragmentWrapper {
                 createGraphs();
             }
         });
-
         return mRootView;
     }
 
@@ -166,13 +157,6 @@ public class MainDashboardFragment extends MainFragmentWrapper {
     public void onPause () {
         super.onPause();
         //Log.d(_CTAG + ".onPause", "==========FRAG ON-PAUSE=====");
-    }
-
-    // called by the MainActivity when handlers or settings have made changes to the database
-    // or to settings options, etc
-    @Override
-    public void needToRefresh() {
-        // TODO V1.1 Dashboard tab
     }
 
     // create the various graphs; should have completed layout
@@ -216,33 +200,32 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         display.getSize(screenSize);
 
         TrendsGraphView theDailyResults = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
-        theDailyResults.prepareForDashboard(screenSize);
+        theDailyResults.prepareForStats(screenSize);
         whichIsChecked();
         theDailyResults.setDatasetForDashboard(theData, goalTotalSleepMin, goalREMpct, goalDeepPct);
-        theDailyResults.setOnClickListener(mGraphClickListener);
     }
 
-    // determine which radio button is already checked
+    // determine which check boxes and radio buttons are already checked
     private void whichIsChecked() {
         TrendsGraphView theDailyResults = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
-        theDailyResults.toggleAllOff();
-        RadioButton rb = (RadioButton)mRootView.findViewById(R.id.radioButton_deep);
-        if (rb.isChecked()) { theDailyResults.mShowDeep = true; return; };
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_rem);
-        if (rb.isChecked()) { theDailyResults.mShowREM = true; return; };
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_light);
-        if (rb.isChecked()) { theDailyResults.mShowLight = true; return; };
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_awake);
-        if (rb.isChecked()) { theDailyResults.mShowAwake = true; return; };
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_time2z);
-        if (rb.isChecked()) { theDailyResults.mShowTimeToZ = true; return; };
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_total);
-        if (rb.isChecked()) { theDailyResults.mShowTotalSleep = true; return; };
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_zq);
-        if (rb.isChecked()) { theDailyResults.mShowZQscore = true; return; };
+        CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep);
+        theDailyResults.mShowDeep = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_light);
+        theDailyResults.mShowLight = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem);
+        theDailyResults.mShowREM = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake);
+        theDailyResults.mShowAwake = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_time2z);
+        theDailyResults.mShowTimeToZ = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total);
+        theDailyResults.mShowTotalSleep = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_zq);
+        theDailyResults.mShowZQscore = cb.isChecked();
 
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_deep);
-        rb.setChecked(true);
-        theDailyResults.mShowDeep = true;
+        RadioButton rb = (RadioButton)mRootView.findViewById(R.id.radioButton_barsAndLines);
+        if (rb.isChecked()) { theDailyResults.mShowBarsAndLines = true; };
+        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_lines);
+        if (rb.isChecked()) { theDailyResults.mShowBarsAndLines = false; };
     }
 }

@@ -7,6 +7,7 @@
     <string name="title_activity_maint">Customize</string>
     <string name="title_activity_outbox">Outbox</string>
     <string name="title_activity_alerts">Alerts</string>
+    <string name="title_activity_stats">Statistics</string>
 
     <string name="action_share">Share/Export</string>
     <string name="action_headband">Headband Commander</string>

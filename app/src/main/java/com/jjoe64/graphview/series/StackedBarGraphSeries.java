@@ -22,12 +22,12 @@ package com.jjoe64.graphview.series;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.util.Log;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.ValueDependentColor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,12 +35,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Series with Bars to visualize the data.
+ * Series with Stacked Bars to visualize multiple subseries of related Y-value data.
  * The Bars are always vertical.
  *
- * @author jjoe64
+ * @author mmaschino
+ * This particular source code file is licensed per overall GraphView's license
  */
-public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> {
+public class StackedBarGraphSeries<E extends DataPointInterface> extends BaseMultiSeries<E> {
     /**
      * paint to do drawing on canvas
      */
@@ -52,6 +53,12 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
      * 100 => the space bewetten the bars is as big as the bars itself
      */
     private int mSpacing;
+
+    /**
+     * override the width of an individual bar, in pixels.
+     * 0 => no override
+     */
+    private float mBarWidth;
 
     /**
      * callback to generate value-dependent colors
@@ -86,28 +93,21 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
     private Map<RectF, E> mDataPoints = new HashMap<RectF, E>();
 
     /**
-     * creates bar series without any data
+     * creates stackedBar series without any data subseries yet
      */
-    public BarGraphSeries() {
+    public StackedBarGraphSeries() {
         mPaint = new Paint();
     }
 
     /**
-     * creates bar series with data
+     * creates stackedBar series with one initial data subseries
      *
      * @param data values
      */
-    public BarGraphSeries(E[] data) {
+    public StackedBarGraphSeries(E[] data) {
         super(data);
         mPaint = new Paint();
     }
-
-    /**
-     * @return  number of stored subseries; always returns -1 to indicate this series contains no subseries
-     *
-     */
-    @Override
-    public int getQtySubseries() { return -1; }
 
     /**
      * draws the bars on the canvas
@@ -147,7 +147,7 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
         boolean isCurrentSeries;
         SortedSet<Double> xVals = new TreeSet<Double>();
         for(Series inspectedSeries: graphView.getSeries()) {
-            if(inspectedSeries instanceof BarGraphSeries) {
+            if(inspectedSeries instanceof StackedBarGraphSeries) {
                 isCurrentSeries = (inspectedSeries == this);
                 if(isCurrentSeries) {
                     currentSeriesOrder = numBarSeries;
@@ -197,8 +197,9 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
 
         // Total spacing (both sides) between sets of bars
         float spacing = Math.min((float) barSlotWidth*mSpacing/100, barSlotWidth*0.98f);
-        // Width of an individual bar
+        // Width of an individual bar in pixels
         float barWidth = (barSlotWidth - spacing) / numBarSeries;
+        if (mBarWidth > 0) { barWidth = (float)mBarWidth; }
         // Offset from the center of a given bar to start drawing
         float offset = barSlotWidth/2;
 
@@ -213,6 +214,7 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
         int i=0;
         while (values.hasNext()) {
             E value = values.next();
+            int position = value.getPositionInSeries();
 
             double valY = value.getY() - minY;
             double ratY = valY / diffY;
@@ -253,7 +255,22 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
 
             mDataPoints.put(new RectF(left, top, right, bottom), value);
 
+            // draw the super bar; it should get completely overdrawn by the subseries
             canvas.drawRect(left, top, right, bottom, mPaint);
+
+            // get the subseries Y values and draw the sub-bars in the correct colors
+            double[] yValues = getValueYs(position);
+            double sumY = 0.0;
+            for (int j = 0; j < yValues.length; j++) {
+                sumY += yValues[j];
+                valY = sumY - minY;
+                ratY = valY / diffY;
+                y = contentHeight * ratY;
+                top = (contentTop - (float)y) + contentHeight;
+                mPaint.setColor(getColor(j));
+                canvas.drawRect(left, top, right, bottom, mPaint);
+                bottom = top;
+            }
 
             // set values on top of graph
             if (mDrawValuesOnTop) {
@@ -274,6 +291,20 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
 
             i++;
         }
+    }
+
+    public float getDrawY(GraphView graphView, int subseries, int position) {       // CHANGE NOTICE: alternate LegendRenderer
+        double sumY = 0.0;
+        for (int i = 0; i <= subseries; i++) { sumY += getValueY(i, position); }
+
+        float graphHeight = graphView.getGraphContentHeight();
+        double maxY = graphView.getViewport().getMaxY(false);
+        double minY = graphView.getViewport().getMinY(false);
+        double diffY = maxY - minY;
+        double valY = sumY - minY;
+        double ratY = valY / diffY;
+        double y = graphHeight * ratY;
+        return (float)(graphView.getGraphContentTop() - y) + graphHeight;
     }
 
     public float getDrawY(GraphView graphView, int position) {       // CHANGE NOTICE: alternate LegendRenderer
@@ -303,6 +334,21 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
      */
     public void setValueDependentColor(ValueDependentColor<E> mValueDependentColor) {
         this.mValueDependentColor = mValueDependentColor;
+    }
+
+    /**
+     * @return the override bar width, in pixels
+     */
+    public float getBarWidth() {
+        return mBarWidth;
+    }
+
+    /**
+     * @param mBarWidth  overrides the individual bar width, in pixels.
+     *                  0 => no override
+     */
+    public void setBarWidth(float mBarWidth) {
+        this.mBarWidth = mBarWidth;
     }
 
     /**

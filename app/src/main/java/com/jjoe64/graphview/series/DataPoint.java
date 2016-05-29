@@ -33,6 +33,7 @@ import java.util.Date;
 public class DataPoint implements DataPointInterface, Serializable {
     private static final long serialVersionUID=1428263322645L;
 
+    private int positionInSeries = -1;                                   // CHANGE NOTICE: support StackedBarGraphSeries
     private int index;                                                  // CHANGE NOTICE: include index# in the callback
     private double x;
     private double y;
@@ -50,18 +51,27 @@ public class DataPoint implements DataPointInterface, Serializable {
     }
 
     @Override
-    public int getIndex() { return index; }                             // CHANGE NOTICE: include index# in the callback
+    public int getIndex() { return this.index; }                        // CHANGE NOTICE: include index# in the callback
 
     @Override
     public double getX() {
-        return x;
+        return this.x;
     }
 
     @Override
     public double getY() {
-        return y;
+        return this.y;
     }
 
     @Override
+    public double addToY(double y) { this.y += y; return this.y; }      // CHANGE NOTICE: support StackedBarGraphSeries
+
+    @Override
     public String toString() { return "[#"+index+":"+x+"/"+y+"]"; }     // CHANGE NOTICE: include index# in the callback
+
+    @Override
+    public void setPositionInSeries(int positionInSeries) { this.positionInSeries = positionInSeries; }     // CHANGE NOTICE: support StackedBarGraphSeries
+
+    @Override
+    public int getPositionInSeries() { return this.positionInSeries; }        // CHANGE NOTICE: support StackedBarGraphSeries
 }

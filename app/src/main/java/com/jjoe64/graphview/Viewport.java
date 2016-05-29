@@ -758,7 +758,7 @@ public class Viewport {
      * {@link #setYAxisBoundsManual(boolean)}
      * @param y min / lowest value
      */
-    public void setAxisMinY(double y) {
+    public void setAxisMinY(double y) {     // CHANGE NOTICE: parallel scrolling and scaling
         if (mAxisRange_bottom == null) { mAxisRange_bottom = new Float(y); }
         else { mAxisRange_bottom = (float)y; }
         mCurrentViewport.bottom = mAxisRange_bottom;
@@ -770,7 +770,7 @@ public class Viewport {
      * {@link #setXAxisBoundsManual(boolean)}
      * @param x max / highest value
      */
-    public void setAxisMaxX(double x) {
+    public void setAxisMaxX(double x) {     // CHANGE NOTICE: parallel scrolling and scaling
         if (mAxisRange_right == null) { mAxisRange_right = new Float(x); }
         else { mAxisRange_right = (float)x; }
         mCurrentViewport.right = mAxisRange_right;
@@ -782,10 +782,26 @@ public class Viewport {
      * {@link #setXAxisBoundsManual(boolean)}
      * @param x min / lowest value
      */
-    public void setAxisMinX(double x) {
+    public void setAxisMinX(double x) {     // CHANGE NOTICE: parallel scrolling and scaling
         if (mAxisRange_left == null) { mAxisRange_left = new Float(x); }
         else { mAxisRange_left = (float)x; }
         mCurrentViewport.left = mAxisRange_left;
+    }
+
+    public double xPixelsToDeltaXvalue(float xPixels) {     // CHANGE NOTICE: support StackedBarGraphSeries
+        double rangeXpixels = mGraphView.getGraphContentWidth();
+        double rangeXvalues = mCurrentViewport.right - mCurrentViewport.left;
+        Log.d("VP.xPixelsToDeltaXvalue","xPixels="+xPixels+", rangeXpixels="+rangeXpixels+", rangeXvalues="+rangeXvalues);
+        return (double)xPixels / rangeXpixels * rangeXvalues;
+    }
+
+    public float deltaXvalueToXpixels(double deltaXvalue) {          // CHANGE NOTICE: support StackedBarGraphSeries
+        double rangeXpixels = mGraphView.getGraphContentWidth();
+        double rangeXvalues = mCurrentViewport.right - mCurrentViewport.left;
+        if (rangeXvalues == 0.0) { return 1.0f; }
+        float pixels = (float)(deltaXvalue / rangeXvalues * rangeXpixels);
+        if (pixels < 1.0f) { pixels = 1.0f; }
+        return pixels;
     }
 
     /**

@@ -141,6 +141,13 @@ public class PointsGraphSeries<E extends DataPointInterface> extends BaseSeries<
     }
 
     /**
+     * @return  number of stored subseries; always returns -1 to indicate this series contains no subseries
+     *
+     */
+    @Override
+    public int getQtySubseries() { return -1; }
+
+    /**
      * plot the data to the viewport
      *
      * @param graphView graphview
@@ -236,6 +243,10 @@ public class PointsGraphSeries<E extends DataPointInterface> extends BaseSeries<
             i++;
         }
 
+    }
+
+    public float getDrawY(GraphView graphView, int position) {       // CHANGE NOTICE: alternate LegendRenderer
+        return (float)0.0;
     }
 
     /**

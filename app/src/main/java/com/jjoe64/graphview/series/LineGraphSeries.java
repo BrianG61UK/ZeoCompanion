@@ -143,6 +143,13 @@ public class LineGraphSeries<E extends DataPointInterface> extends BaseSeries<E>
     }
 
     /**
+     * @return  number of stored subseries; always returns -1 to indicate this series contains no subseries
+     *
+     */
+    @Override
+    public int getQtySubseries() { return -1; }
+
+    /**
      * plots the series
      * draws the line and the background
      *
@@ -278,7 +285,7 @@ public class LineGraphSeries<E extends DataPointInterface> extends BaseSeries<E>
                 //fix: last value not drawn as datapoint. Draw first point here, and then on every step the end values (above)
                 float first_X = (float) x + (graphLeft + 1);
                 float first_Y = (float) (graphTop - y) + graphHeight;
-                //TODO canvas.drawCircle(first_X, first_Y, dataPointsRadius, mPaint);
+                canvas.drawCircle(first_X, first_Y, mStyles.dataPointsRadius, mPaint);  // CHANGE NOTICE: draw initial datapoint
             }
             lastEndY = orgY;
             lastEndX = orgX;
@@ -293,6 +300,17 @@ public class LineGraphSeries<E extends DataPointInterface> extends BaseSeries<E>
             canvas.drawPath(mPathBackground, mPaintBackground);
         }
 
+    }
+
+    public float getDrawY(GraphView graphView, int position) {     // CHANGE NOTICE: alternate LegendRenderer
+        float graphHeight = graphView.getGraphContentHeight();
+        double maxY = graphView.getViewport().getMaxY(false);
+        double minY = graphView.getViewport().getMinY(false);
+        double diffY = maxY - minY;
+        double valY =  getValueY(position) - minY;
+        double ratY = valY / diffY;
+        double y = graphHeight * ratY;
+        return (float)(graphView.getGraphContentTop() - y) + graphHeight;
     }
 
     /**

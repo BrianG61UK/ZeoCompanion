@@ -83,6 +83,7 @@ public class HistoryDetailActivityFragment extends Fragment {
         }
     };
 
+    // listener for taps on the 30-second hypnogram
     private View.OnClickListener m30SecHypnoClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             mBigHypnoFrag.show(getFragmentManager(), "DiagBHF");

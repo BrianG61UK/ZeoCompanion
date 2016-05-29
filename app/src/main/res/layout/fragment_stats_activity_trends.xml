@@ -1,0 +1,141 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                tools:context="opensource.zeocompanion.fragments.StatsActivityTrendsFragment">
+
+    <LinearLayout
+        android:id="@+id/checkboxes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="left"
+        android:layout_marginLeft="5dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true">
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/checkBox_deep"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="7dp"
+            android:textSize="16sp"
+            android:textColor="#0000CC"
+            android:text="Deep% Total"
+            app:buttonTint="#FFFFFF" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/checkBox_light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
+            android:textSize="16sp"
+            android:textColor="#66B2FF"
+            android:text="Light% Total"
+            app:buttonTint="#FFFFFF" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/checkBox_rem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
+            android:textSize="16sp"
+            android:textColor="#009900"
+            android:text="REM% Total"
+            app:buttonTint="#FFFFFF" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/checkBox_awake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
+            android:textSize="16sp"
+            android:textColor="#FF0000"
+            android:text="Awake% Total"
+            app:buttonTint="#FFFFFF" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/checkBox_time2z"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
+            android:textSize="16sp"
+            android:textColor="#FFA500"
+            android:text="Time2Z% Total"
+            app:buttonTint="#FFFFFF" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/checkBox_total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:text="Total% Goal"
+            app:buttonTint="#FFFFFF" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/checkBox_zq"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:text="ZQ"
+            app:buttonTint="#FFFFFF" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/topRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/checkboxes">
+
+        <TextView
+            android:id="@+id/textView_trendtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="All Sessions Trend; scrollable/scalable"/>
+
+        <RadioGroup
+            android:id="@+id/radioButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right"
+            android:gravity="right">
+
+            <RadioButton
+                android:id="@+id/radioButton_lines"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text="Lines" />
+
+            <RadioButton
+                android:id="@+id/radioButton_barsAndLines"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text="Bars+Lines" />
+
+        </RadioGroup>
+
+    </RelativeLayout>
+
+    <opensource.zeocompanion.views.TrendsGraphView
+        android:id="@+id/graph_trends"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/topRow"
+        android:layout_toLeftOf="@+id/checkboxes"/>
+
+</RelativeLayout>

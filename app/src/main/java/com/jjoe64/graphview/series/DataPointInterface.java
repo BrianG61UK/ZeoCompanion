@@ -30,7 +30,7 @@ package com.jjoe64.graphview.series;
  */
 public interface DataPointInterface {
     /**
-     * @return the index
+     * @return the index as was provided by the mainline; this number has context only to the mainline
      */
     public int getIndex();      // CHANGE NOTICE: include index# in the callback
 
@@ -43,4 +43,14 @@ public interface DataPointInterface {
      * @return the y value
      */
     public double getY();
+
+    /**
+     * @param y value to add to the existing y value
+     * @return the new y value
+     */
+    public double addToY(double y);     // CHANGE NOTICE: support StackedBarGraphSeries
+
+    public void setPositionInSeries(int positionInSeries);      // CHANGE NOTICE: support StackedBarGraphSeries
+
+    public int getPositionInSeries();         // CHANGE NOTICE: support StackedBarGraphSeries
 }

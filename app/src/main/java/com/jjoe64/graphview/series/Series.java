@@ -40,6 +40,12 @@ import java.util.Iterator;
  */
 public interface Series<E extends DataPointInterface> {
     /**
+     * @return  number of stored subseries; returns -1 for series that do not support subseries
+     *
+     */
+    public int getQtySubseries();
+
+    /**
      * @return the lowest x-value of the data
      */
     public double getLowestValueX();
@@ -83,6 +89,8 @@ public interface Series<E extends DataPointInterface> {
      * @param isSecondScale true if the drawing is for the second scale
      */
     public void draw(GraphView graphView, Canvas canvas, boolean isSecondScale);
+
+    public float getDrawY(GraphView graphView, int position);     // CHANGE NOTICE: alternate LegendRenderer
 
     /**
      * @return the title of the series. Used in the legend

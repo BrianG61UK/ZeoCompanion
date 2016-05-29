@@ -106,6 +106,12 @@ public abstract class BaseSeries<E extends DataPointInterface> implements Series
         }
     }
 
+    public double getValueY(int position) {
+        if (mData.isEmpty()) return 0d;
+        return mData.get(position).getY();
+    }
+
+
     /**
      * @return the lowest x value, or 0 if there is no data
      */
