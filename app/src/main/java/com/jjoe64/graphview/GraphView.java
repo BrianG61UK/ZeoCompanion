@@ -25,17 +25,13 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
 import com.jjoe64.graphview.series.Series;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -463,7 +459,7 @@ public class GraphView extends View {
         boolean a = super.onTouchEvent(event);
 
         // is it a click?
-        if (mTapDetector.onTouchEvent(event)) {
+        /*if (mTapDetector.onTouchEvent(event)) {
             for (Series s : mSeries) {
                 s.onTap(event.getX(), event.getY());
             }
@@ -472,7 +468,7 @@ public class GraphView extends View {
                     s.onTap(event.getX(), event.getY());
                 }
             }
-        }
+        }*/
 
         return b || a;
     }

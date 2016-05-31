@@ -43,7 +43,7 @@ public interface Series<E extends DataPointInterface> {
      * @return  number of stored subseries; returns -1 for series that do not support subseries
      *
      */
-    public int getQtySubseries();
+    public int getQtySubseries();       // CHANGE NOTICE: support StackedBarGraphSeries
 
     /**
      * @return the lowest x-value of the data
@@ -130,4 +130,9 @@ public interface Series<E extends DataPointInterface> {
      * @return whether there are data points
      */
     boolean isEmpty();
+
+    /**
+     * @return quantity of data points
+     */
+    int size();
 }

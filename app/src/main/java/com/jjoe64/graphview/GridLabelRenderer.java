@@ -124,6 +124,18 @@ public class GridLabelRenderer {
         boolean verticalLabelsVisible;
 
         /**
+         * flag whether the horizontal labels are
+         * placed in fixed positions (do not move during scrolling or scaling)
+         */
+        boolean horizontalLabelsFixedPosition;      // CHANGE NOTICE: Fixed-position labels used with existing StaticLabelFormatter
+
+        /**
+         * flag whether the vertical labels are
+         * placed in fixed positions (do not move during scrolling or scaling)
+         */
+        boolean verticalLabelsFixedPosition;        // CHANGE NOTICE: Fixed-position labels used with existing StaticLabelFormatter
+
+        /**
          * defines which lines will be drawn in the background
          */
         GridStyle gridStyle;
@@ -562,6 +574,27 @@ public class GridLabelRenderer {
             return false;
         }
 
+        if (mStyles.verticalLabelsFixedPosition) {            // CHANGE NOTICE: Fixed-position labels used with existing StaticLabelFormatter
+            if (mStepsVertical != null) {
+                mStepsVertical.clear();
+            } else {
+                mStepsVertical = new LinkedHashMap<Integer, Double>((int) mNumVerticalLabels);
+            }
+
+            int top = mGraphView.getGraphContentTop();
+            int height = mGraphView.getGraphContentHeight();
+            int deltaPixels = height / (mNumVerticalLabels - 1);
+            double exactSteps = (maxY - minY) / (mNumVerticalLabels - 1);;
+            double v = minY;
+
+            for (int i = 0; i < mNumVerticalLabels; i++) {
+                int p = (deltaPixels * i) + (top + 1);
+                mStepsVertical.put(p, v);
+                v += exactSteps;
+            }
+            return true;
+        }
+
         int numVerticalLabels = mNumVerticalLabels;
 
         //double newMinY;
@@ -669,6 +702,27 @@ public class GridLabelRenderer {
         double minX = mGraphView.getViewport().getMinX(false);  // remember these may be smaller to define a scrolling viewport
         double maxX = mGraphView.getViewport().getMaxX(false);
         if (minX == maxX) return false;
+
+        if (mStyles.horizontalLabelsFixedPosition) {            // CHANGE NOTICE: Fixed-position labels used with existing StaticLabelFormatter
+            if (mStepsHorizontal != null) {
+                mStepsHorizontal.clear();
+            } else {
+                mStepsHorizontal = new LinkedHashMap<Integer, Double>((int) mNumHorizontalLabels);
+            }
+
+            int left = mGraphView.getGraphContentLeft();
+            int width = mGraphView.getGraphContentWidth();
+            int deltaPixels = width / (mNumHorizontalLabels - 1);
+            double exactSteps = (maxX - minX) / (mNumHorizontalLabels - 1);;
+            double v = minX;
+
+            for (int i = 0; i < mNumHorizontalLabels; i++) {
+                int p = (deltaPixels * i) + (left + 1);
+                mStepsHorizontal.put(p, v);
+                v += exactSteps;
+            }
+            return true;
+        }
 
         int numHorizontalLabels = mNumHorizontalLabels;
 
@@ -809,8 +863,8 @@ public class GridLabelRenderer {
             double x = width * ratX;
             int p = (int)x + (left + 1);
 
-            // don't draw steps before 0 (scrolling)
-            if (p >= left) { mStepsHorizontal.put(p, v); }      // CHANGE NOTICE: explicit control of labeling
+            // don't draw steps outside the graph boundaries (scrolling)
+            if (p >= left && p <= left + width) { mStepsHorizontal.put(p, v); }      // CHANGE NOTICE: explicit control of labeling
             //p += pixelStep;                                   // CHANGE NOTICE: explicit control of labeling
             v += exactSteps;
         }
@@ -1505,6 +1559,14 @@ public class GridLabelRenderer {
     }
 
     /**
+     * @param horizontalTitleFixedPosition    flag whether the horizontal labels are
+     *                                  to be kept in a fixed position
+     */
+    public void setHorizontalLabelsFixedPosition(boolean horizontalTitleFixedPosition) {        // CHANGE NOTICE: Fixed-position labels used with existing StaticLabelFormatter
+        mStyles.horizontalLabelsFixedPosition = horizontalTitleFixedPosition;
+    }
+
+    /**
      * @return  flag whether the vertical labels are
      *          visible
      */
@@ -1518,6 +1580,14 @@ public class GridLabelRenderer {
      */
     public void setVerticalLabelsVisible(boolean verticalTitleVisible) {
         mStyles.verticalLabelsVisible = verticalTitleVisible;
+    }
+
+    /**
+     * @param verticalTitleFixedPosition  flag whether the vertical labels are
+     *                              to be kept in a fixed position
+     */
+    public void setVerticalLabelsFixedPosition(boolean verticalTitleFixedPosition) {            // CHANGE NOTICE: Fixed-position labels used with existing StaticLabelFormatter
+        mStyles.verticalLabelsFixedPosition = verticalTitleFixedPosition;
     }
 
     /**

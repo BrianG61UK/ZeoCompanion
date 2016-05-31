@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.util.Log;
 
 import com.jjoe64.graphview.GraphView;
 
@@ -147,7 +148,7 @@ public class LineGraphSeries<E extends DataPointInterface> extends BaseSeries<E>
      *
      */
     @Override
-    public int getQtySubseries() { return -1; }
+    public int getQtySubseries() { return -1; }     // CHANGE NOTICE: support StackedBarGraphSeries
 
     /**
      * plots the series
@@ -265,14 +266,17 @@ public class LineGraphSeries<E extends DataPointInterface> extends BaseSeries<E>
                 // draw data point
                 if (mStyles.drawDataPoints) {
                     //fix: last value was not drawn. Draw here now the end values
-                    canvas.drawCircle(endX, endY, mStyles.dataPointsRadius, paint);
+                    if (endX >= graphLeft && endX <= graphLeft+graphWidth) {              // CHANGE NOTICE: do not draw datapoints off-graph
+                        canvas.drawCircle(endX, endY, mStyles.dataPointsRadius, paint);
+                    }
                 }
                 registerDataPoint(endX, endY, value);
 
-                mPath.reset();
-                mPath.moveTo(startX, startY);
-                mPath.lineTo(endX, endY);
-                canvas.drawPath(mPath, paint);
+                //mPath.reset();                    // CHANGE NOTICE: https://github.com/jjoe64/GraphView/pull/366/commits/7d3029deb462bff5f04c9c04f9afb8162c63283c
+                //mPath.moveTo(startX, startY);
+                //mPath.lineTo(endX, endY);
+                //canvas.drawPath(mPath, paint);
+                canvas.drawLine(startX, startY, endX, endY, paint);
                 if (mStyles.drawBackground) {
                     if (i==1) {
                         firstX = startX;
@@ -285,7 +289,10 @@ public class LineGraphSeries<E extends DataPointInterface> extends BaseSeries<E>
                 //fix: last value not drawn as datapoint. Draw first point here, and then on every step the end values (above)
                 float first_X = (float) x + (graphLeft + 1);
                 float first_Y = (float) (graphTop - y) + graphHeight;
-                canvas.drawCircle(first_X, first_Y, mStyles.dataPointsRadius, mPaint);  // CHANGE NOTICE: draw initial datapoint
+
+                if (first_X >= graphLeft && first_X <= graphLeft+graphWidth) {              // CHANGE NOTICE: do not draw datapoints off-graph
+                    canvas.drawCircle(first_X, first_Y, mStyles.dataPointsRadius, mPaint);  // CHANGE NOTICE: draw initial datapoint
+                }
             }
             lastEndY = orgY;
             lastEndX = orgX;

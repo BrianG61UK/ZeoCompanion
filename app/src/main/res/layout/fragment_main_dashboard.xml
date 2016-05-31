@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="7dp"
             android:textSize="16sp"
-            android:text="Deep% Total" />
+            android:text="Deep% Dur" />
 
         <RadioButton
             android:id="@+id/radioButton_light"
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="7dp"
             android:textSize="16sp"
-            android:text="Light% Total" />
+            android:text="Light% Dur" />
 
         <RadioButton
             android:id="@+id/radioButton_rem"
@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="7dp"
             android:textSize="16sp"
-            android:text="REM% Total" />
+            android:text="REM% Dur" />
 
         <RadioButton
             android:id="@+id/radioButton_awake"
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="7dp"
             android:textSize="16sp"
-            android:text="Awake% Total"  />
+            android:text="Awake% Dur"  />
 
         <RadioButton
             android:id="@+id/radioButton_time2z"
@@ -68,7 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="7dp"
             android:textSize="16sp"
-            android:text="Time2Z% Total"  />
+            android:text="Time2Z% Dur"  />
 
         <RadioButton
             android:id="@+id/radioButton_total"

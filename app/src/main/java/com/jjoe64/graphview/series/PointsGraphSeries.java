@@ -145,7 +145,7 @@ public class PointsGraphSeries<E extends DataPointInterface> extends BaseSeries<
      *
      */
     @Override
-    public int getQtySubseries() { return -1; }
+    public int getQtySubseries() { return -1; }     // CHANGE NOTICE: support StackedBarGraphSeries
 
     /**
      * plot the data to the viewport

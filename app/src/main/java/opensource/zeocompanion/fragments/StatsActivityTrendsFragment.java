@@ -2,6 +2,7 @@ package opensource.zeocompanion.fragments;
 
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.Viewport;
 import com.obscuredPreferences.ObscuredPrefs;
 import java.util.ArrayList;
 import opensource.zeocompanion.R;
@@ -26,6 +29,7 @@ public class StatsActivityTrendsFragment extends Fragment {
     // member variables
     private View mRootView = null;
     private boolean mLayoutDone = false;
+    private RectF lastViewport = null;
 
     // member constants and other static content
     private static final String _CTAG = "M1F";
@@ -83,6 +87,17 @@ public class StatsActivityTrendsFragment extends Fragment {
                     }
                     break;
             }
+        }
+    };
+
+    // setup a listener for scrolling activities in either hypnogram
+    private Viewport.ScrollScaleListener mScrollScaleListener = new Viewport.ScrollScaleListener() {
+        // scrolling is occurring
+        public void onScrolling(GraphView graphView, RectF newViewport) {
+            // ???
+        }
+        public void onScaling(GraphView graphView, RectF newViewport) {
+            // ???
         }
     };
 
@@ -203,6 +218,8 @@ public class StatsActivityTrendsFragment extends Fragment {
         theDailyResults.prepareForStats(screenSize);
         whichIsChecked();
         theDailyResults.setDatasetForDashboard(theData, goalTotalSleepMin, goalREMpct, goalDeepPct);
+
+        theDailyResults.setScrollScaleListener(1L, mScrollScaleListener);
     }
 
     // determine which check boxes and radio buttons are already checked

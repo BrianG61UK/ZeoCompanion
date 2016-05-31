@@ -48,6 +48,11 @@ public interface MultiSeries<E extends DataPointInterface> extends Series<E> {
      */
     public void clearAllSubseries();
 
+    /**
+     * @return quantity of data points for specified subseries; should be the same for all subseries and summed-Y subseries0
+     */
+    public int size(int subseries);
+
     public float getDrawY(GraphView graphView, int subseries, int position);
 
     /**

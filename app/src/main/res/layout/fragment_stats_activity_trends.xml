@@ -23,7 +23,7 @@
             android:layout_marginBottom="7dp"
             android:textSize="16sp"
             android:textColor="#0000CC"
-            android:text="Deep% Total"
+            android:text="Deep% Dur"
             app:buttonTint="#FFFFFF" />
 
         <android.support.v7.widget.AppCompatCheckBox
@@ -33,7 +33,7 @@
             android:layout_marginBottom="7dp"
             android:textSize="16sp"
             android:textColor="#66B2FF"
-            android:text="Light% Total"
+            android:text="Light% Dur"
             app:buttonTint="#FFFFFF" />
 
         <android.support.v7.widget.AppCompatCheckBox
@@ -43,7 +43,7 @@
             android:layout_marginBottom="7dp"
             android:textSize="16sp"
             android:textColor="#009900"
-            android:text="REM% Total"
+            android:text="REM% Dur"
             app:buttonTint="#FFFFFF" />
 
         <android.support.v7.widget.AppCompatCheckBox
@@ -53,7 +53,7 @@
             android:layout_marginBottom="7dp"
             android:textSize="16sp"
             android:textColor="#FF0000"
-            android:text="Awake% Total"
+            android:text="Awake% Dur"
             app:buttonTint="#FFFFFF" />
 
         <android.support.v7.widget.AppCompatCheckBox
@@ -63,7 +63,7 @@
             android:layout_marginBottom="7dp"
             android:textSize="16sp"
             android:textColor="#FFA500"
-            android:text="Time2Z% Total"
+            android:text="Time2Z% Dur"
             app:buttonTint="#FFFFFF" />
 
         <android.support.v7.widget.AppCompatCheckBox

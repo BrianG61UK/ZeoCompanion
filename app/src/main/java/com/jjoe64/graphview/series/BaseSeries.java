@@ -106,7 +106,7 @@ public abstract class BaseSeries<E extends DataPointInterface> implements Series
         }
     }
 
-    public double getValueY(int position) {
+    public double getValueY(int position) {     // CHANGE NOTICE: alternate LegendRenderer
         if (mData.isEmpty()) return 0d;
         return mData.get(position).getY();
     }
@@ -186,19 +186,21 @@ public abstract class BaseSeries<E extends DataPointInterface> implements Series
                     if (org.hasNext()) {
                         prevValue = org.next();
                     }
-                    if (prevValue.getX() >= from) {
-                        nextValue = prevValue;
-                        found = true;
-                    } else {
-                        while (org.hasNext()) {
-                            nextValue = org.next();
-                            if (nextValue.getX() >= from) {
-                                found = true;
-                                nextNextValue = nextValue;
-                                nextValue = prevValue;
-                                break;
+                    if (prevValue != null) {            // CHANGE NOTICE: https://github.com/jjoe64/GraphView/pull/353/commits/59b7d958e947758a758a94c5d18eee2a4b490deb
+                        if (prevValue.getX() >= from) {
+                            nextValue = prevValue;
+                            found = true;
+                        } else {
+                            while (org.hasNext()) {
+                                nextValue = org.next();
+                                if (nextValue.getX() >= from) {
+                                    found = true;
+                                    nextNextValue = nextValue;
+                                    nextValue = prevValue;
+                                    break;
+                                }
+                                prevValue = nextValue;
                             }
-                            prevValue = nextValue;
                         }
                     }
                     if (!found) {
@@ -423,6 +425,12 @@ public abstract class BaseSeries<E extends DataPointInterface> implements Series
     public boolean isEmpty() {
         return mData.isEmpty();
     }
+
+    /**
+     * @return quantity of data points
+     */
+    @Override
+    public int size() { return mData.size(); }
 
     /**
      * checks that the data is in the correct order

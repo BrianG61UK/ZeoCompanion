@@ -107,7 +107,7 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
      *
      */
     @Override
-    public int getQtySubseries() { return -1; }
+    public int getQtySubseries() { return -1; }     // CHANGE NOTICE: support StackedBarGraphSeries
 
     /**
      * draws the bars on the canvas
@@ -123,6 +123,8 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
             mValuesOnTopSize = graphView.getGridLabelRenderer().getTextSize();
         }
         mPaint.setTextSize(mValuesOnTopSize);
+
+        resetDataPoints();      // CHANGE NOTICE: https://github.com/jjoe64/GraphView/pull/384/commits/6cc50c567a44032251e8f571d67bbe2a2d434859
 
         // get data
         double maxX = graphView.getViewport().getMaxX(false);

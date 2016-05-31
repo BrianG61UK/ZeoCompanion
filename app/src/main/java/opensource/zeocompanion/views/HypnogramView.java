@@ -66,14 +66,6 @@ public class HypnogramView extends GraphView {
     public HypnogramView(Context context, AttributeSet attrs) { super(context, attrs); }
     public HypnogramView(Context context, AttributeSet attrs, int defStyle) { super(context, attrs, defStyle); }
 
-    // touch event occured on the hypnogram
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        boolean b = mViewport.onTouchEvent(event);
-        boolean a = super.onTouchEvent(event);
-        return b || a;
-    }
-
     // shown without labels (History Tab)
     public void showAsCompact() {
         mShowAsMode = 1;
@@ -663,7 +655,7 @@ public class HypnogramView extends GraphView {
         int maxEnd2 = ((int)Math.floor(maxX));
         if (maxEnd2 < 1) { maxEnd2 = 1; }
 
-        Log.d(_CTAG+".setLabelsPerScale","MinX="+viewport.getMaxX(false)+", MaxX="+viewport.getMinX(false)+" Span="+span+" maxEnd2="+maxEnd2);
+        //Log.d(_CTAG+".setLabelsPerScale","MinX="+viewport.getMaxX(false)+", MaxX="+viewport.getMinX(false)+" Span="+span+" maxEnd2="+maxEnd2);
 
         if (span >= 3.0) {
             render.setHorizontalLabelsEndX((double)maxEnd2);

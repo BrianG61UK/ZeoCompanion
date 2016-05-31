@@ -152,6 +152,25 @@ public abstract class BaseMultiSeries<E extends DataPointInterface> implements M
     }
 
     /**
+     * @return quantity of data points for baseline subseries 0
+     */
+    @Override
+    public int size() {
+        if ( mSubseries.size() == 0) { return 0; }
+        ArrayList<E> subSeries0 = (ArrayList<E>)mSubseries.get(0);
+        return subSeries0.size();
+    }
+
+    /**
+     * @return quantity of data points for specified subseries; should be the same for all subseries and summed-Y subseries0
+     */
+    public int size(int subseries) {
+        if ( mSubseries.size() == 0) { return 0; }
+        ArrayList<E> oneSubSeries = (ArrayList<E>)mSubseries.get(subseries + 1);
+        return oneSubSeries.size();
+    }
+
+    /**
      * clear all the subseries usually in preparation for re-adding new subseries
      */
     @Override

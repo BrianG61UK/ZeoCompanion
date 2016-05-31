@@ -7,15 +7,18 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
+import com.jjoe64.graphview.LabelFormatter;
 import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.ValueDependentColor;
 import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
+import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -40,6 +43,7 @@ public class TrendsGraphView extends GraphView {
     private int mShowAsMode = 0;
     private Point mScreenSize = null;
     private int mQtySeries = 0;
+    private long mLowestTimestamp = 0L;
     private double mGoalTotalSleepMin = 480.0;  // 8 hours
     private double mGoalREMpct = 20.0;
     private double mGoalDeepPct = 15.0;
@@ -70,13 +74,13 @@ public class TrendsGraphView extends GraphView {
 
     // member constants and other static content
     private static final String _CTAG = "TG";
-    private static final int MAXLINES = 11;
+    private static final int MAXFIELDS = 9;
     private SimpleDateFormat mDF1 = new SimpleDateFormat("MM/dd/yy");
 
     // data record
     public static class Trends_dataSet {
         public long mTimestamp = 0;
-        public double mDataArray[] = new double[MAXLINES];
+        public double mDataArray[] = new double[MAXFIELDS];
 
         // constructor
         public Trends_dataSet(long timestamp, double timeToZMin, double totalSleepMin, double remMin, double awakeMin, double lightMin, double deepMin, int awakeningsQty, int zq_score) {
@@ -89,6 +93,7 @@ public class TrendsGraphView extends GraphView {
             mDataArray[5] = deepMin;
             mDataArray[6] = awakeningsQty;
             mDataArray[7] = zq_score;
+            mDataArray[8] = timeToZMin + totalSleepMin +  awakeMin;
         }
     }
 
@@ -118,8 +123,9 @@ public class TrendsGraphView extends GraphView {
                 if (s.getQtySubseries() <= -1) {
                     // this series has no subseries
                     String title = s.getTitle();
-                    if (title != null) {
-                        float y = s.getDrawY(mGraphView, 0) + mStyles.textSize / (float)2.0;
+                    int len = s.size();
+                    if (len > 0 && title != null) {
+                        float y = s.getDrawY(mGraphView, len - 1) + mStyles.textSize / (float)2.0;
                         if (y > bottom) { y = bottom; }
                         mPaint.setColor(s.getColor());
                         canvas.drawText(title, left + mStyles.padding, y, mPaint);
@@ -129,8 +135,9 @@ public class TrendsGraphView extends GraphView {
                     for (int j = 0; j < s.getQtySubseries(); j++) {
                         MultiSeries ms = (MultiSeries)s;
                         String title = ms.getTitle(j);
-                        if (title != null) {
-                            float y = ms.getDrawY(mGraphView, j, 0) + mStyles.textSize / (float)2.0;
+                        int len = ms.size(j);
+                        if (len > 0 && title != null) {
+                            float y = ms.getDrawY(mGraphView, j, len - 1) + mStyles.textSize / (float)2.0;
                             if (y > bottom) { y = bottom; }
                             mPaint.setColor(ms.getColor(j));
                             canvas.drawText(title, left + mStyles.padding, y, mPaint);
@@ -174,6 +181,84 @@ public class TrendsGraphView extends GraphView {
         @Override
         public int getLegendRenderLayoutHeight() {
             return 0;
+        }
+    }
+
+    public class TGV_StaticLabelsFormatter extends StaticLabelsFormatter {
+        public TGV_StaticLabelsFormatter(GraphView graphView, LabelFormatter dlf) {
+            super(graphView, dlf);
+        }
+
+        @Override
+        public String formatLabelEx(GridLabelRenderer.LabelFormatterReason reason, int index, double value, boolean isValueX) {    // CHANGE NOTICE: include reason and index# in the callback (used only in callback Overrides)
+            switch (reason) {
+                case SIZING:
+                case SIZING_MAX:
+                case SIZING_MIN:
+                    if (isValueX && mHorizontalLabels != null) { return "00/00/00"; }
+                    return mDynamicLabelFormatter.formatLabelEx(reason, index, value, isValueX);
+
+                case AXIS_STEP:
+                case AXIS_STEP_SECONDSCALE:
+                    if (isValueX && mHorizontalLabels != null) {
+                        double dateValue = 0.0;
+                        switch (index) {
+                            case 0:
+                                dateValue = mViewport.getMinX(false);
+                                break;
+                            case 1:
+                            case 2:
+                            case 3:
+                                double interval = (mViewport.getMaxX(false) - mViewport.getMinX(false)) / 4.0;
+                                dateValue = mViewport.getMinX(false) + interval * index;
+                                break;
+                            case 4:
+                                dateValue = mViewport.getMaxX(false);
+                                break;
+                        }
+                        long ts = (long)dateValue;
+                        ts = (ts * 60000L) + mLowestTimestamp;
+                        Date dt = new Date(ts);
+                        return mDF1.format(dt);
+                    }
+                    return mDynamicLabelFormatter.formatLabelEx(reason, index, value, isValueX);
+
+                default:
+                    // index cannot be utilized
+                    return mDynamicLabelFormatter.formatLabelEx(reason, index, value, isValueX);
+            }
+        }
+    }
+
+    public class TGV_DefaultLabelFormatter extends DefaultLabelFormatter {
+        @Override
+        public String formatLabelEx(GridLabelRenderer.LabelFormatterReason reason, int index, double value, boolean isValueX) {
+            switch (reason) {
+                case SIZING:
+                case SIZING_MAX:
+                case SIZING_MIN:
+                    // return the largest sized label
+                    if (isValueX) {
+                        return "00/00/00";
+                    } else {
+                        return "000%";
+                    }
+
+                case AXIS_STEP:
+                case AXIS_STEP_SECONDSCALE:
+                case DATA_POINT:
+                default:
+                    if (isValueX) {
+                        // show the date
+                        long ts = (long)value;
+                        ts = (ts * 60000L) + mLowestTimestamp;
+                        Date dt = new Date(ts);
+                        return mDF1.format(dt);
+                    } else {
+                        // show the Y value
+                        return String.format("%.0f",value)+"%";
+                    }
+            }
         }
     }
 
@@ -227,36 +312,8 @@ public class TrendsGraphView extends GraphView {
         viewport.setXAxisBoundsManual(true);    // for dates, must handle the X-axis manually
         render.setNumHorizontalLabels(2);
 
-        render.setLabelFormatter(new DefaultLabelFormatter() {
-            @Override
-            public String formatLabelEx(GridLabelRenderer.LabelFormatterReason reason, int index, double value, boolean isValueX) {
-                switch (reason) {
-                    case SIZING:
-                    case SIZING_MAX:
-                    case SIZING_MIN:
-                        // return the largest sized label
-                        if (isValueX) {
-                            return "00/00/00";
-                        } else {
-                            return "000%";
-                        }
-
-                    case AXIS_STEP:
-                    case AXIS_STEP_SECONDSCALE:
-                    case DATA_POINT:
-                    default:
-                        if (isValueX) {
-                            // show the date
-                            long ts = (long)value;
-                            Date dt = new Date(ts);
-                            return mDF1.format(dt);
-                        } else {
-                            // show the Y value
-                            return String.format("%.0f",value)+"%";
-                        }
-                }
-            }
-        });
+        TGV_DefaultLabelFormatter dlf = new TGV_DefaultLabelFormatter();
+        render.setLabelFormatter(dlf);
 
         if (mScreenSize.x >= 1024) {
             setLegendRenderer(new TGV_LegendRenderer(this));
@@ -298,41 +355,19 @@ public class TrendsGraphView extends GraphView {
         viewport.setYAxisBoundsManual(true);
         viewport.setMinY(0.0);
         viewport.setMaxY(105.0);
+        viewport.setAxisMinY(0.0);
+        viewport.setAxisMaxY(105.0);
         render.setNumVerticalLabels(6);
         render.setVerticalLabelsEndY(100.0);
         viewport.setXAxisBoundsManual(true);    // for dates, must handle the X-axis manually
-        render.setNumHorizontalLabels(2);
+        render.setNumHorizontalLabels(5);
+        render.setHorizontalLabelsFixedPosition(true);
 
-        render.setLabelFormatter(new DefaultLabelFormatter() {
-            @Override
-            public String formatLabelEx(GridLabelRenderer.LabelFormatterReason reason, int index, double value, boolean isValueX) {
-                switch (reason) {
-                    case SIZING:
-                    case SIZING_MAX:
-                    case SIZING_MIN:
-                        // return the largest sized label
-                        if (isValueX) {
-                            return "00/00/00";
-                        } else {
-                            return "000%";
-                        }
-
-                    case AXIS_STEP:
-                    case AXIS_STEP_SECONDSCALE:
-                    case DATA_POINT:
-                    default:
-                        if (isValueX) {
-                            // show the date
-                            long ts = (long)value;
-                            Date dt = new Date(ts);
-                            return mDF1.format(dt);
-                        } else {
-                            // show the Y value
-                            return String.format("%.0f",value)+"%";
-                        }
-                }
-            }
-        });
+        TGV_DefaultLabelFormatter dlf = new TGV_DefaultLabelFormatter();
+        TGV_StaticLabelsFormatter slf = new TGV_StaticLabelsFormatter(this, dlf);
+        slf.setHorizontalLabels(new String[] {"00/00/00", "00/00/00", "00/00/00", "00/00/00", "00/00/00"});
+        slf.setViewport(viewport);
+        render.setLabelFormatter(slf);
 
         if (mScreenSize.x >= 1024) {
             setLegendRenderer(new TGV_LegendRenderer(this));
@@ -341,6 +376,10 @@ public class TrendsGraphView extends GraphView {
             lr.setBackgroundColor(Color.LTGRAY);
             lr.setPadding(5);
         }
+
+        viewport.setMinimumScaleWidth((float)10080.0);     // 7 days of minimum width in minutes
+        viewport.setScrollable(true);
+        viewport.setScalable(true);
 
         mShowTimeToZ = false;
         mShowTotalSleep = false;
@@ -364,7 +403,8 @@ public class TrendsGraphView extends GraphView {
         return;
     }
 
-    // set the data for the trends graph
+    // set the data for the trends graph; note that the passed dataset is in descending date order;
+    // however GraphView mandates that X-values be in ascending value order; this will be handled in the buildSeries methods
     public void setDatasetForDashboard(ArrayList<Trends_dataSet> theData, double goalTotalSleep, double goalREMpct, double goalDeepPct) {
         mGoalTotalSleepMin = goalTotalSleep;
         mGoalREMpct = goalREMpct;
@@ -373,6 +413,10 @@ public class TrendsGraphView extends GraphView {
         mOrigDataSet = theData;
         mDatasetLen = theData.size();
         if (mShowAsMode == 1 && mDatasetLen > 7) { mDatasetLen = 7; }
+
+        Trends_dataSet item = mOrigDataSet.get(mDatasetLen - 1);
+        mLowestTimestamp = item.mTimestamp;
+
         refresh();
     }
 
@@ -398,13 +442,13 @@ public class TrendsGraphView extends GraphView {
         double highestDate = 0.0;
         if (mDatasetLen > 0) {
             Trends_dataSet item = mOrigDataSet.get(0);
-            double nextDate = (double)item.mTimestamp;
+            double nextDate = (double)((item.mTimestamp - mLowestTimestamp) / 60000L);
             lowestDate = nextDate;
             highestDate = nextDate;
             int i = 1;
             while (i < mDatasetLen) {
                 item = mOrigDataSet.get(i);
-                nextDate = (double)item.mTimestamp;
+                nextDate = (double)((item.mTimestamp - mLowestTimestamp) / 60000L);
                 if (nextDate < lowestDate) { lowestDate = nextDate; }
                 if (nextDate > highestDate) { highestDate = nextDate; }
                 i++;
@@ -412,10 +456,11 @@ public class TrendsGraphView extends GraphView {
         }
         Viewport viewport = this.getViewport();
         viewport.setMinX(lowestDate);
+        viewport.setAxisMinX(lowestDate);
         viewport.setMaxX(highestDate);
         double addX = viewport.xPixelsToDeltaXvalue(10.0f);
-        Log.d(_CTAG+".refresh","lowestDate="+lowestDate+", highestDate="+highestDate+", addX="+addX);
         viewport.setMaxX(highestDate + addX);
+        viewport.setAxisMaxX(highestDate + addX);
         GridLabelRenderer render = this.getGridLabelRenderer();
         render.setHorizontalLabelsEndX(highestDate);
 
@@ -469,7 +514,7 @@ public class TrendsGraphView extends GraphView {
                 double y = mStackedBarSeries.getHighestValueY();
                 if (y > maxY) { maxY = y; }
 
-                float pixels = viewport.deltaXvalueToXpixels(57600000.0);
+                float pixels = viewport.deltaXvalueToXpixels(960.0);    // 16 hours in minutes
                 mStackedBarSeries.setBarWidth(pixels);
                 addSeries_deferRedraw(mStackedBarSeries);
                 mQtySeries++;
@@ -643,6 +688,7 @@ public class TrendsGraphView extends GraphView {
             maxY = 175.0;
         }
         viewport.setMaxY(maxY + 5.0);
+        viewport.setAxisMaxY(maxY + 5.0);
         render.setVerticalLabelsEndY(maxY);
 
         // now redraw the entire graph
@@ -679,11 +725,12 @@ public class TrendsGraphView extends GraphView {
         return true;
     }
 
-    // build the data points for a single data field
+    // build the data points for a single data field; note the X-values are in descending order but GraphView must have them in ascending order
     private DataPoint[] buildDataPoints(int dataArrayIndex) {
         if (mDatasetLen <= 0) { return null; }
         DataPoint[] theDataPoints = new DataPoint[mDatasetLen];
-        for (int i = 0; i < mDatasetLen; i++) {
+        int j = 0;
+        for (int i = mDatasetLen - 1; i >= 0; i--) {
             Trends_dataSet item = mOrigDataSet.get(i);
             double y = 0.0;
             switch (dataArrayIndex) {
@@ -697,9 +744,9 @@ public class TrendsGraphView extends GraphView {
                 case 3:
                 case 4:
                 case 5:
-                    // time-to-Z, awake, REM, light, deep (all min); percentage to total sleep
-                    if (item.mDataArray[1] == 0.0) { y = 0.0; }
-                    else { y = item.mDataArray[dataArrayIndex] / item.mDataArray[1] * 100.0; }
+                    // time-to-Z, awake, REM, light, deep (all min); percentage to total duration
+                    if (item.mDataArray[8] == 0.0) { y = 0.0; }
+                    else { y = item.mDataArray[dataArrayIndex] / item.mDataArray[8] * 100.0; }
                     break;
                 case 6:
                     // qty awakenings (count)
@@ -709,9 +756,18 @@ public class TrendsGraphView extends GraphView {
                     y = item.mDataArray[dataArrayIndex];
                     break;
             }
-            theDataPoints[i] = new DataPoint(i, item.mTimestamp, y);
+            double x = (double)((item.mTimestamp - mLowestTimestamp)/60000L);
+            theDataPoints[j] = new DataPoint(i, x, y);
+            j++;
         }
         return theDataPoints;
+    }
+
+    // set a scrolling and scaling callback listener
+    public void setScrollScaleListener(long callbackNumber, Viewport.ScrollScaleListener listener) {
+        mParentNumber = callbackNumber;
+        Viewport viewport = this.getViewport();
+        viewport.setScrollScaleListener(listener);
     }
 }
 

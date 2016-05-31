@@ -125,6 +125,7 @@ public class Viewport {
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             if (mIsScalable) {
+                mGraphView.getParent().requestDisallowInterceptTouchEvent(true);    // CHANGE NOTICE: scaling in scrollable layouts
                 mScalingBeginWidth = mCurrentViewport.width();
                 mScalingBeginLeft = mCurrentViewport.left;
                 mScalingActive = true;
@@ -177,6 +178,7 @@ public class Viewport {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (!mIsScrollable || mScalingActive) return false;
+            mGraphView.getParent().requestDisallowInterceptTouchEvent(true);        // CHANGE NOTICE: scrolling in scrollable layouts
 
             if (Float.isNaN(mScrollingReferenceX)) {
                 mScrollingReferenceX = mCurrentViewport.left;
@@ -791,7 +793,6 @@ public class Viewport {
     public double xPixelsToDeltaXvalue(float xPixels) {     // CHANGE NOTICE: support StackedBarGraphSeries
         double rangeXpixels = mGraphView.getGraphContentWidth();
         double rangeXvalues = mCurrentViewport.right - mCurrentViewport.left;
-        Log.d("VP.xPixelsToDeltaXvalue","xPixels="+xPixels+", rangeXpixels="+rangeXpixels+", rangeXvalues="+rangeXvalues);
         return (double)xPixels / rangeXpixels * rangeXvalues;
     }
 
