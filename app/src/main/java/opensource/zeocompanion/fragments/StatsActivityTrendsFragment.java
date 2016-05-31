@@ -94,10 +94,10 @@ public class StatsActivityTrendsFragment extends Fragment {
     private Viewport.ScrollScaleListener mScrollScaleListener = new Viewport.ScrollScaleListener() {
         // scrolling is occurring
         public void onScrolling(GraphView graphView, RectF newViewport) {
-            // ???
+            // nothing needed
         }
         public void onScaling(GraphView graphView, RectF newViewport) {
-            // ???
+            // ??? change bar width due to scaling?
         }
     };
 

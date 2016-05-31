@@ -3,6 +3,8 @@ package opensource.zeocompanion.views;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -26,9 +28,12 @@ import com.jjoe64.graphview.series.MultiSeries;
 import com.jjoe64.graphview.series.Series;
 import com.jjoe64.graphview.series.StackedBarGraphSeries;
 
+import org.apache.commons.math3.stat.regression.SimpleRegression;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import opensource.zeocompanion.ZeoCompanionApplication;
@@ -48,6 +53,7 @@ public class TrendsGraphView extends GraphView {
     private double mGoalREMpct = 20.0;
     private double mGoalDeepPct = 15.0;
     private double mGoalLightPct = 70.0;
+    ArrayList<TrendlinePoints> mTrendLines = null;
     LineGraphSeries<DataPoint> mLineSeries_TimeToZ = null;
     LineGraphSeries<DataPoint> mLineSeries_TotalSleep = null;
     LineGraphSeries<DataPoint> mLineSeries_Awake = null;
@@ -57,12 +63,12 @@ public class TrendsGraphView extends GraphView {
     LineGraphSeries<DataPoint> mLineSeries_Awakenings = null;
     LineGraphSeries<DataPoint> mLineSeries_ZQscore = null;
     LineGraphSeries<DataPoint> mLineSeries_Goal = null;
+    LineGraphSeries<DataPoint> mLineSeries_Trend = null;
     StackedBarGraphSeries<DataPoint> mStackedBarSeries = null;
 
     public boolean mShowBarsAndLines = false;
     public boolean mShowGoalLine = false;
     public boolean mShowTrendLine = false;
-    public boolean mShowEntireTrendLine = false;
     public boolean mShowTimeToZ = false;
     public boolean mShowTotalSleep = false;
     public boolean mShowAwake = false;
@@ -333,7 +339,6 @@ public class TrendsGraphView extends GraphView {
         mShowAwakenings = false;
         mShowGoalLine = true;
         mShowTrendLine = true;
-        mShowEntireTrendLine = false;
     }
 
     // full capability graph
@@ -390,8 +395,7 @@ public class TrendsGraphView extends GraphView {
         mShowZQscore = false;
         mShowAwakenings = false;
         mShowGoalLine = true;
-        mShowTrendLine = true;
-        mShowEntireTrendLine = false;
+        mShowTrendLine = false;
     }
 
     // prepare to create a bitmap rather than a view
@@ -416,8 +420,14 @@ public class TrendsGraphView extends GraphView {
 
         Trends_dataSet item = mOrigDataSet.get(mDatasetLen - 1);
         mLowestTimestamp = item.mTimestamp;
-
         refresh();
+    }
+
+    // set a scrolling and scaling callback listener
+    public void setScrollScaleListener(long callbackNumber, Viewport.ScrollScaleListener listener) {
+        mParentNumber = callbackNumber;
+        Viewport viewport = this.getViewport();
+        viewport.setScrollScaleListener(listener);
     }
 
     // rebuild the trends graph usually after a change in the line(s) to display
@@ -468,11 +478,14 @@ public class TrendsGraphView extends GraphView {
         // first up are those series that can be also be shown as a stackedBar
         int qtyFieldsShown = 0;
         double maxY = 0.0;
+        DataPoint[] theDataPoints = null;
         if (mShowBarsAndLines) {
             if (mShowDeep || mShowLight || mShowREM || mShowAwake || mShowTimeToZ) {
                 mStackedBarSeries = new StackedBarGraphSeries<DataPoint>();
                 if (mShowDeep) {
-                    if (buildBarSubseries(5)) {
+                    theDataPoints = buildDataPoints(5);
+                    if (theDataPoints != null) {
+                        mStackedBarSeries.addSubseries(theDataPoints);
                         int subseriesNo = mStackedBarSeries.getQtySubseries() - 1;
                         mStackedBarSeries.setColor(subseriesNo,  Color.rgb(0, 0, 204));  // dark blue
                         mStackedBarSeries.setTitle(subseriesNo, "Deep%");
@@ -480,7 +493,9 @@ public class TrendsGraphView extends GraphView {
                     }
                 }
                 if (mShowLight) {
-                    if (buildBarSubseries(4)) {
+                    theDataPoints = buildDataPoints(4);
+                    if (theDataPoints != null) {
+                        mStackedBarSeries.addSubseries(theDataPoints);
                         int subseriesNo = mStackedBarSeries.getQtySubseries() - 1;
                         mStackedBarSeries.setColor(subseriesNo,  Color.rgb(102, 178, 255));  // light blue
                         mStackedBarSeries.setTitle(subseriesNo, "Light%");
@@ -488,7 +503,9 @@ public class TrendsGraphView extends GraphView {
                     }
                 }
                 if (mShowREM) {
-                    if (buildBarSubseries(3)) {
+                    theDataPoints = buildDataPoints(3);
+                    if (theDataPoints != null) {
+                        mStackedBarSeries.addSubseries(theDataPoints);
                         int subseriesNo = mStackedBarSeries.getQtySubseries() - 1;
                         mStackedBarSeries.setColor(subseriesNo,  Color.rgb(0, 153, 0));  // green
                         mStackedBarSeries.setTitle(subseriesNo, "REM%");
@@ -496,7 +513,9 @@ public class TrendsGraphView extends GraphView {
                     }
                 }
                 if (mShowAwake) {
-                    if (buildBarSubseries(2)) {
+                    theDataPoints = buildDataPoints(2);
+                    if (theDataPoints != null) {
+                        mStackedBarSeries.addSubseries(theDataPoints);
                         int subseriesNo = mStackedBarSeries.getQtySubseries() - 1;
                         mStackedBarSeries.setColor(subseriesNo,  Color.RED);
                         mStackedBarSeries.setTitle(subseriesNo, "Awake%");
@@ -504,7 +523,9 @@ public class TrendsGraphView extends GraphView {
                     }
                 }
                 if (mShowTimeToZ) {
-                    if (buildBarSubseries(0)) {
+                    theDataPoints = buildDataPoints(0);
+                    if (theDataPoints != null) {
+                        mStackedBarSeries.addSubseries(theDataPoints);
                         int subseriesNo = mStackedBarSeries.getQtySubseries() - 1;
                         mStackedBarSeries.setColor(subseriesNo,  Color.rgb(255, 165, 0));   // orange
                         mStackedBarSeries.setTitle(subseriesNo, "Time2Z%");
@@ -521,8 +542,9 @@ public class TrendsGraphView extends GraphView {
             }
         } else {
             if (mShowDeep) {
-                mLineSeries_Deep = buildLineSeries(5);
-                if (mLineSeries_Deep != null) {
+                theDataPoints = buildDataPoints(5);
+                if (theDataPoints != null) {
+                    mLineSeries_Deep = new LineGraphSeries<DataPoint>(theDataPoints);
                     double y = mLineSeries_Deep.getHighestValueY();
                     if (y > maxY) { maxY = y; }
                     if (mShowAsMode == 1) { mLineSeries_Deep.setColor(Color.BLUE); }
@@ -534,11 +556,13 @@ public class TrendsGraphView extends GraphView {
                     addSeries_deferRedraw(mLineSeries_Deep);
                     mQtySeries++;
                     qtyFieldsShown++;
+
                 }
             }
             if (mShowLight) {
-                mLineSeries_Light = buildLineSeries(4);
-                if (mLineSeries_Light != null) {
+                theDataPoints = buildDataPoints(4);
+                if (theDataPoints != null) {
+                    mLineSeries_Light = new LineGraphSeries<DataPoint>(theDataPoints);
                     double y = mLineSeries_Light.getHighestValueY();
                     if (y > maxY) { maxY = y; }
                     if (mShowAsMode == 1) { mLineSeries_Light.setColor(Color.BLUE); }
@@ -553,8 +577,9 @@ public class TrendsGraphView extends GraphView {
                 }
             }
             if (mShowREM) {
-                mLineSeries_REM = buildLineSeries(3);
-                if (mLineSeries_REM != null) {
+                theDataPoints = buildDataPoints(3);
+                if (theDataPoints != null) {
+                    mLineSeries_REM = new LineGraphSeries<DataPoint>(theDataPoints);
                     double y = mLineSeries_REM.getHighestValueY();
                     if (y > maxY) { maxY = y; }
                     if (mShowAsMode == 1) { mLineSeries_REM.setColor(Color.BLUE); }
@@ -569,8 +594,9 @@ public class TrendsGraphView extends GraphView {
                 }
             }
             if (mShowAwake) {
-                mLineSeries_Awake = buildLineSeries(2);
-                if (mLineSeries_Awake != null) {
+                theDataPoints = buildDataPoints(2);
+                if (theDataPoints != null) {
+                    mLineSeries_Awake = new LineGraphSeries<DataPoint>(theDataPoints);
                     double y = mLineSeries_Awake.getHighestValueY();
                     if (y > maxY) { maxY = y; }
                     if (mShowAsMode == 1) { mLineSeries_Awake.setColor(Color.BLUE); }
@@ -585,8 +611,9 @@ public class TrendsGraphView extends GraphView {
                 }
             }
             if (mShowTimeToZ) {
-                mLineSeries_TimeToZ = buildLineSeries(0);
-                if (mLineSeries_TimeToZ != null) {
+                theDataPoints = buildDataPoints(0);
+                if (theDataPoints != null) {
+                    mLineSeries_TimeToZ = new LineGraphSeries<DataPoint>(theDataPoints);
                     double y = mLineSeries_TimeToZ.getHighestValueY();
                     if (y > maxY) { maxY = y; }
                     if (mShowAsMode == 1) { mLineSeries_TimeToZ.setColor(Color.BLUE); }
@@ -604,8 +631,9 @@ public class TrendsGraphView extends GraphView {
 
         // now those series that are always lines
         if (mShowTotalSleep) {
-            mLineSeries_TotalSleep = buildLineSeries(1);
-            if (mLineSeries_TotalSleep != null) {
+            theDataPoints = buildDataPoints(1);
+            if (theDataPoints != null) {
+                mLineSeries_TotalSleep = new LineGraphSeries<DataPoint>(theDataPoints);
                 double y = mLineSeries_TotalSleep.getHighestValueY();
                 if (y > maxY) { maxY = y; }
                 if (mShowAsMode == 1) { mLineSeries_TotalSleep.setColor(Color.BLUE); }
@@ -620,8 +648,9 @@ public class TrendsGraphView extends GraphView {
             }
         }
         /*if (mShowAwakenings) {
-            mSeries_Awakenings = buildLineSeries(6);
-            if (mSeries_Awakenings != null) {
+            theDataPoints = buildDataPoints(6);
+            if (theDataPoints != null) {
+                mSeries_Awakenings = new LineGraphSeries<DataPoint>(theDataPoints);
                 double y = mSeries_Awakenings.getHighestValueY();
                 if (y > maxY) { maxY = y; }
                 if (mShowAsMode == 1) { mSeries_Awakenings.setColor(Color.BLUE); }
@@ -635,8 +664,9 @@ public class TrendsGraphView extends GraphView {
             }
         }*/
         if (mShowZQscore) {
-            mLineSeries_ZQscore = buildLineSeries(7);
-            if (mLineSeries_ZQscore != null) {
+            theDataPoints = buildDataPoints(7);
+            if (theDataPoints != null) {
+                mLineSeries_ZQscore = new LineGraphSeries<DataPoint>(theDataPoints);
                 double y = mLineSeries_ZQscore.getHighestValueY();
                 if (y > maxY) { maxY = y; }
                 if (mShowAsMode == 1) { mLineSeries_ZQscore.setColor(Color.BLUE); }
@@ -663,10 +693,37 @@ public class TrendsGraphView extends GraphView {
                     if (y > maxY) { maxY = y; }
                     mLineSeries_Goal.setColor(Color.GRAY);
                     mLineSeries_Goal.setDrawDataPoints(false);
+                    Paint paint = new Paint();
+                    paint.setStyle(Paint.Style.STROKE);
+                    if (ZeoCompanionApplication.mScreenDensity > 1.0f) { paint.setStrokeWidth(5); }
+                    else { paint.setStrokeWidth(3); }
+                    paint.setPathEffect(new DashPathEffect(new float[]{8, 5}, 0));
+                    mLineSeries_Goal.setCustomPaint(paint);
                     if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_Goal.setThickness(5); }
                     else { mLineSeries_Goal.setThickness(3); }
                     mLineSeries_Goal.setTitle("Goal");
                     addSeries_deferRedraw(mLineSeries_Goal);
+                    mQtySeries++;
+                }
+            }
+        }
+
+        if (mShowTrendLine && qtyFieldsShown == 1) {
+            if (mDatasetLen > 1 && theDataPoints != null) {
+                TrendlinePoints tp = calculateTrendline(theDataPoints);
+                if (tp != null) {
+                    DataPoint[] trendDataPoints = new DataPoint[2];
+                    trendDataPoints[0] = new DataPoint(0, tp.mStartValueX, tp.mStartValueY);
+                    trendDataPoints[1] = new DataPoint(1, tp.mEndValueX, tp.mEndValueY);
+                    mLineSeries_Trend = new LineGraphSeries<DataPoint>(trendDataPoints);
+                    double y = mLineSeries_Trend.getHighestValueY();
+                    if (y > maxY) { maxY = y; }
+                    mLineSeries_Trend.setColor(Color.GRAY);
+                    mLineSeries_Trend.setDrawDataPoints(false);
+                    if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_Trend.setThickness(5); }
+                    else { mLineSeries_Trend.setThickness(3); }
+                    mLineSeries_Trend.setTitle("Trend");
+                    addSeries_deferRedraw(mLineSeries_Trend);
                     mQtySeries++;
                 }
             }
@@ -710,21 +767,6 @@ public class TrendsGraphView extends GraphView {
         }
     }
 
-    // build a particular line series for a single data field
-    private LineGraphSeries<DataPoint> buildLineSeries(int dataArrayIndex) {
-        DataPoint[] theDataPoints = buildDataPoints(dataArrayIndex);
-        if (theDataPoints == null) { return null; }
-        return new LineGraphSeries<DataPoint>(theDataPoints);
-    }
-
-    // build a particular startedBar series for a single data field
-    private boolean buildBarSubseries(int dataArrayIndex) {
-        DataPoint[] theDataPoints = buildDataPoints(dataArrayIndex);
-        if (theDataPoints == null) { return false; }
-        mStackedBarSeries.addSubseries(theDataPoints);
-        return true;
-    }
-
     // build the data points for a single data field; note the X-values are in descending order but GraphView must have them in ascending order
     private DataPoint[] buildDataPoints(int dataArrayIndex) {
         if (mDatasetLen <= 0) { return null; }
@@ -763,11 +805,31 @@ public class TrendsGraphView extends GraphView {
         return theDataPoints;
     }
 
-    // set a scrolling and scaling callback listener
-    public void setScrollScaleListener(long callbackNumber, Viewport.ScrollScaleListener listener) {
-        mParentNumber = callbackNumber;
-        Viewport viewport = this.getViewport();
-        viewport.setScrollScaleListener(listener);
+    // data points record for showing trendlines
+    private class TrendlinePoints {
+        public double mStartValueX;
+        public double mStartValueY;
+        public double mEndValueX;
+        public double mEndValueY;
+    }
+
+    // calculate one or more trend lines
+    private TrendlinePoints calculateTrendline(DataPoint[] theDataPoints) {
+        if (mDatasetLen <= 1) { return null; }
+        SimpleRegression sr = new SimpleRegression(true);
+        for (int i = 0; i < mDatasetLen; i++) {
+            sr.addData(theDataPoints[i].getX(), theDataPoints[i].getY());
+        }
+        if (!sr.hasIntercept()) { return null; }
+
+        double slope = sr.getSlope();
+        TrendlinePoints results = new TrendlinePoints();
+        results.mStartValueX = theDataPoints[0].getX();
+        results.mStartValueY = sr.getIntercept();
+
+        results.mEndValueX = theDataPoints[mDatasetLen - 1].getX();
+        results.mEndValueY = results.mStartValueY + (results.mEndValueX - results.mStartValueX) * slope;
+        return results;
     }
 }
 
