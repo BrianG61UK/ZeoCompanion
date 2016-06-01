@@ -49,6 +49,7 @@ public class TrendsGraphView extends GraphView {
     private Point mScreenSize = null;
     private int mQtySeries = 0;
     private long mLowestTimestamp = 0L;
+    private boolean firstTime = true;
     private double mGoalTotalSleepMin = 480.0;  // 8 hours
     private double mGoalREMpct = 20.0;
     private double mGoalDeepPct = 15.0;
@@ -432,6 +433,12 @@ public class TrendsGraphView extends GraphView {
 
     // rebuild the trends graph usually after a change in the line(s) to display
     private void refresh() {
+        // preserve the current viewport scale and scroll of the X-axis
+        Viewport viewport = this.getViewport();
+        GridLabelRenderer render = this.getGridLabelRenderer();
+        double origMinX = viewport.getMinX(false);
+        double origMaxX = viewport.getMaxX(false);
+
         // first clear out any existing sets of series
         if (mQtySeries > 0) {
             removeAllSeries_deferRedraw();
@@ -448,6 +455,7 @@ public class TrendsGraphView extends GraphView {
             mQtySeries = 0;
         }
 
+        // determine the date range for the X-axis
         double lowestDate = 0.0;
         double highestDate = 0.0;
         if (mDatasetLen > 0) {
@@ -464,15 +472,20 @@ public class TrendsGraphView extends GraphView {
                 i++;
             }
         }
-        Viewport viewport = this.getViewport();
+
+        // set the viewport properly (including current scaling and scrolling)
         viewport.setMinX(lowestDate);
         viewport.setAxisMinX(lowestDate);
         viewport.setMaxX(highestDate);
         double addX = viewport.xPixelsToDeltaXvalue(10.0f);
         viewport.setMaxX(highestDate + addX);
         viewport.setAxisMaxX(highestDate + addX);
-        GridLabelRenderer render = this.getGridLabelRenderer();
         render.setHorizontalLabelsEndX(highestDate);
+        if (!firstTime) {
+            viewport.setMinX(origMinX);
+            viewport.setMaxX(origMaxX);
+        }
+        firstTime = false;
 
         // begin building series and adding them to the graph
         // first up are those series that can be also be shown as a stackedBar
