@@ -326,6 +326,16 @@ public abstract class BaseMultiSeries<E extends DataPointInterface> implements M
     }
 
     /**
+     * @return array of data points based upon the summed-Y values
+     */
+    public DataPoint[] toArray() {
+        if (mSubseries.isEmpty()) return null;
+        ArrayList<E> subseries0 = (ArrayList<E>)mSubseries.get(0);
+        DataPoint[] points = new DataPoint[subseries0.size()];
+        return (DataPoint[])subseries0.toArray(points);
+    }
+
+    /**
      * get the summed-Y values for a given x range. if from and until are bigger or equal than
      * all the data, the original data is returned.
      * If it is only a part of the data, the range is returned plus one datapoint

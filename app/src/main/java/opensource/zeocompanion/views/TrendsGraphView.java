@@ -395,7 +395,7 @@ public class TrendsGraphView extends GraphView {
         mShowZQscore = false;
         mShowAwakenings = false;
         mShowGoalLine = true;
-        mShowTrendLine = false;
+        mShowTrendLine = true;
     }
 
     // prepare to create a bitmap rather than a view
@@ -681,40 +681,21 @@ public class TrendsGraphView extends GraphView {
             }
         }
 
-        if (mShowGoalLine && qtyFieldsShown == 1) {
-            if (mDatasetLen > 0) {
-                double goal = getGoal();
-                if (goal > 0.0) {
-                    DataPoint[] goalDataPoints = new DataPoint[2];
-                    goalDataPoints[0] = new DataPoint(0, lowestDate, goal);
-                    goalDataPoints[1] = new DataPoint(1, highestDate, goal);
-                    mLineSeries_Goal = new LineGraphSeries<DataPoint>(goalDataPoints);
-                    double y = mLineSeries_Goal.getHighestValueY();
-                    if (y > maxY) { maxY = y; }
-                    mLineSeries_Goal.setColor(Color.GRAY);
-                    mLineSeries_Goal.setDrawDataPoints(false);
-                    Paint paint = new Paint();
-                    paint.setStyle(Paint.Style.STROKE);
-                    if (ZeoCompanionApplication.mScreenDensity > 1.0f) { paint.setStrokeWidth(5); }
-                    else { paint.setStrokeWidth(3); }
-                    paint.setPathEffect(new DashPathEffect(new float[]{8, 5}, 0));
-                    mLineSeries_Goal.setCustomPaint(paint);
-                    if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_Goal.setThickness(5); }
-                    else { mLineSeries_Goal.setThickness(3); }
-                    mLineSeries_Goal.setTitle("Goal");
-                    addSeries_deferRedraw(mLineSeries_Goal);
-                    mQtySeries++;
-                }
+        // special series (trends and goal)
+        if (mShowTrendLine &&  mDatasetLen > 1 && theDataPoints != null) {
+            TrendlinePoints[] tps = null;
+            String title = "Trend";
+            if (mShowAsMode == 2) { title += "(s)"; }
+            if (qtyFieldsShown == 1) {
+                tps = calculateTrendlines(theDataPoints);
+            } else if (mShowBarsAndLines && mStackedBarSeries != null && qtyFieldsShown > 1 && mQtySeries == 1) {
+                tps = calculateTrendlines(mStackedBarSeries.toArray());
             }
-        }
-
-        if (mShowTrendLine && qtyFieldsShown == 1) {
-            if (mDatasetLen > 1 && theDataPoints != null) {
-                TrendlinePoints tp = calculateTrendline(theDataPoints);
-                if (tp != null) {
+            if (tps != null) {
+                for (int i = 0; i < tps.length; i++) {
                     DataPoint[] trendDataPoints = new DataPoint[2];
-                    trendDataPoints[0] = new DataPoint(0, tp.mStartValueX, tp.mStartValueY);
-                    trendDataPoints[1] = new DataPoint(1, tp.mEndValueX, tp.mEndValueY);
+                    trendDataPoints[0] = new DataPoint(0, tps[i].mStartValueX, tps[i].mStartValueY);
+                    trendDataPoints[1] = new DataPoint(1, tps[i].mEndValueX, tps[i].mEndValueY);
                     mLineSeries_Trend = new LineGraphSeries<DataPoint>(trendDataPoints);
                     double y = mLineSeries_Trend.getHighestValueY();
                     if (y > maxY) { maxY = y; }
@@ -722,13 +703,40 @@ public class TrendsGraphView extends GraphView {
                     mLineSeries_Trend.setDrawDataPoints(false);
                     if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_Trend.setThickness(5); }
                     else { mLineSeries_Trend.setThickness(3); }
-                    mLineSeries_Trend.setTitle("Trend");
+                    if (i == tps.length - 1) { mLineSeries_Trend.setTitle(title); }
+                    else { mLineSeries_Trend.setTitle(null); }
                     addSeries_deferRedraw(mLineSeries_Trend);
                     mQtySeries++;
                 }
             }
         }
 
+        if (mShowGoalLine && mDatasetLen > 0) {
+            double goal = getGoal(qtyFieldsShown);
+            if (goal > 0.0) {
+                DataPoint[] goalDataPoints = new DataPoint[2];
+                goalDataPoints[0] = new DataPoint(0, lowestDate, goal);
+                goalDataPoints[1] = new DataPoint(1, highestDate, goal);
+                mLineSeries_Goal = new LineGraphSeries<DataPoint>(goalDataPoints);
+                double y = mLineSeries_Goal.getHighestValueY();
+                if (y > maxY) { maxY = y; }
+                mLineSeries_Goal.setColor(Color.GRAY);
+                mLineSeries_Goal.setDrawDataPoints(false);
+                Paint paint = new Paint();
+                paint.setStyle(Paint.Style.STROKE);
+                if (ZeoCompanionApplication.mScreenDensity > 1.0f) { paint.setStrokeWidth(5); }
+                else { paint.setStrokeWidth(3); }
+                paint.setPathEffect(new DashPathEffect(new float[]{8, 5}, 0));
+                mLineSeries_Goal.setCustomPaint(paint);
+                if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_Goal.setThickness(5); }
+                else { mLineSeries_Goal.setThickness(3); }
+                mLineSeries_Goal.setTitle("Goal");
+                addSeries_deferRedraw(mLineSeries_Goal);
+                mQtySeries++;
+            }
+        }
+
+        // adjust the maximum Y to nice intervals
         if (maxY < 25.0) {
             maxY = 25.0;
         } else if (maxY < 50.0) {
@@ -753,17 +761,31 @@ public class TrendsGraphView extends GraphView {
     }
 
     // get the proper goal value for the shown data field; only used in show-single-line mode
-    private double getGoal() {
-        if (mShowREM) {
-            return mGoalREMpct;
-        } else if (mShowLight) {
-            return mGoalLightPct;
-        } else if (mShowDeep) {
-            return mGoalDeepPct;
-        } else if (mShowTotalSleep) {
-            return 100.0;
-        } else {
+    private double getGoal(int qtyFieldsShown) {
+        if (mShowBarsAndLines) {
+            if (mShowTotalSleep && qtyFieldsShown == 1) { return 100.0; }
+            double sumGoalPct = 0.0;
+            int c = 0;
+            if (mShowREM) { sumGoalPct += mGoalREMpct; c++; }
+            if (mShowLight) { sumGoalPct += mGoalLightPct; c++; }
+            if (mShowDeep) { sumGoalPct += mGoalDeepPct; c++; }
+            if (mShowAwake) { c++; }
+            if (mShowTimeToZ) { c++; }
+            if (c == qtyFieldsShown) { return sumGoalPct; }
             return 0.0;
+        } else {
+            if (qtyFieldsShown > 1) { return 0.0; }
+            if (mShowREM) {
+                return mGoalREMpct;
+            } else if (mShowLight) {
+                return mGoalLightPct;
+            } else if (mShowDeep) {
+                return mGoalDeepPct;
+            } else if (mShowTotalSleep) {
+                return 100.0;
+            } else {
+                return 0.0;
+            }
         }
     }
 
@@ -813,23 +835,67 @@ public class TrendsGraphView extends GraphView {
         public double mEndValueY;
     }
 
-    // calculate one or more trend lines
-    private TrendlinePoints calculateTrendline(DataPoint[] theDataPoints) {
-        if (mDatasetLen <= 1) { return null; }
+    // calculate one trend line
+    private TrendlinePoints calculateOneTrendline(DataPoint[] theDataPoints, int startInx, int endInx) {
+        if (endInx - startInx  < 1) { return null; }
         SimpleRegression sr = new SimpleRegression(true);
-        for (int i = 0; i < mDatasetLen; i++) {
+        for (int i = startInx; i <= endInx; i++) {
             sr.addData(theDataPoints[i].getX(), theDataPoints[i].getY());
         }
         if (!sr.hasIntercept()) { return null; }
 
         double slope = sr.getSlope();
-        TrendlinePoints results = new TrendlinePoints();
-        results.mStartValueX = theDataPoints[0].getX();
-        results.mStartValueY = sr.getIntercept();
+        double ValueYatXzero = sr.getIntercept();
 
-        results.mEndValueX = theDataPoints[mDatasetLen - 1].getX();
-        results.mEndValueY = results.mStartValueY + (results.mEndValueX - results.mStartValueX) * slope;
+        TrendlinePoints results = new TrendlinePoints();
+        results.mStartValueX = theDataPoints[startInx].getX();
+        results.mStartValueY = ValueYatXzero + results.mStartValueX * slope;
+
+        results.mEndValueX = theDataPoints[endInx].getX();
+        results.mEndValueY = ValueYatXzero + results.mEndValueX * slope;
         return results;
+    }
+
+    // calculate one or more trend lines depending on dataset size and time-gaps in the dataset
+    private TrendlinePoints[] calculateTrendlines(DataPoint[] theDataPoints) {
+        if (theDataPoints == null) { return null; }
+        if (mDatasetLen <= 1) { return null; }
+        if (mDatasetLen <= 7) {
+            // this is for the dashboard tab, or if there are less than or equal to just 7 sleep sessions to-date
+            TrendlinePoints[] tps = new TrendlinePoints[1];
+            tps[0] = calculateOneTrendline(theDataPoints, 0, mDatasetLen - 1);
+            if (tps[0] == null) { return null; }
+            return tps;
+        }
+
+        // this is for a larger dataset for the Statistics graph;
+        // need to look for time-gaps in the sleep records and form separate trend lines
+        ArrayList<TrendlinePoints> tpa = new ArrayList<TrendlinePoints>();
+        int startI = 0;
+        int endI = 0;
+        double priorX = 0.0;
+        while (endI < mDatasetLen) {
+            double endX = theDataPoints[endI].getX();
+            if (endX - priorX > 10080.0) {     // 7 days in minutes
+                // greater than 7 days since prior sleep session
+                if ((endI - 1) - startI > 0) {
+                    // have two or more days of sleep session data
+                    TrendlinePoints tp = calculateOneTrendline(theDataPoints, startI, endI - 1);
+                    tpa.add(tp);
+                }
+                startI = endI;
+            }
+            priorX = endX;
+            endI++;
+        }
+        if ((endI - 1) - startI > 0) {
+            // have two or more days of sleep session data
+            TrendlinePoints tp = calculateOneTrendline(theDataPoints, startI, endI - 1);
+            tpa.add(tp);
+        }
+
+        TrendlinePoints[] tps = new TrendlinePoints[tpa.size()];
+        return (TrendlinePoints[])tpa.toArray(tps);
     }
 }
 
