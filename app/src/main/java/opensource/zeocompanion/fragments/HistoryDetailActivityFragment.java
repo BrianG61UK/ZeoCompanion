@@ -6,6 +6,7 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -86,7 +87,14 @@ public class HistoryDetailActivityFragment extends Fragment {
     // listener for taps on the 30-second hypnogram
     private View.OnClickListener m30SecHypnoClickListener = new View.OnClickListener() {
         public void onClick(View v) {
-            mBigHypnoFrag.show(getFragmentManager(), "DiagBHF");
+            if (mBigHypnoFrag != null) {
+                if (mBigHypnoFrag.isAdded()) {
+                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                    ft.remove(mBigHypnoFrag);
+                    ft.commit();
+                }
+                mBigHypnoFrag.show(getFragmentManager(), "DiagBHF");
+            }
         }
     };
 
@@ -113,7 +121,7 @@ public class HistoryDetailActivityFragment extends Fragment {
             //Log.d(_CTAG + ".onCreateView", "==========FRAG ON-CREATEVIEW=====");
             // Inflate the layout for this fragment
             mRootView = inflater.inflate(R.layout.fragment_history_detail, container, false);
-            mBigHypnoFrag = new HistoryDetailScrollHypnoDialogFragment();
+            if (mBigHypnoFrag == null) { mBigHypnoFrag = new HistoryDetailScrollHypnoDialogFragment(); }
 
             // if the ZSE or the CSE in the iRec are still active, then do a reload of them both because their contents may have changed
             // after the History Tab built its list of records
@@ -192,6 +200,7 @@ public class HistoryDetailActivityFragment extends Fragment {
     // Called by the framework when the fragment's view has been detached from the fragment (counterpart to onCreateView)
     @Override
     public void onDestroyView () {
+        mBigHypnoFrag = null;
         //Log.d(_CTAG + ".onDestroyView", "==========FRAG ON-DESTROYVIEW=====");
         super.onDestroyView();
     }
