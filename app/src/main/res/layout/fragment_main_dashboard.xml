@@ -1,90 +1,197 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="opensource.zeocompanion.fragments.MainDashboardFragment">
 
-    <TextView
-        android:id="@+id/textView_trendtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Last 7 Session Trend; tap for expanded graphing"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
-
-    <opensource.zeocompanion.views.TrendsGraphView
-        android:id="@+id/graph_trends"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_below="@id/textView_trendtitle"
-        android:layout_toLeftOf="@+id/radioGroup"/>
+        android:layout_height="wrap_content">
 
-    <RadioGroup
-        android:id="@+id/radioGroup"
-        android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/textView_trendtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Last 7 Session Trend; tap for expanded graphing"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+
+        <opensource.zeocompanion.views.TrendsGraphView
+            android:id="@+id/graph_trends"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_below="@id/textView_trendtitle"
+            android:layout_toLeftOf="@+id/radioGroup_trends"/>
+
+        <RadioGroup
+            android:id="@+id/radioGroup_trends"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="left"
+            android:layout_marginLeft="5dp"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/textView_trendtitle" >
+
+            <RadioButton
+                android:id="@+id/radioButton_trends_deep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="Deep% Dur" />
+
+            <RadioButton
+                android:id="@+id/radioButton_trends_light"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="Light% Dur" />
+
+            <RadioButton
+                android:id="@+id/radioButton_trends_rem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="REM% Dur" />
+
+            <RadioButton
+                android:id="@+id/radioButton_trends_awake"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="Awake% Dur"  />
+
+            <RadioButton
+                android:id="@+id/radioButton_trends_time2z"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="Time2Z% Dur"  />
+
+            <RadioButton
+                android:id="@+id/radioButton_trends_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="Total% Goal" />
+
+            <RadioButton
+                android:id="@+id/radioButton_trends_zq"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text="ZQ" />
+
+        </RadioGroup>
+
+    </RelativeLayout>
+
+    <!--<RelativeLayout
+        android:id="@+id/relativeLayout_attrEffectsTitle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="left"
-        android:layout_marginLeft="5dp"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/textView_trendtitle" >
+        android:layout_marginTop="10dp">
 
-        <RadioButton
-            android:id="@+id/radioButton_deep"
+        <TextView
+            android:id="@+id/textView_attrEffectsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
-            android:textSize="16sp"
-            android:text="Deep% Dur" />
+            android:text="Last 7 Session Attribute Effects; tap for expanded graphing"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
 
-        <RadioButton
-            android:id="@+id/radioButton_light"
+        <Spinner
+            android:id="@+id/spinner_attrEffects"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
-            android:textSize="16sp"
-            android:text="Light% Dur" />
+            android:layout_below="@+id/textView_attrEffectsTitle"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_centerHorizontal="true" />
 
-        <RadioButton
-            android:id="@+id/radioButton_rem"
+        <opensource.zeocompanion.views.AttributeEffectsGraphView
+            android:id="@+id/graph_attrEffects"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_below="@id/spinner_attrEffects"
+            android:layout_toLeftOf="@+id/radioGroup_attrEffects"/>
+
+        <RadioGroup
+            android:id="@+id/radioGroup_attrEffects"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
-            android:textSize="16sp"
-            android:text="REM% Dur" />
+            android:orientation="vertical"
+            android:gravity="left"
+            android:layout_marginLeft="5dp"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/spinner_attrEffects" >
 
-        <RadioButton
-            android:id="@+id/radioButton_awake"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
-            android:textSize="16sp"
-            android:text="Awake% Dur"  />
+            <RadioButton
+                android:id="@+id/radioButton_attrEffects_deep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="Deep% Dur" />
 
-        <RadioButton
-            android:id="@+id/radioButton_time2z"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
-            android:textSize="16sp"
-            android:text="Time2Z% Dur"  />
+            <RadioButton
+                android:id="@+id/radioButton_attrEffects_light"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="Light% Dur" />
 
-        <RadioButton
-            android:id="@+id/radioButton_total"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
-            android:textSize="16sp"
-            android:text="Total% Goal" />
+            <RadioButton
+                android:id="@+id/radioButton_attrEffects_rem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="REM% Dur" />
 
-        <RadioButton
-            android:id="@+id/radioButton_zq"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="ZQ" />
+            <RadioButton
+                android:id="@+id/radioButton_attrEffects_awake"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="Awake% Dur"  />
 
-    </RadioGroup>
+            <RadioButton
+                android:id="@+id/radioButton_attrEffects_time2z"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="Time2Z% Dur"  />
 
-</RelativeLayout>
+            <RadioButton
+                android:id="@+id/radioButton_attrEffects_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:textSize="16sp"
+                android:text="Total% Goal" />
+
+            <RadioButton
+                android:id="@+id/radioButton_attrEffects_zq"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text="ZQ" />
+
+        </RadioGroup>
+
+    </RelativeLayout>-->
+
+</LinearLayout>

@@ -26,7 +26,6 @@ import opensource.zeocompanion.utility.CSVexporter;
 import opensource.zeocompanion.utility.DirectEmailerThread;
 import opensource.zeocompanion.utility.ImageExporter;
 import opensource.zeocompanion.utility.Utilities;
-
 import com.android.EvtSpinner;
 
 // primary UI fragment that gathers parameters and performs a manual export of data in CSV or Image formats

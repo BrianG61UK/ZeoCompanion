@@ -14,7 +14,6 @@ import android.view.ViewTreeObserver;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
-
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.Viewport;
 import com.obscuredPreferences.ObscuredPrefs;
@@ -217,7 +216,7 @@ public class StatsActivityTrendsFragment extends Fragment {
         TrendsGraphView theDailyResults = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
         theDailyResults.prepareForStats(screenSize);
         whichIsChecked();
-        theDailyResults.setDatasetForDashboard(theData, goalTotalSleepMin, goalREMpct, goalDeepPct);
+        theDailyResults.setDataset(theData, goalTotalSleepMin, goalREMpct, goalDeepPct);
 
         theDailyResults.setScrollScaleListener(1L, mScrollScaleListener);
     }

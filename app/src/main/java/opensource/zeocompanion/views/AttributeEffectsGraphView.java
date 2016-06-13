@@ -1,6 +1,7 @@
 package opensource.zeocompanion.views;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
@@ -21,6 +22,7 @@ import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.series.MultiSeries;
+import com.jjoe64.graphview.series.PointsGraphSeries;
 import com.jjoe64.graphview.series.Series;
 import com.jjoe64.graphview.series.StackedBarGraphSeries;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
@@ -28,37 +30,40 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import opensource.zeocompanion.ZeoCompanionApplication;
-import opensource.zeocompanion.utility.Utilities;
+import opensource.zeocompanion.database.CompanionAttributeValuesRec;
 
-// displays a time-series line chart or stacked bar chart
-public class TrendsGraphView extends GraphView {
+// displays an attribute-values line chart or stacked bar chart
+public class AttributeEffectsGraphView extends GraphView {
     // member variables
     private Context mContext = null;
-    private  ArrayList<Trends_dataSet> mOrigDataSet = null;
+    public  ArrayList<String> mAttributes = null;
+    private  ArrayList<AttrEffects_dataSet> mOriginalDataSet = null;
+    private  ArrayList<AttrEffects_dataSet> mShowAttrDataSet = null;
+    private ArrayList<CompanionAttributeValuesRec> mXaxisValues = null;
     public int mDatasetLen = 0;
+    public int mShownDatasetLen = 0;
     private int mShowAsMode = 0;
     private Point mScreenSize = null;
     private int mQtySeries = 0;
-    private long mLowestTimestamp = 0L;
     private boolean firstTime = true;
     private double mGoalTotalSleepMin = 480.0;  // 8 hours
     private double mGoalREMpct = 20.0;
     private double mGoalDeepPct = 15.0;
     private double mGoalLightPct = 70.0;
-    LineGraphSeries<DataPoint> mLineSeries_TimeToZ = null;
-    LineGraphSeries<DataPoint> mLineSeries_TotalSleep = null;
-    LineGraphSeries<DataPoint> mLineSeries_Awake = null;
-    LineGraphSeries<DataPoint> mLineSeries_REM = null;
-    LineGraphSeries<DataPoint> mLineSeries_Light = null;
-    LineGraphSeries<DataPoint> mLineSeries_Deep = null;
-    LineGraphSeries<DataPoint> mLineSeries_Awakenings = null;
-    LineGraphSeries<DataPoint> mLineSeries_ZQscore = null;
+    PointsGraphSeries<DataPoint> mPointsSeries_TimeToZ = null;
+    PointsGraphSeries<DataPoint> mPointsSeries_TotalSleep = null;
+    PointsGraphSeries<DataPoint> mPointsSeries_Awake = null;
+    PointsGraphSeries<DataPoint> mPointsSeries_REM = null;
+    PointsGraphSeries<DataPoint> mPointsSeries_Light = null;
+    PointsGraphSeries<DataPoint> mPointsSeries_Deep = null;
+    PointsGraphSeries<DataPoint> mPointsSeries_Awakenings = null;
+    PointsGraphSeries<DataPoint> mPointsSeries_ZQscore = null;
     LineGraphSeries<DataPoint> mLineSeries_Goal = null;
     LineGraphSeries<DataPoint> mLineSeries_Trend = null;
     StackedBarGraphSeries<DataPoint> mStackedBarSeries = null;
 
+    public String mShowAttribute = null;
     public boolean mShowBarsAndLines = false;
     public boolean mShowGoalLine = false;
     public boolean mShowTrendLine = false;
@@ -72,17 +77,23 @@ public class TrendsGraphView extends GraphView {
     public boolean mShowAwakenings = false;
 
     // member constants and other static content
-    private static final String _CTAG = "TG";
+    private static final String _CTAG = "AEG";
     private static final int MAXFIELDS = 9;
-    private SimpleDateFormat mDF1 = new SimpleDateFormat("MM/dd/yy");
+    //private SimpleDateFormat mDF1 = new SimpleDateFormat("MM/dd/yy");
 
     // data record
-    public static class Trends_dataSet {
+    public static class AttrEffects_dataSet {
+        public String mAttributeName;
+        public String mValueString;
+        public float mLikertValue;
         public long mTimestamp = 0;
         public double mDataArray[] = new double[MAXFIELDS];
 
         // constructor
-        public Trends_dataSet(long timestamp, double timeToZMin, double totalSleepMin, double remMin, double awakeMin, double lightMin, double deepMin, int awakeningsQty, int zq_score) {
+        public AttrEffects_dataSet(String attribute, float likert, String valueString, long timestamp, double timeToZMin, double totalSleepMin, double remMin, double awakeMin, double lightMin, double deepMin, int awakeningsQty, int zq_score) {
+            mAttributeName = attribute;
+            mValueString = valueString;
+            mLikertValue = likert;
             mTimestamp = timestamp;
             mDataArray[0] = timeToZMin;
             mDataArray[1] = totalSleepMin;
@@ -183,52 +194,6 @@ public class TrendsGraphView extends GraphView {
         }
     }
 
-    public class TGV_StaticLabelsFormatter extends StaticLabelsFormatter {
-        public TGV_StaticLabelsFormatter(GraphView graphView, LabelFormatter dlf) {
-            super(graphView, dlf);
-        }
-
-        @Override
-        public String formatLabelEx(GridLabelRenderer.LabelFormatterReason reason, int index, double value, boolean isValueX) {    // CHANGE NOTICE: include reason and index# in the callback (used only in callback Overrides)
-            switch (reason) {
-                case SIZING:
-                case SIZING_MAX:
-                case SIZING_MIN:
-                    if (isValueX && mHorizontalLabels != null) { return "00/00/00"; }
-                    return mDynamicLabelFormatter.formatLabelEx(reason, index, value, isValueX);
-
-                case AXIS_STEP:
-                case AXIS_STEP_SECONDSCALE:
-                    if (isValueX && mHorizontalLabels != null) {
-                        double dateValue = 0.0;
-                        switch (index) {
-                            case 0:
-                                dateValue = mViewport.getMinX(false);
-                                break;
-                            case 1:
-                            case 2:
-                            case 3:
-                                double interval = (mViewport.getMaxX(false) - mViewport.getMinX(false)) / 4.0;
-                                dateValue = mViewport.getMinX(false) + interval * index;
-                                break;
-                            case 4:
-                                dateValue = mViewport.getMaxX(false);
-                                break;
-                        }
-                        long ts = (long)dateValue;
-                        ts = (ts * 60000L) + mLowestTimestamp;
-                        Date dt = new Date(ts);
-                        return mDF1.format(dt);
-                    }
-                    return mDynamicLabelFormatter.formatLabelEx(reason, index, value, isValueX);
-
-                default:
-                    // index cannot be utilized
-                    return mDynamicLabelFormatter.formatLabelEx(reason, index, value, isValueX);
-            }
-        }
-    }
-
     public class TGV_DefaultLabelFormatter extends DefaultLabelFormatter {
         @Override
         public String formatLabelEx(GridLabelRenderer.LabelFormatterReason reason, int index, double value, boolean isValueX) {
@@ -238,7 +203,7 @@ public class TrendsGraphView extends GraphView {
                 case SIZING_MIN:
                     // return the largest sized label
                     if (isValueX) {
-                        return "00/00/00";
+                        return "00.00\nString";
                     } else {
                         return "000%";
                     }
@@ -248,11 +213,8 @@ public class TrendsGraphView extends GraphView {
                 case DATA_POINT:
                 default:
                     if (isValueX) {
-                        // show the date
-                        long ts = (long)value;
-                        ts = (ts * 60000L) + mLowestTimestamp;
-                        Date dt = new Date(ts);
-                        return mDF1.format(dt);
+                        // show the likert value and string version of it
+                        return String.format("%.0f",value)+"\n";    // ???
                     } else {
                         // show the Y value
                         return String.format("%.0f",value)+"%";
@@ -262,9 +224,9 @@ public class TrendsGraphView extends GraphView {
     }
 
     // constructors
-    public TrendsGraphView(Context context) { super(context); mContext = context; setLayerType(View.LAYER_TYPE_SOFTWARE, null); }
-    public TrendsGraphView(Context context, AttributeSet attrs) { super(context, attrs); mContext = context; setLayerType(View.LAYER_TYPE_SOFTWARE, null); }
-    public TrendsGraphView(Context context, AttributeSet attrs, int defStyle) { super(context, attrs, defStyle); mContext = context; setLayerType(View.LAYER_TYPE_SOFTWARE, null); }
+    public AttributeEffectsGraphView(Context context) { super(context); mContext = context; setLayerType(View.LAYER_TYPE_SOFTWARE, null); }
+    public AttributeEffectsGraphView(Context context, AttributeSet attrs) { super(context, attrs); mContext = context; setLayerType(View.LAYER_TYPE_SOFTWARE, null); }
+    public AttributeEffectsGraphView(Context context, AttributeSet attrs, int defStyle) { super(context, attrs, defStyle); mContext = context; setLayerType(View.LAYER_TYPE_SOFTWARE, null); }
 
     // toogle methods for the various lines available to show
     public void toggleBarsAndLines(boolean bars) { mShowBarsAndLines = bars; refresh(); }
@@ -286,8 +248,9 @@ public class TrendsGraphView extends GraphView {
         mShowAwakenings = false;
         mShowZQscore = false;
     }
+    public void toggleAttribute(String attribute) { mShowAttribute = attribute; refresh(); }
 
-    // show just one line plus goal and trend (Dashboard Tab)
+    // show just one data field plus goal and trend (Dashboard Tab)
     public void prepareForDashboard(Point screenSize) {
         mShowAsMode = 1;
         mScreenSize = screenSize;
@@ -308,11 +271,8 @@ public class TrendsGraphView extends GraphView {
         viewport.setMaxY(105.0);
         render.setNumVerticalLabels(6);
         render.setVerticalLabelsEndY(100.0);
-        viewport.setXAxisBoundsManual(true);    // for dates, must handle the X-axis manually
-        render.setNumHorizontalLabels(2);
-
-        TGV_DefaultLabelFormatter dlf = new TGV_DefaultLabelFormatter();
-        render.setLabelFormatter(dlf);
+        viewport.setXAxisBoundsManual(true);
+        render.setLabelFormatter(new TGV_DefaultLabelFormatter());
 
         if (mScreenSize.x >= 1024) {
             setLegendRenderer(new TGV_LegendRenderer(this));
@@ -357,15 +317,9 @@ public class TrendsGraphView extends GraphView {
         viewport.setAxisMaxY(105.0);
         render.setNumVerticalLabels(6);
         render.setVerticalLabelsEndY(100.0);
-        viewport.setXAxisBoundsManual(true);    // for dates, must handle the X-axis manually
-        render.setNumHorizontalLabels(5);
+        viewport.setXAxisBoundsManual(true);
         render.setHorizontalLabelsFixedPosition(true);
-
-        TGV_DefaultLabelFormatter dlf = new TGV_DefaultLabelFormatter();
-        TGV_StaticLabelsFormatter slf = new TGV_StaticLabelsFormatter(this, dlf);
-        slf.setHorizontalLabels(new String[] {"00/00/00", "00/00/00", "00/00/00", "00/00/00", "00/00/00"});
-        slf.setViewport(viewport);
-        render.setLabelFormatter(slf);
+        render.setLabelFormatter(new TGV_DefaultLabelFormatter());
 
         if (mScreenSize.x >= 1024) {
             setLegendRenderer(new TGV_LegendRenderer(this));
@@ -375,9 +329,9 @@ public class TrendsGraphView extends GraphView {
             lr.setPadding(5);
         }
 
-        viewport.setMinimumScaleWidth((float)10080.0);     // 7 days of minimum width in minutes
-        viewport.setScrollable(true);
-        viewport.setScalable(true);
+        //viewport.setMinimumScaleWidth((float)10080.0);     // 7 days of minimum width in minutes
+        //viewport.setScrollable(true);
+        //viewport.setScalable(true);
 
         mShowTimeToZ = false;
         mShowTotalSleep = false;
@@ -402,19 +356,29 @@ public class TrendsGraphView extends GraphView {
 
     // set the data for the trends graph; note that the passed dataset is in descending date order;
     // however GraphView mandates that X-values be in ascending value order; this will be handled in the buildSeries methods
-    public boolean setDataset(ArrayList<Trends_dataSet> theData, double goalTotalSleep, double goalREMpct, double goalDeepPct) {
+    public boolean setDataset(ArrayList<AttrEffects_dataSet> theData, double goalTotalSleep, double goalREMpct, double goalDeepPct) {
         mGoalTotalSleepMin = goalTotalSleep;
         mGoalREMpct = goalREMpct;
         mGoalDeepPct = goalDeepPct;
         mGoalLightPct = 100.0 - goalREMpct - goalDeepPct;
-        mOrigDataSet = theData;
+        mOriginalDataSet = theData;
         mDatasetLen = theData.size();
         if (mShowAsMode == 1 && mDatasetLen > 7) { mDatasetLen = 7; }
+        mShownDatasetLen = mDatasetLen;
 
-        Trends_dataSet item = mOrigDataSet.get(mDatasetLen - 1);
-        mLowestTimestamp = item.mTimestamp;
-        refresh();
+        mAttributes = new ArrayList<String>();
+        for (int i = 0; i < mDatasetLen; i++ ) {
+            AttrEffects_dataSet ads = mOriginalDataSet.get(i);
+            boolean found = false;
+            for (String existingAttr: mAttributes) {
+                if (ads.mAttributeName.equals(existingAttr)) { found = true; }
+            }
+            if (!found) { mAttributes.add(ads.mAttributeName); }
+        }
+        Log.d(_CTAG+".setDataset","Total Recs Cnt="+mDatasetLen+", Found Attributes Cnt="+mAttributes.size());
+
         if (mDatasetLen == 0) return false;
+        refresh();
         return true;
     }
 
@@ -430,58 +394,101 @@ public class TrendsGraphView extends GraphView {
         // preserve the current viewport scale and scroll of the X-axis
         Viewport viewport = this.getViewport();
         GridLabelRenderer render = this.getGridLabelRenderer();
-        double origMinX = viewport.getMinX(false);
-        double origMaxX = viewport.getMaxX(false);
+       // double origMinX = viewport.getMinX(false);
+        //double origMaxX = viewport.getMaxX(false);
 
         // first clear out any existing sets of series
         if (mQtySeries > 0) {
             removeAllSeries_deferRedraw();
-            mLineSeries_TimeToZ = null;
-            mLineSeries_TotalSleep = null;
-            mLineSeries_Awake = null;
-            mLineSeries_REM = null;
-            mLineSeries_Light = null;
-            mLineSeries_Deep = null;
-            mLineSeries_Awakenings = null;
-            mLineSeries_ZQscore = null;
+            mPointsSeries_TimeToZ = null;
+            mPointsSeries_TotalSleep = null;
+            mPointsSeries_Awake = null;
+            mPointsSeries_REM = null;
+            mPointsSeries_Light = null;
+            mPointsSeries_Deep = null;
+            mPointsSeries_Awakenings = null;
+            mPointsSeries_ZQscore = null;
             mLineSeries_Goal = null;
             mStackedBarSeries = null;
             mQtySeries = 0;
         }
 
-        // determine the date range for the X-axis
-        double lowestDate = 0.0;
-        double highestDate = 0.0;
-        if (mDatasetLen > 0) {
-            Trends_dataSet item = mOrigDataSet.get(0);
-            double nextDate = (double)((item.mTimestamp - mLowestTimestamp) / 60000L);
-            lowestDate = nextDate;
-            highestDate = nextDate;
-            int i = 1;
-            while (i < mDatasetLen) {
-                item = mOrigDataSet.get(i);
-                nextDate = (double)((item.mTimestamp - mLowestTimestamp) / 60000L);
-                if (nextDate < lowestDate) { lowestDate = nextDate; }
-                if (nextDate > highestDate) { highestDate = nextDate; }
-                i++;
+        // select the subset of data for the shown attribute
+        if (mShowAttribute == null) { mShownDatasetLen = 0; return; }
+        if (mShowAttribute.isEmpty()) { mShownDatasetLen = 0; return; }
+        if (mShowAttrDataSet != null) { mShowAttrDataSet.clear(); }
+        else { mShowAttrDataSet = new ArrayList<AttrEffects_dataSet>(); }
+        double lowestFoundLikert = 999999999999.0;
+        double highestFoundLikert = 0.0;
+        for (int i = 0; i < mDatasetLen; i++) {
+            AttrEffects_dataSet item = mOriginalDataSet.get(i);
+            if (item.mAttributeName.equals(mShowAttribute)) {
+                if (item.mLikertValue > highestFoundLikert) { highestFoundLikert = item.mLikertValue; }
+                if (item.mLikertValue < lowestFoundLikert) { lowestFoundLikert = item.mLikertValue; }
+                mShowAttrDataSet.add(item);
             }
         }
+        Log.d(_CTAG+".refresh","Attribute="+mShowAttribute+", Found Recs Cnt="+mShowAttrDataSet.size()+", Lowest Observed Likert="+lowestFoundLikert+", Highest Observed Likert="+highestFoundLikert);
+
+        // get all the possible X-axis likert values for the shown attribute
+        double lowestOfficialLikert = 999999999999.0;
+        double highestOfficialLikert = 0.0;
+        Cursor cursor = ZeoCompanionApplication.mDatabaseHandler.getAttributeValuesRecsForAttributeSortedLikert(mShowAttribute);
+        if (mXaxisValues != null) { mXaxisValues.clear(); }
+        else { mXaxisValues = new ArrayList<CompanionAttributeValuesRec>(); }
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    CompanionAttributeValuesRec avRec = new CompanionAttributeValuesRec(cursor);
+                    if (avRec.rLikert > highestOfficialLikert) { highestOfficialLikert = avRec.rLikert; }
+                    if (avRec.rLikert < lowestOfficialLikert) { lowestOfficialLikert = avRec.rLikert; }
+                    mXaxisValues.add(avRec);
+                } while (cursor.moveToNext());
+            }
+        }
+        Log.d(_CTAG+".refresh","Attribute="+mShowAttribute+", Lowest Official Likert="+lowestOfficialLikert+", Highest Official Likert="+highestOfficialLikert);
 
         // set the viewport properly (including current scaling and scrolling)
-        viewport.setMinX(lowestDate);
-        viewport.setAxisMinX(lowestDate);
-        viewport.setMaxX(highestDate);
-        double addX = viewport.xPixelsToDeltaXvalue(10.0f);
-        viewport.setMaxX(highestDate + addX);
-        viewport.setAxisMaxX(highestDate + addX);
-        render.setHorizontalLabelsEndX(highestDate);
-        if (!firstTime) {
+        double xMin = 999999999999.0;
+        if (lowestOfficialLikert < 999999999999.0) {
+            xMin = lowestOfficialLikert;
+        } else if (lowestFoundLikert < 999999999999.0) {
+            xMin = lowestFoundLikert;
+        } else {
+            xMin = 1.0;
+        }
+        xMin = Math.floor(xMin);
+        double xMax = 0.0;
+        if (highestOfficialLikert > 0.0) {
+            xMax = highestOfficialLikert;
+        } else if (highestFoundLikert > 0.0) {
+            xMax = highestFoundLikert;
+        } else {
+            xMax = 5.0;
+        }
+        xMax = Math.ceil(xMax);
+        Log.d(_CTAG+".refresh","Attribute="+mShowAttribute+", Found Recs Cnt="+mShowAttrDataSet.size()+", lowest X="+xMin+", highest X="+xMax);
+
+        viewport.setMinX(xMin);
+        //viewport.setAxisMinX(lowestDate);
+        viewport.setMaxX(xMax);
+        //double addX = viewport.xPixelsToDeltaXvalue(10.0f);
+        //viewport.setMaxX(highestDate + addX);
+        //viewport.setAxisMaxX(highestDate + addX);
+       // render.setHorizontalLabelsEndX(highestDate);
+        /*if (!firstTime) {
             viewport.setMinX(origMinX);
             viewport.setMaxX(origMaxX);
         }
-        firstTime = false;
+        firstTime = false;*/
+        int q = (int)(xMax - xMin);
+        render.setNumHorizontalLabels(q + 1);
 
-        // begin building series and adding them to the graph
+        // is there any data for this attribute?
+        mShownDatasetLen = mShowAttrDataSet.size();
+        if (mShownDatasetLen == 0) { return; }
+
+        // yes, begin building series and adding them to the graph
         // first up are those series that can be also be shown as a stackedBar
         int qtyFieldsShown = 0;
         double maxY = 0.0;
@@ -551,16 +558,13 @@ public class TrendsGraphView extends GraphView {
             if (mShowDeep) {
                 theDataPoints = buildDataPoints(5);
                 if (theDataPoints != null) {
-                    mLineSeries_Deep = new LineGraphSeries<DataPoint>(theDataPoints);
-                    double y = mLineSeries_Deep.getHighestValueY();
+                    mPointsSeries_Deep = new PointsGraphSeries<DataPoint>(theDataPoints);
+                    double y = mPointsSeries_Deep.getHighestValueY();
                     if (y > maxY) { maxY = y; }
-                    if (mShowAsMode == 1) { mLineSeries_Deep.setColor(Color.BLUE); }
-                    else { mLineSeries_Deep.setColor(Color.rgb(0, 0, 204)); }    // dark blue
-                    mLineSeries_Deep.setDrawDataPoints(true);
-                    if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_Deep.setThickness(5); mLineSeries_Deep.setDataPointsRadius(5); }
-                    else { mLineSeries_Deep.setThickness(3); mLineSeries_Deep.setDataPointsRadius(3); }
-                    mLineSeries_Deep.setTitle("Deep%");
-                    addSeries_deferRedraw(mLineSeries_Deep);
+                    if (mShowAsMode == 1) { mPointsSeries_Deep.setColor(Color.BLUE); }
+                    else { mPointsSeries_Deep.setColor(Color.rgb(0, 0, 204)); }    // dark blue
+                    mPointsSeries_Deep.setTitle("Deep%");
+                    addSeries_deferRedraw(mPointsSeries_Deep);
                     mQtySeries++;
                     qtyFieldsShown++;
 
@@ -569,16 +573,13 @@ public class TrendsGraphView extends GraphView {
             if (mShowLight) {
                 theDataPoints = buildDataPoints(4);
                 if (theDataPoints != null) {
-                    mLineSeries_Light = new LineGraphSeries<DataPoint>(theDataPoints);
-                    double y = mLineSeries_Light.getHighestValueY();
+                    mPointsSeries_Light = new PointsGraphSeries<DataPoint>(theDataPoints);
+                    double y = mPointsSeries_Light.getHighestValueY();
                     if (y > maxY) { maxY = y; }
-                    if (mShowAsMode == 1) { mLineSeries_Light.setColor(Color.BLUE); }
-                    else { mLineSeries_Light.setColor(Color.rgb(102, 178, 255)); }    // light blue
-                    mLineSeries_Light.setDrawDataPoints(true);
-                    if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_Light.setThickness(5); mLineSeries_Light.setDataPointsRadius(5); }
-                    else { mLineSeries_Light.setThickness(3); mLineSeries_Light.setDataPointsRadius(3); }
-                    mLineSeries_Light.setTitle("Light%");
-                    addSeries_deferRedraw(mLineSeries_Light);
+                    if (mShowAsMode == 1) { mPointsSeries_Light.setColor(Color.BLUE); }
+                    else { mPointsSeries_Light.setColor(Color.rgb(102, 178, 255)); }    // light blue
+                    mPointsSeries_Light.setTitle("Light%");
+                    addSeries_deferRedraw(mPointsSeries_Light);
                     mQtySeries++;
                     qtyFieldsShown++;
                 }
@@ -586,16 +587,13 @@ public class TrendsGraphView extends GraphView {
             if (mShowREM) {
                 theDataPoints = buildDataPoints(3);
                 if (theDataPoints != null) {
-                    mLineSeries_REM = new LineGraphSeries<DataPoint>(theDataPoints);
-                    double y = mLineSeries_REM.getHighestValueY();
+                    mPointsSeries_REM = new PointsGraphSeries<DataPoint>(theDataPoints);
+                    double y = mPointsSeries_REM.getHighestValueY();
                     if (y > maxY) { maxY = y; }
-                    if (mShowAsMode == 1) { mLineSeries_REM.setColor(Color.BLUE); }
-                    else { mLineSeries_REM.setColor(Color.rgb(0, 153, 0)); }    // green
-                    mLineSeries_REM.setDrawDataPoints(true);
-                    if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_REM.setThickness(5); mLineSeries_REM.setDataPointsRadius(5); }
-                    else { mLineSeries_REM.setThickness(3); mLineSeries_REM.setDataPointsRadius(3); }
-                    mLineSeries_REM.setTitle("REM%");
-                    addSeries_deferRedraw(mLineSeries_REM);
+                    if (mShowAsMode == 1) { mPointsSeries_REM.setColor(Color.BLUE); }
+                    else { mPointsSeries_REM.setColor(Color.rgb(0, 153, 0)); }    // green
+                    mPointsSeries_REM.setTitle("REM%");
+                    addSeries_deferRedraw(mPointsSeries_REM);
                     mQtySeries++;
                     qtyFieldsShown++;
                 }
@@ -603,16 +601,13 @@ public class TrendsGraphView extends GraphView {
             if (mShowAwake) {
                 theDataPoints = buildDataPoints(2);
                 if (theDataPoints != null) {
-                    mLineSeries_Awake = new LineGraphSeries<DataPoint>(theDataPoints);
-                    double y = mLineSeries_Awake.getHighestValueY();
+                    mPointsSeries_Awake = new PointsGraphSeries<DataPoint>(theDataPoints);
+                    double y = mPointsSeries_Awake.getHighestValueY();
                     if (y > maxY) { maxY = y; }
-                    if (mShowAsMode == 1) { mLineSeries_Awake.setColor(Color.BLUE); }
-                    else { mLineSeries_Awake.setColor(Color.RED); }
-                    mLineSeries_Awake.setDrawDataPoints(true);
-                    if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_Awake.setThickness(5); mLineSeries_Awake.setDataPointsRadius(5); }
-                    else { mLineSeries_Awake.setThickness(3); mLineSeries_Awake.setDataPointsRadius(3); }
-                    mLineSeries_Awake.setTitle("Awake%");
-                    addSeries_deferRedraw(mLineSeries_Awake);
+                    if (mShowAsMode == 1) { mPointsSeries_Awake.setColor(Color.BLUE); }
+                    else { mPointsSeries_Awake.setColor(Color.RED); }
+                    mPointsSeries_Awake.setTitle("Awake%");
+                    addSeries_deferRedraw(mPointsSeries_Awake);
                     mQtySeries++;
                     qtyFieldsShown++;
                 }
@@ -620,16 +615,13 @@ public class TrendsGraphView extends GraphView {
             if (mShowTimeToZ) {
                 theDataPoints = buildDataPoints(0);
                 if (theDataPoints != null) {
-                    mLineSeries_TimeToZ = new LineGraphSeries<DataPoint>(theDataPoints);
-                    double y = mLineSeries_TimeToZ.getHighestValueY();
+                    mPointsSeries_TimeToZ = new PointsGraphSeries<DataPoint>(theDataPoints);
+                    double y = mPointsSeries_TimeToZ.getHighestValueY();
                     if (y > maxY) { maxY = y; }
-                    if (mShowAsMode == 1) { mLineSeries_TimeToZ.setColor(Color.BLUE); }
-                    else { mLineSeries_TimeToZ.setColor(Color.rgb(255, 165, 0)); }  // orange
-                    mLineSeries_TimeToZ.setDrawDataPoints(true);
-                    if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_TimeToZ.setThickness(5); mLineSeries_TimeToZ.setDataPointsRadius(5); }
-                    else { mLineSeries_TimeToZ.setThickness(2); mLineSeries_TimeToZ.setDataPointsRadius(2); }
-                    mLineSeries_TimeToZ.setTitle("Time2Z%");
-                    addSeries_deferRedraw(mLineSeries_TimeToZ);
+                    if (mShowAsMode == 1) { mPointsSeries_TimeToZ.setColor(Color.BLUE); }
+                    else { mPointsSeries_TimeToZ.setColor(Color.rgb(255, 165, 0)); }  // orange
+                    mPointsSeries_TimeToZ.setTitle("Time2Z%");
+                    addSeries_deferRedraw(mPointsSeries_TimeToZ);
                     mQtySeries++;
                     qtyFieldsShown++;
                 }
@@ -640,16 +632,13 @@ public class TrendsGraphView extends GraphView {
         if (mShowTotalSleep) {
             theDataPoints = buildDataPoints(1);
             if (theDataPoints != null) {
-                mLineSeries_TotalSleep = new LineGraphSeries<DataPoint>(theDataPoints);
-                double y = mLineSeries_TotalSleep.getHighestValueY();
+                mPointsSeries_TotalSleep = new PointsGraphSeries<DataPoint>(theDataPoints);
+                double y = mPointsSeries_TotalSleep.getHighestValueY();
                 if (y > maxY) { maxY = y; }
-                if (mShowAsMode == 1) { mLineSeries_TotalSleep.setColor(Color.BLUE); }
-                else { mLineSeries_TotalSleep.setColor(Color.BLACK); }
-                mLineSeries_TotalSleep.setDrawDataPoints(true);
-                if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_TotalSleep.setThickness(5); mLineSeries_TotalSleep.setDataPointsRadius(5); }
-                else { mLineSeries_TotalSleep.setThickness(3); mLineSeries_TotalSleep.setDataPointsRadius(3); }
-                mLineSeries_TotalSleep.setTitle("Total%");
-                addSeries_deferRedraw(mLineSeries_TotalSleep);
+                if (mShowAsMode == 1) { mPointsSeries_TotalSleep.setColor(Color.BLUE); }
+                else { mPointsSeries_TotalSleep.setColor(Color.BLACK); }
+                mPointsSeries_TotalSleep.setTitle("Total%");
+                addSeries_deferRedraw(mPointsSeries_TotalSleep);
                 mQtySeries++;
                 qtyFieldsShown++;
             }
@@ -673,23 +662,20 @@ public class TrendsGraphView extends GraphView {
         if (mShowZQscore) {
             theDataPoints = buildDataPoints(7);
             if (theDataPoints != null) {
-                mLineSeries_ZQscore = new LineGraphSeries<DataPoint>(theDataPoints);
-                double y = mLineSeries_ZQscore.getHighestValueY();
+                mPointsSeries_ZQscore = new PointsGraphSeries<DataPoint>(theDataPoints);
+                double y = mPointsSeries_ZQscore.getHighestValueY();
                 if (y > maxY) { maxY = y; }
-                if (mShowAsMode == 1) { mLineSeries_ZQscore.setColor(Color.BLUE); }
-                else { mLineSeries_ZQscore.setColor(Color.WHITE); }
-                mLineSeries_ZQscore.setDrawDataPoints(true);
-                if (ZeoCompanionApplication.mScreenDensity > 1.0f) { mLineSeries_ZQscore.setThickness(5); mLineSeries_ZQscore.setDataPointsRadius(5); }
-                else { mLineSeries_ZQscore.setThickness(3); mLineSeries_ZQscore.setDataPointsRadius(3); }
-                mLineSeries_ZQscore.setTitle("ZQ");
-                addSeries_deferRedraw(mLineSeries_ZQscore);
+                if (mShowAsMode == 1) { mPointsSeries_ZQscore.setColor(Color.BLUE); }
+                else { mPointsSeries_ZQscore.setColor(Color.WHITE); }
+                mPointsSeries_ZQscore.setTitle("ZQ");
+                addSeries_deferRedraw(mPointsSeries_ZQscore);
                 mQtySeries++;
                 qtyFieldsShown++;
             }
         }
 
         // special series (trends and goal)
-        if (mShowTrendLine &&  mDatasetLen > 1 && theDataPoints != null) {
+        /*???if (mShowTrendLine &&  mDatasetLen > 1 && theDataPoints != null) {
             TrendlinePoints[] tps = null;
             String title = "Trend";
             if (mShowAsMode == 2) { title += "(s)"; }
@@ -716,14 +702,14 @@ public class TrendsGraphView extends GraphView {
                     mQtySeries++;
                 }
             }
-        }
+        }*/
 
         if (mShowGoalLine && mDatasetLen > 0) {
             double goal = getGoal(qtyFieldsShown);
             if (goal > 0.0) {
                 DataPoint[] goalDataPoints = new DataPoint[2];
-                goalDataPoints[0] = new DataPoint(0, lowestDate, goal);
-                goalDataPoints[1] = new DataPoint(1, highestDate, goal);
+                goalDataPoints[0] = new DataPoint(0, xMin, goal);
+                goalDataPoints[1] = new DataPoint(1, xMax, goal);
                 mLineSeries_Goal = new LineGraphSeries<DataPoint>(goalDataPoints);
                 double y = mLineSeries_Goal.getHighestValueY();
                 if (y > maxY) { maxY = y; }
@@ -799,10 +785,10 @@ public class TrendsGraphView extends GraphView {
     // build the data points for a single data field; note the X-values are in descending order but GraphView must have them in ascending order
     private DataPoint[] buildDataPoints(int dataArrayIndex) {
         if (mDatasetLen <= 0) { return null; }
-        DataPoint[] theDataPoints = new DataPoint[mDatasetLen];
+        DataPoint[] theDataPoints = new DataPoint[mShownDatasetLen];
         int j = 0;
-        for (int i = mDatasetLen - 1; i >= 0; i--) {
-            Trends_dataSet item = mOrigDataSet.get(i);
+        for (int i = mShownDatasetLen - 1; i >= 0; i--) {
+            AttrEffects_dataSet item = mShowAttrDataSet.get(i);
             double y = 0.0;
             switch (dataArrayIndex) {
                 case 1:
@@ -827,8 +813,7 @@ public class TrendsGraphView extends GraphView {
                     y = item.mDataArray[dataArrayIndex];
                     break;
             }
-            double x = (double)((item.mTimestamp - mLowestTimestamp)/60000L);
-            theDataPoints[j] = new DataPoint(i, x, y);
+            theDataPoints[j] = new DataPoint(i, (double)item.mLikertValue, y);
             j++;
         }
         return theDataPoints;
