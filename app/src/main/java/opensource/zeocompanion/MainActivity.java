@@ -263,6 +263,19 @@ public class MainActivity extends AppCompatActivity {
                 else { ZeoCompanionApplication.mMaxBitmapDim = 4096; }
             }
         });
+
+        // inform end-user using a small-sized screen
+        Display display = getWindowManager().getDefaultDisplay();
+        Point screenSize = new Point();
+        display.getSize(screenSize);
+        int screenWidthDp = (int)((float)screenSize.x / ZeoCompanionApplication.mScreenDensity);
+        int screenHeightDp = (int)((float)screenSize.y / ZeoCompanionApplication.mScreenDensity);
+        int largestDp = screenWidthDp;
+        if (screenHeightDp > largestDp) { largestDp = screenHeightDp; }
+        if (largestDp < 1024 && (ZeoCompanionApplication.mFirstTimeHintsShown & ZeoCompanionApplication.APP_HINTS_SMALLSCREEN) == 0){
+            ZeoCompanionApplication.hintShown(ZeoCompanionApplication.APP_HINTS_SMALLSCREEN);
+            Utilities.showAlertDialog(this, "Warning", "Warning: this App is designed to show data-dense graphs and tables. It is optimized for Android Tablets whose screen size is 1024 x 600 or larger.  It can be used on phones or tablets of smaller size, however some screens will be cramped, some lettering will be abbreviated and overlapped, some buttons may overlap, extensive scrolling may be necessary, as will constant rotation of the device from portrait to landscape and back.", "Okay");
+        }
     }
 
     // called only when the Activity returns to the Foreground

@@ -113,6 +113,7 @@ public class ZeoCompanionApplication extends Application {
     public static final int APP_HINTS_SUMMARY_FRAGMENT = 0x0020;
     public static final int APP_HINTS_HISTORY_FRAGMENT = 0x0040;
     public static final int APP_HINTS_BACKUP = 0x0080;
+    public static final int APP_HINTS_SMALLSCREEN = 0x0100;
 
     // inter-process messaging constants used by various Activities and Handlers
     public static final int MESSAGE_HEADBAND_HBFRAG_LOW = 9000;
