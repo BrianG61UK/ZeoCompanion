@@ -411,8 +411,10 @@ public class TrendsGraphView extends GraphView {
         mDatasetLen = theData.size();
         if (mShowAsMode == 1 && mDatasetLen > 7) { mDatasetLen = 7; }
 
-        Trends_dataSet item = mOrigDataSet.get(mDatasetLen - 1);
-        mLowestTimestamp = item.mTimestamp;
+        if (mDatasetLen > 0) {
+            Trends_dataSet item = mOrigDataSet.get(mDatasetLen - 1);
+            mLowestTimestamp = item.mTimestamp;
+        }
         refresh();
         if (mDatasetLen == 0) return false;
         return true;

@@ -387,7 +387,8 @@ public class MainDashboardFragment extends MainFragmentWrapper {
             TextView tv = (TextView)mRootView.findViewById(R.id.textView_trendtitle);
             tv.setText("Last 7 Session Trend; only one sleep session; line-graph will not be useful");
         }
-        theTrendsGraph.setOnClickListener(mTrendsGraphClickListener);
+        if (hasAnyData) { theTrendsGraph.setOnClickListener(mTrendsGraphClickListener); }
+        else { theTrendsGraph.setOnClickListener(null); }
 
         /*RelativeLayout rl = (RelativeLayout)mRootView.findViewById(R.id.relativeLayout_attrEffectsTitle);
         if (journal_enabled) {
