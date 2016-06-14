@@ -39,7 +39,7 @@ public class ZeoAppHandler {
     private boolean mAtNonJournal = false;
     private long mZeoAppProbeDelayMS = DEFAULT_ZEOAPP_PROBE_DELAY_MS;
     private long mCurrProbeRunnableIndex = 0L;
-    private long mTypicalSleepDurationMin = 0L;
+    private long mTypicalSleepDurationMin = 465L;
     private long mTimestampLastPollKnownSleepRecordID = 0L;
     private ArrayList<ZAH_Listener> mListeners = null;
     private Uri mBaseContentURI = null;
@@ -149,17 +149,6 @@ public class ZeoAppHandler {
         }
         mHeadbandsContentURI = mBaseContentURI.buildUpon().appendPath("headbands").build();
         mSleepRecordsContentURI = mBaseContentURI.buildUpon().appendPath("sleep_records").build();
-
-        // progressively determine the end-user's typical or expected sleep duration
-        mTypicalSleepDurationMin = 465; // 15 min less than 8 hours
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String str = ObscuredPrefs.decryptString(prefs.getString("profile_goal_hours_per_night", "8"));
-        if(!str.isEmpty()) {
-            double d = Double.parseDouble(str);
-            if (d > 0.0) { mTypicalSleepDurationMin = (long)(d * 60.0) - 15L; }
-        }
-        Long observedSleepDurationMin = getObservedTypicalSleepDurationMin();   // note: the JDC is not yet initialized
-        if (observedSleepDurationMin != null) { mTypicalSleepDurationMin = observedSleepDurationMin; }
     }
 
     // verify the Zeo's API is active and the Zeo has been used;
@@ -174,11 +163,13 @@ public class ZeoAppHandler {
         int permissionCheck = ContextCompat.checkSelfPermission(mContext, "com.myzeo.permission.READ_SLEEP_RECORDS");
         if (permissionCheck == PackageManager.PERMISSION_DENIED) { return ZAH_ERROR_NO_PERMISSION; }
 
+        // check Zeo App headband records
         final Cursor cursor1 = mContext.getContentResolver().query(mHeadbandsContentURI, cols_hb, null, null, null);
         if (cursor1 == null) { Log.e(_CTAG+".verifyAPI","The ZeoApp Headband Table is inaccessible"); return ZAH_ERROR_NO_DB; }
         if (!cursor1.moveToFirst()) { cursor1.close(); Log.e(_CTAG + ".verifyAPI", "The ZeoApp Headband Table is empty");  return ZAH_ERROR_NO_HB_REC; }
         cursor1.close();
 
+        // check Zeo App sleep records
         String[] cols_sleepRec = new String[] {
                 SleepRecord.SLEEP_EPISODE_ID,
                 SleepRecord.SOURCE,
@@ -188,6 +179,18 @@ public class ZeoAppHandler {
         if (!cursor2.moveToFirst()) { cursor2.close(); return ZAH_ERROR_NO_DATA; }
         cursor2.close();
 
+        // progressively determine the end-user's typical or expected sleep duration
+        mTypicalSleepDurationMin = 465; // 15 min less than 8 hours
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        String str = ObscuredPrefs.decryptString(prefs.getString("profile_goal_hours_per_night", "8"));
+        if(!str.isEmpty()) {
+            double d = Double.parseDouble(str);
+            if (d > 0.0) { mTypicalSleepDurationMin = (long)(d * 60.0) - 15L; }
+        }
+        Long observedSleepDurationMin = getObservedTypicalSleepDurationMin();   // note: the JDC is not yet initialized
+        if (observedSleepDurationMin != null) { mTypicalSleepDurationMin = observedSleepDurationMin; }
+
+        // probe once the Zeo App's current state and listen for relevant preferences changes
         probeAppState();
         PreferenceManager.getDefaultSharedPreferences(mContext).registerOnSharedPreferenceChangeListener(mPrefsChangeListener);
         return ZAH_ERROR_NONE;
