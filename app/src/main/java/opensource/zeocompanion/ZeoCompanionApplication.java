@@ -53,6 +53,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Environment;
@@ -61,6 +62,8 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 import android.widget.Toast;
 import com.obscuredPreferences.ObscuredPrefs;
 import org.apache.commons.io.FileUtils;
@@ -636,6 +639,11 @@ public class ZeoCompanionApplication extends Application {
             wrt.write("\n");
             wrt.write("Android Version " + android.os.Build.VERSION.RELEASE + " API " + android.os.Build.VERSION.SDK_INT + "\n");
             wrt.write("Platform Manf " + Build.MANUFACTURER + " Model " + Build.MODEL + "\n");
+            WindowManager windowManager = (WindowManager)mApp.getSystemService(Context.WINDOW_SERVICE);
+            Display display = windowManager.getDefaultDisplay();
+            Point screenSize = new Point();
+            display.getSize(screenSize);
+            wrt.write("Platform Screen Orientation X,Y " + screenSize.x + "," + screenSize.y + ", Density=" + mScreenDensity + "\n");
             if (method != null) {
                 if (!method.isEmpty()) {  wrt.write(method + "\n"); }
             }
