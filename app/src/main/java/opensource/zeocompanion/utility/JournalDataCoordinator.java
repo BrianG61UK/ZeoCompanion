@@ -614,9 +614,9 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                                 theCSE.rStatesFlag = (theCSE.rStatesFlag | CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_ZEO_DEADREC);
                             }
                         }
+                        iRec.theCSErecord = null;
+                        iRec.destroy();
                     }
-                    iRec.theCSErecord = null;
-                    iRec.destroy();
                 }
                 theCSE.saveToDB();
                 break;
