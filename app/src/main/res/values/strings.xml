@@ -22,6 +22,7 @@
     <string name="action_email_outbox">View Email Outbox</string>
     <string name="action_alerts">View Alerts</string>
     <string name="action_user_guide">User Guide</string>
+    <string name="action_emailErrorLog">Email error.log</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_header_direct_email">Email</string>

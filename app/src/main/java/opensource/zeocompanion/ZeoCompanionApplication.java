@@ -586,6 +586,23 @@ public class ZeoCompanionApplication extends Application {
     // Methods related to the error.log and Alerts
     ///////////////////////////////////////////////////////////////////
 
+    // Thread Context: called from MainActivity in main thread
+    // return the FILE for the path to the error.log file
+    public static File errorLogFile() {
+        File internalsDir = new File(mBaseExtStorageDir + File.separator + "internals");
+        internalsDir.mkdirs();
+        return new File(internalsDir + File.separator + "error.log");
+    }
+
+    // Thread Context: called from MainActivity in main thread
+    // indicate whether the error.log file exists or not
+    public static boolean hasErrorLog() {
+        File internalsDir = new File(mBaseExtStorageDir + File.separator + "internals");
+        internalsDir.mkdirs();
+        File errLogFile = new File(internalsDir + File.separator + "error.log");
+        return errLogFile.exists();
+    }
+
     // Thread Context: can be called from utility threads, so cannot perform UI actions like Toast
     // write detailed exception information into an error log that the end-user can email to the developer
     public static void postToErrorLog(String method, Throwable theException) {

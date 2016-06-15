@@ -371,10 +371,15 @@ public class MainActivity extends AppCompatActivity {
         int cnt2 = ZeoCompanionApplication.mEmailOutbox.getQtyEntries();
         if (cnt2 > 0) { item2.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM); }
         else { item2.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER); }
+
+        MenuItem item3 = menu.findItem(R.id.action_emailErrorLog);
+        if (ZeoCompanionApplication.hasErrorLog()) { item3.setVisible(true); }
+        else { item3.setVisible(false); }
+
         return true;
     }
 
-    // have seslected memu items "pop-out" if they have content
+    // have selected memu items "pop-out" if they have content
     public void adjustMenus() {
         invalidateOptionsMenu();
     }
@@ -571,6 +576,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(browserIntent);
                 break;
 
+            case R.id.action_emailErrorLog:
+                emailErrorLog();
+                break;
+
             case R.id.action_about:
                 // show an "About" alert dialog
                 String str = "Companion for Zeo App Version " + BuildConfig.VERSION_NAME + " Build " + BuildConfig.VERSION_CODE;
@@ -666,6 +675,22 @@ public class MainActivity extends AppCompatActivity {
             getWindow().setAttributes(lparams);
             mSectionsPagerAdapter.informAllFragmentsToUndimControls();
             //Log.d(_CTAG+".togKeepScreenOn","FLAG_KEEP_SCREEN_ON is removed");
+        }
+    }
+
+    // email the error.log file to the Developer limited support email address
+    public void emailErrorLog() {
+        File errorLogFile = ZeoCompanionApplication.errorLogFile();
+        if (errorLogFile.exists()) {
+            Intent sendIntent = new Intent(Intent.ACTION_SEND);
+            sendIntent.setType("text/plain");
+            String[] addresses = { "zeocompanion@mail.com" };
+            sendIntent.putExtra(Intent.EXTRA_EMAIL, addresses);
+            sendIntent.putExtra(Intent.EXTRA_SUBJECT, "ZeoCompanion error.log File Submission");
+            sendIntent.putExtra(Intent.EXTRA_TEXT, "<Please add the problem your are experiencing below>\n");
+            Uri uri = Uri.parse("file://" + errorLogFile);
+            sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            startActivity(Intent.createChooser(sendIntent, "Please add a description of your problem to the email.  Email via..."));
         }
     }
 
