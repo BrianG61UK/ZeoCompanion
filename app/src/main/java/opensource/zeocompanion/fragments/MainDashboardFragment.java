@@ -2,31 +2,34 @@ package opensource.zeocompanion.fragments;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import com.obscuredPreferences.ObscuredPrefs;
 import java.util.ArrayList;
 import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.activities.StatsActivity;
+import opensource.zeocompanion.database.CompanionAttributesRec;
 import opensource.zeocompanion.database.CompanionDatabaseContract;
 import opensource.zeocompanion.database.CompanionSleepEpisodeInfoParsedRec;
 import opensource.zeocompanion.utility.JournalDataCoordinator;
+import opensource.zeocompanion.utility.Utilities;
+import opensource.zeocompanion.views.AttrValsSleepDatasetRec;
 import opensource.zeocompanion.views.AttributeEffectsGraphView;
+import opensource.zeocompanion.views.AttributesHeatmapGraphView;
 import opensource.zeocompanion.views.TrendsGraphView;
 
 // fragment within the MainActivity that displays simple non-configurable statistical graphs
@@ -35,7 +38,7 @@ public class MainDashboardFragment extends MainFragmentWrapper {
     private View mRootView = null;
     private boolean mLayoutDone = false;
     ArrayList<TrendsGraphView.Trends_dataSet> mTrendsData = null;
-    ArrayList<AttributeEffectsGraphView.AttrEffects_dataSet> mAttrEffectsData = null;
+    ArrayList<AttrValsSleepDatasetRec> mAttrValsData = null;
 
     // member constants and other static content
     private static final String _CTAG = "M1F";
@@ -90,6 +93,33 @@ public class MainDashboardFragment extends MainFragmentWrapper {
                         theTrendsGraph.toggleAllOff();
                         theTrendsGraph.toggleZQ(true);
                     }
+                    break;
+            }
+        }
+    };
+
+    // common listener for presses on the attributes heatmap checkbox buttons
+    CheckBox.OnCheckedChangeListener mAttrsHeatmapCheckboxChangedListener = new CheckBox.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            AttributesHeatmapGraphView theAttrsHeatmapGraph = (AttributesHeatmapGraphView)mRootView.findViewById(R.id.graph_attrsHeatmap);
+
+            // Check which checkbox was checked
+            switch(buttonView.getId()) {
+                case R.id.checkBox_deep:
+                    theAttrsHeatmapGraph.toggleDeep(isChecked);
+                    break;
+                case R.id.checkBox_rem:
+                    theAttrsHeatmapGraph.toggleREM(isChecked);
+                    break;
+                case R.id.checkBox_awake:
+                    theAttrsHeatmapGraph.toggleAwake(isChecked);
+                    break;
+                case R.id.checkBox_awakenings:
+                    theAttrsHeatmapGraph.toggleAwakenings(isChecked);
+                    break;
+                case R.id.checkBox_total:
+                    theAttrsHeatmapGraph.toggleTotalSleep(isChecked);
                     break;
             }
         }
@@ -211,7 +241,7 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         //Log.d(_CTAG+".onCreateView", "==========FRAG ON-CREATEVIEW=====");
         mRootView = inflater.inflate(R.layout.fragment_main_dashboard, container, false);
 
-        // setup all the radio buttons
+        // setup all the radio buttons for trends
         RadioButton rb = (RadioButton)mRootView.findViewById(R.id.radioButton_trends_deep);
         rb.setChecked(true);
         rb.setOnClickListener(mTrendsRadioButtonOnClickListener);
@@ -227,6 +257,23 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         rb.setOnClickListener(mTrendsRadioButtonOnClickListener);
         rb = (RadioButton)mRootView.findViewById(R.id.radioButton_trends_zq);
         rb.setOnClickListener(mTrendsRadioButtonOnClickListener);
+
+        // setup all the checkboxes for attributes heatmap
+        CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awakenings);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
 
         /*rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_deep);
         rb.setChecked(true);
@@ -269,6 +316,14 @@ public class MainDashboardFragment extends MainFragmentWrapper {
     @Override
     public void onDestroyView () {
         mLayoutDone = false;
+        TrendsGraphView theTrendsGraph = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
+        theTrendsGraph.releaseDataset();
+        AttributesHeatmapGraphView theAttrsHeatmapGraph = (AttributesHeatmapGraphView)mRootView.findViewById(R.id.graph_attrsHeatmap);
+        theAttrsHeatmapGraph.releaseDataset();
+        //AttributeEffectsGraphView theAttrEffectsGraph = (AttributeEffectsGraphView)mRootView.findViewById(R.id.graph_attrEffects);
+        //theAttrEffectsGraph.releaseDataset();
+        if (mTrendsData != null) { mTrendsData.clear(); }
+        if (mAttrValsData != null) { mAttrValsData.clear(); }
         super.onDestroyView();
         //Log.d(_CTAG + ".onDestroyView", "==========FRAG ON-DESTROYVIEW=====");
     }
@@ -298,17 +353,25 @@ public class MainDashboardFragment extends MainFragmentWrapper {
 
     // select the entire dataset needed for all graphs
     private void selectNeededData() {
+        // determine if the Sleep Journal is enabled
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         boolean journal_enabled = prefs.getBoolean("journal_enable", true);
 
+        // prepare empty dataset arrays
         ArrayList<JournalDataCoordinator.IntegratedHistoryRec> theIrecs = new ArrayList<JournalDataCoordinator.IntegratedHistoryRec>();
-        mTrendsData = new ArrayList<TrendsGraphView.Trends_dataSet>();
-        mAttrEffectsData = new ArrayList<AttributeEffectsGraphView.AttrEffects_dataSet>();
+        if (mTrendsData != null) { mTrendsData.clear(); }
+        else { mTrendsData = new ArrayList<TrendsGraphView.Trends_dataSet>(); }
+        if (mAttrValsData != null) { mAttrValsData.clear(); }
+        else { mAttrValsData = new ArrayList<AttrValsSleepDatasetRec>(); }
 
+        // obtain all integrated sleep data
         ZeoCompanionApplication.mCoordinator.getAllIntegratedHistoryRecs(theIrecs); // sorted newest to oldest
 
+        // parse through the entire integrated database
         for (JournalDataCoordinator.IntegratedHistoryRec iRec: theIrecs) {
             if (iRec.theZAH_SleepRecord != null) {
+                // have an iRec that has Zeo App Sleep Session data;
+                // compose dateset for the trends graph
                 TrendsGraphView.Trends_dataSet tds = new TrendsGraphView.Trends_dataSet(iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
                         iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
                         iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
@@ -317,29 +380,59 @@ public class MainDashboardFragment extends MainFragmentWrapper {
 
                 if (journal_enabled && iRec.theCSErecord != null) {
                     if (iRec.theCSErecord.doAttributesExist()) {
+                        // have an iRec that also has ZeoCompanion sleep data, which contains attributes, and the Sleep Journal is enabled
                         iRec.theCSErecord.unpackInfoCSVstrings();
+                        // compose dataset for the various attribute-based graphs
                         for (CompanionSleepEpisodeInfoParsedRec avr: iRec.theCSErecord.mAttribs_Fixed_array) {
                             if (avr != null) {
                                 if (avr.rSleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) {
-                                    AttributeEffectsGraphView.AttrEffects_dataSet ads = new AttributeEffectsGraphView.AttrEffects_dataSet(avr.rAttributeExportName, avr.rLikert, avr.rValue,
+                                    AttrValsSleepDatasetRec ads = new AttrValsSleepDatasetRec(avr.rAttributeExportName, avr.rLikert, avr.rValue,
                                             iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
                                             iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
                                             iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
                                             iRec.theZAH_SleepRecord.rZQ_Score);
-                                    mAttrEffectsData.add(ads);
+                                    mAttrValsData.add(ads);
                                 }
                             }
                         }
                         for (CompanionSleepEpisodeInfoParsedRec avr: iRec.theCSErecord.mAttribs_Vari_array) {
                             if (avr != null) {
                                 if (avr.rSleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) {
-                                    AttributeEffectsGraphView.AttrEffects_dataSet ads = new AttributeEffectsGraphView.AttrEffects_dataSet(avr.rAttributeExportName, avr.rLikert, avr.rValue,
+                                    AttrValsSleepDatasetRec ads = new AttrValsSleepDatasetRec(avr.rAttributeExportName, avr.rLikert, avr.rValue,
                                             iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
                                             iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
                                             iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
                                             iRec.theZAH_SleepRecord.rZQ_Score);
-                                    mAttrEffectsData.add(ads);
+                                    mAttrValsData.add(ads);
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // attempt to locate the attribute display names for all the found data's attribute export names
+        if (!mAttrValsData.isEmpty()) {
+            Cursor cursor = ZeoCompanionApplication.mDatabaseHandler.getAllAttributeRecsSortedInvSleepStageDisplayOrder();
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    int qty = cursor.getCount();
+                    String[] attrsDisplay = new String[qty];
+                    String[] attrsShort = new String[qty];
+                    int i = 0;
+                    do {
+                        CompanionAttributesRec aRec = new CompanionAttributesRec(cursor);
+                        attrsDisplay[i] = aRec.rAttributeDisplayName;
+                        attrsShort[i] = aRec.rExportSlotName;
+                        i++;
+                    } while (cursor.moveToNext());
+
+                    for (AttrValsSleepDatasetRec ads:  mAttrValsData) {
+                        for (i = 0; i < qty; i++) {
+                            if (ads.rAttributeShortName.equals(attrsShort[i])) {
+                                ads.rAttributeDisplayName = attrsDisplay[i];
+                                break;
                             }
                         }
                     }
@@ -356,26 +449,19 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         double goalREMpct = 20.0;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         boolean journal_enabled = prefs.getBoolean("journal_enable", true);
-        String wStr = ObscuredPrefs.decryptString(prefs.getString("profile_goal_hours_per_night", "8"));
-        if (!wStr.isEmpty()) {
-            double d = Double.parseDouble(wStr);
-            if (d > 0.0) { goalTotalSleepMin = d * 60.0; }
-        }
-        wStr = ObscuredPrefs.decryptString(prefs.getString("profile_goal_percent_deep", "15"));
-        if (!wStr.isEmpty()) {
-            double d = Double.parseDouble(wStr);
-            if (d > 0.0 && d <= 100.0) { goalDeepPct = d;  }
-        }
-        wStr  = ObscuredPrefs.decryptString(prefs.getString("profile_goal_percent_REM", "20"));
-        if (!wStr.isEmpty()) {
-            double d = Double.parseDouble(wStr);
-            if (d > 0.0 && d <= 100.0) { goalREMpct = d;  }
-        }
+        double d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_hours_per_night", 8.0);
+        if (d > 0.0) { goalTotalSleepMin = d * 60.0; }
+        d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_percent_deep", 15.0);
+        if (d > 0.0 && d <= 100.0) { goalDeepPct = d; }
+        d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_percent_REM", 20.0);
+        if (d > 0.0 && d <= 100.0) { goalREMpct = d; }
 
+        // get current screen orientation sizes
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         Point screenSize = new Point();
         display.getSize(screenSize);
 
+        // prepare the trends graph
         TrendsGraphView theTrendsGraph = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
         theTrendsGraph.prepareForDashboard(screenSize);
         whichIsCheckedTrends();
@@ -390,13 +476,29 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         if (hasAnyData) { theTrendsGraph.setOnClickListener(mTrendsGraphClickListener); }
         else { theTrendsGraph.setOnClickListener(null); }
 
-        /*RelativeLayout rl = (RelativeLayout)mRootView.findViewById(R.id.relativeLayout_attrEffectsTitle);
+        // prepare various attribute-based graphs
+        RelativeLayout rl1 = (RelativeLayout)mRootView.findViewById(R.id.relativeLayout_attrsHeatmapTitle);
+        //RelativeLayout rl2 = (RelativeLayout)mRootView.findViewById(R.id.relativeLayout_attrEffectsTitle);
         if (journal_enabled) {
-            rl.setVisibility(View.VISIBLE);
-            AttributeEffectsGraphView theAttrEffectsGraph = (AttributeEffectsGraphView)mRootView.findViewById(R.id.graph_attrEffects);
+            // sleep journal is enabled, so do show attribute-based graphs
+            rl1.setVisibility(View.VISIBLE);
+            //rl2.setVisibility(View.VISIBLE);
+
+            // prepare the attributes-heatmap graph
+            AttributesHeatmapGraphView theAttrsHeatmapGraph = (AttributesHeatmapGraphView)mRootView.findViewById(R.id.graph_attrsHeatmap);
+            theAttrsHeatmapGraph.prepareForDashboard(screenSize);
+            whichIsCheckedAttrsHeatmap();
+            hasAnyData = theAttrsHeatmapGraph.setDataset(mAttrValsData);
+            if (!hasAnyData) {
+                TextView tv = (TextView)mRootView.findViewById(R.id.textView_attrsHeatmapTitle);
+                tv.setText("Attributes Usefulness HeatMap; there is no data to display");
+            }
+
+            // prepare the attribute-effects graph
+            /*AttributeEffectsGraphView theAttrEffectsGraph = (AttributeEffectsGraphView)mRootView.findViewById(R.id.graph_attrEffects);
             theAttrEffectsGraph.prepareForDashboard(screenSize);
             whichIsCheckedAttrEffects();
-            hasAnyData = theAttrEffectsGraph.setDataset(mAttrEffectsData, goalTotalSleepMin, goalREMpct, goalDeepPct);
+            hasAnyData = theAttrEffectsGraph.setDataset(mAttrValsData, goalTotalSleepMin, goalREMpct, goalDeepPct);
             if (theAttrEffectsGraph.mShownDatasetLen == 0) {
                 TextView tv = (TextView)mRootView.findViewById(R.id.textView_attrEffectsTitle);
                 tv.setText("Last 7 Session Attribute Effects; there is no data to display");
@@ -406,17 +508,19 @@ public class MainDashboardFragment extends MainFragmentWrapper {
             }
             theAttrEffectsGraph.setOnClickListener(mAttrEffectsGraphClickListener);
 
-            // setup the spinner with the found attributes
+            // setup the attribute-effects spinner with the found attributes
             Spinner theSpinner = (Spinner)mRootView.findViewById(R.id.spinner_attrEffects);
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, theAttrEffectsGraph.mAttributes);
             adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             theSpinner.setAdapter(adapter);
             whichIsSelectedAttrEffects();
             theSpinner.setOnTouchListener(mListener);
-            theSpinner.setOnItemSelectedListener(mListener);
+            theSpinner.setOnItemSelectedListener(mListener);*/
         } else {
-            rl.setVisibility(View.GONE);
-        }*/
+            // sleep journal is disabled, so show no attribute-based graphs
+            rl1.setVisibility(View.GONE);
+            //rl2.setVisibility(View.GONE);
+        }
     }
 
     // determine which radio button is already checked
@@ -454,6 +558,21 @@ public class MainDashboardFragment extends MainFragmentWrapper {
                 }
             }
         }
+    }
+
+    // determine which check boxes and radio buttons are already checked
+    private void whichIsCheckedAttrsHeatmap() {
+        AttributesHeatmapGraphView theAttrsHeatmapGraph = (AttributesHeatmapGraphView)mRootView.findViewById(R.id.graph_attrsHeatmap);
+        CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total);
+        theAttrsHeatmapGraph.mIncludeTotalSleep = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep);
+        theAttrsHeatmapGraph.mIncludeDeep = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem);
+        theAttrsHeatmapGraph.mIncludeREM = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake);
+        theAttrsHeatmapGraph.mIncludeAwake = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awakenings);
+        theAttrsHeatmapGraph.mIncludeAwakenings = cb.isChecked();
     }
 
     // determine which radio button is already checked

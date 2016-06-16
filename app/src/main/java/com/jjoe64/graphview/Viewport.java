@@ -317,7 +317,7 @@ public class Viewport {
      * left = minX, right = maxX
      * bottom = minY, top = maxY
      */
-    protected RectF mCurrentViewport = new RectF();
+    public RectF mCurrentViewport = new RectF();
 
     /**
      * this holds the whole range of the data

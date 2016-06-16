@@ -374,7 +374,7 @@ public class BarGraphSeries<E extends DataPointInterface> extends BaseSeries<E> 
      * resets the cached coordinates of the bars
      */
     @Override
-    protected void resetDataPoints() {
+    public void resetDataPoints() {     // CHANGE NOTICE: garbage collection
         mDataPoints.clear();
     }
 

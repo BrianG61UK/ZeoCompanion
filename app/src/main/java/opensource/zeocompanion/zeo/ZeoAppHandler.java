@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import com.myzeo.android.api.data.ZeoDataContract;
 import com.myzeo.android.api.data.ZeoDataContract.Headband;
 import com.myzeo.android.api.data.ZeoDataContract.SleepRecord;
-import com.obscuredPreferences.ObscuredPrefs;
 import opensource.zeocompanion.BuildConfig;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.database.CompanionDatabase;
 import opensource.zeocompanion.database.CompanionDatabaseContract;
+import opensource.zeocompanion.utility.Utilities;
 
 // primary Handler for interacting with the Zeo App
 public class ZeoAppHandler {
@@ -182,11 +182,8 @@ public class ZeoAppHandler {
         // progressively determine the end-user's typical or expected sleep duration
         mTypicalSleepDurationMin = 465; // 15 min less than 8 hours
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String str = ObscuredPrefs.decryptString(prefs.getString("profile_goal_hours_per_night", "8"));
-        if(!str.isEmpty()) {
-            double d = Double.parseDouble(str);
-            if (d > 0.0) { mTypicalSleepDurationMin = (long)(d * 60.0) - 15L; }
-        }
+        double d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_hours_per_night", 8.0);
+        if (d > 0.0) { mTypicalSleepDurationMin = (long)(d * 60.0) - 15L; }
         Long observedSleepDurationMin = getObservedTypicalSleepDurationMin();   // note: the JDC is not yet initialized
         if (observedSleepDurationMin != null) { mTypicalSleepDurationMin = observedSleepDurationMin; }
 

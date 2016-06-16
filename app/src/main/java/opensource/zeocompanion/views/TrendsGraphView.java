@@ -78,21 +78,21 @@ public class TrendsGraphView extends GraphView {
 
     // data record
     public static class Trends_dataSet {
-        public long mTimestamp = 0;
-        public double mDataArray[] = new double[MAXFIELDS];
+        public long rTimestamp = 0;
+        public double[] rDataArray = new double[MAXFIELDS];
 
         // constructor
         public Trends_dataSet(long timestamp, double timeToZMin, double totalSleepMin, double remMin, double awakeMin, double lightMin, double deepMin, int awakeningsQty, int zq_score) {
-            mTimestamp = timestamp;
-            mDataArray[0] = timeToZMin;
-            mDataArray[1] = totalSleepMin;
-            mDataArray[2] = awakeMin;
-            mDataArray[3] = remMin;
-            mDataArray[4] = lightMin;
-            mDataArray[5] = deepMin;
-            mDataArray[6] = awakeningsQty;
-            mDataArray[7] = zq_score;
-            mDataArray[8] = timeToZMin + totalSleepMin +  awakeMin;
+            rTimestamp = timestamp;
+            rDataArray[0] = timeToZMin;
+            rDataArray[1] = totalSleepMin;
+            rDataArray[2] = awakeMin;
+            rDataArray[3] = remMin;
+            rDataArray[4] = lightMin;
+            rDataArray[5] = deepMin;
+            rDataArray[6] = awakeningsQty;
+            rDataArray[7] = zq_score;
+            rDataArray[8] = timeToZMin + totalSleepMin +  awakeMin;
         }
     }
 
@@ -183,6 +183,7 @@ public class TrendsGraphView extends GraphView {
         }
     }
 
+    // custom static labels formatter (used for the X-axis)
     public class TGV_StaticLabelsFormatter extends StaticLabelsFormatter {
         public TGV_StaticLabelsFormatter(GraphView graphView, LabelFormatter dlf) {
             super(graphView, dlf);
@@ -229,6 +230,7 @@ public class TrendsGraphView extends GraphView {
         }
     }
 
+    // custom default label formatter (used for the Y-axis)
     public class TGV_DefaultLabelFormatter extends DefaultLabelFormatter {
         @Override
         public String formatLabelEx(GridLabelRenderer.LabelFormatterReason reason, int index, double value, boolean isValueX) {
@@ -346,7 +348,6 @@ public class TrendsGraphView extends GraphView {
         render.setVerticalLabelsColor(Color.WHITE);
         render.setLabelsSpace(5);
         render.setGridStyle(GridLabelRenderer.GridStyle.NONE);
-        render.setLabelFormatter(new DateAsXAxisLabelFormatter(mContext));
 
         Viewport viewport = this.getViewport();
         viewport.setBackgroundColor(Color.LTGRAY);
@@ -400,6 +401,40 @@ public class TrendsGraphView extends GraphView {
         return;
     }
 
+    // release all stored memory datasets (usually because the view is being destroyed)
+    public void releaseDataset() {
+        mOrigDataSet = null;
+        mDatasetLen = 0;
+        resetSeries();
+    }
+
+    // reset all the series (usually in preparation for drawing a different set of series)
+    private void resetSeries() {
+        removeAllSeries_deferRedraw();
+
+        if (mLineSeries_TimeToZ != null) { mLineSeries_TimeToZ.resetDataPoints(); }
+        mLineSeries_TimeToZ = null;
+        if (mLineSeries_TotalSleep != null) { mLineSeries_TotalSleep.resetDataPoints(); }
+        mLineSeries_TotalSleep = null;
+        if (mLineSeries_Awake != null) { mLineSeries_Awake.resetDataPoints(); }
+        mLineSeries_Awake = null;
+        if (mLineSeries_REM != null) { mLineSeries_REM.resetDataPoints(); }
+        mLineSeries_REM = null;
+        if (mLineSeries_Light != null) { mLineSeries_Light.resetDataPoints(); }
+        mLineSeries_Light = null;
+        if (mLineSeries_Deep != null) { mLineSeries_Deep.resetDataPoints(); }
+        mLineSeries_Deep = null;
+        if (mLineSeries_Awakenings != null) { mLineSeries_Awakenings.resetDataPoints(); }
+        mLineSeries_Awakenings = null;
+        if (mLineSeries_ZQscore != null) { mLineSeries_ZQscore.resetDataPoints(); }
+        mLineSeries_ZQscore = null;
+        if (mLineSeries_Goal != null) { mLineSeries_Goal.resetDataPoints(); }
+        mLineSeries_Goal = null;
+        if (mStackedBarSeries != null) { mStackedBarSeries.resetDataPoints(); }
+        mStackedBarSeries = null;
+        mQtySeries = 0;
+    }
+
     // set the data for the trends graph; note that the passed dataset is in descending date order;
     // however GraphView mandates that X-values be in ascending value order; this will be handled in the buildSeries methods
     public boolean setDataset(ArrayList<Trends_dataSet> theData, double goalTotalSleep, double goalREMpct, double goalDeepPct) {
@@ -413,18 +448,11 @@ public class TrendsGraphView extends GraphView {
 
         if (mDatasetLen > 0) {
             Trends_dataSet item = mOrigDataSet.get(mDatasetLen - 1);
-            mLowestTimestamp = item.mTimestamp;
+            mLowestTimestamp = item.rTimestamp;
         }
         refresh();
         if (mDatasetLen == 0) return false;
         return true;
-    }
-
-    // set a scrolling and scaling callback listener
-    public void setScrollScaleListener(long callbackNumber, Viewport.ScrollScaleListener listener) {
-        mParentNumber = callbackNumber;
-        Viewport viewport = this.getViewport();
-        viewport.setScrollScaleListener(listener);
     }
 
     // rebuild the trends graph usually after a change in the line(s) to display
@@ -436,33 +464,20 @@ public class TrendsGraphView extends GraphView {
         double origMaxX = viewport.getMaxX(false);
 
         // first clear out any existing sets of series
-        if (mQtySeries > 0) {
-            removeAllSeries_deferRedraw();
-            mLineSeries_TimeToZ = null;
-            mLineSeries_TotalSleep = null;
-            mLineSeries_Awake = null;
-            mLineSeries_REM = null;
-            mLineSeries_Light = null;
-            mLineSeries_Deep = null;
-            mLineSeries_Awakenings = null;
-            mLineSeries_ZQscore = null;
-            mLineSeries_Goal = null;
-            mStackedBarSeries = null;
-            mQtySeries = 0;
-        }
+        resetSeries();
 
         // determine the date range for the X-axis
         double lowestDate = 0.0;
         double highestDate = 0.0;
         if (mDatasetLen > 0) {
             Trends_dataSet item = mOrigDataSet.get(0);
-            double nextDate = (double)((item.mTimestamp - mLowestTimestamp) / 60000L);
+            double nextDate = (double)((item.rTimestamp - mLowestTimestamp) / 60000L);
             lowestDate = nextDate;
             highestDate = nextDate;
             int i = 1;
             while (i < mDatasetLen) {
                 item = mOrigDataSet.get(i);
-                nextDate = (double)((item.mTimestamp - mLowestTimestamp) / 60000L);
+                nextDate = (double)((item.rTimestamp - mLowestTimestamp) / 60000L);
                 if (nextDate < lowestDate) { lowestDate = nextDate; }
                 if (nextDate > highestDate) { highestDate = nextDate; }
                 i++;
@@ -810,7 +825,7 @@ public class TrendsGraphView extends GraphView {
                 case 1:
                     // total sleep (min); percentage to goal
                     if (mGoalTotalSleepMin == 0.0) { y = 0.0; }
-                    else { y = item.mDataArray[1] / mGoalTotalSleepMin * 100.0; }
+                    else { y = item.rDataArray[1] / mGoalTotalSleepMin * 100.0; }
                     break;
                 case 0:
                 case 2:
@@ -818,18 +833,18 @@ public class TrendsGraphView extends GraphView {
                 case 4:
                 case 5:
                     // time-to-Z, awake, REM, light, deep (all min); percentage to total duration
-                    if (item.mDataArray[8] == 0.0) { y = 0.0; }
-                    else { y = item.mDataArray[dataArrayIndex] / item.mDataArray[8] * 100.0; }
+                    if (item.rDataArray[8] == 0.0) { y = 0.0; }
+                    else { y = item.rDataArray[dataArrayIndex] / item.rDataArray[8] * 100.0; }
                     break;
                 case 6:
                     // qty awakenings (count)
                     break;
                 case 7:
                     // ZQ score is generally 0 to 100, but could go higher than 100
-                    y = item.mDataArray[dataArrayIndex];
+                    y = item.rDataArray[dataArrayIndex];
                     break;
             }
-            double x = (double)((item.mTimestamp - mLowestTimestamp)/60000L);
+            double x = (double)((item.rTimestamp - mLowestTimestamp)/60000L);
             theDataPoints[j] = new DataPoint(i, x, y);
             j++;
         }

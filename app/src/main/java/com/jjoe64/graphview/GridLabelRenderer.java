@@ -983,6 +983,13 @@ public class GridLabelRenderer {
     }
 
     /**
+     * calculates a label size
+     */
+    public void computeTextBounds(String text, int start, int end, Rect bounds) {       // CHANGE NOTICE: variable length labels due to scaling
+        mPaintLabel.getTextBounds(text, start, end, bounds);
+    }
+
+    /**
      * do the drawing of the grid
      * and labels
      * @param canvas canvas

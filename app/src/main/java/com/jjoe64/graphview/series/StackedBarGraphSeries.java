@@ -418,7 +418,7 @@ public class StackedBarGraphSeries<E extends DataPointInterface> extends BaseMul
      * resets the cached coordinates of the bars
      */
     @Override
-    protected void resetDataPoints() {
+    public void resetDataPoints() {     // CHANGE NOTICE: garbage collection
         mDataPoints.clear();
     }
 

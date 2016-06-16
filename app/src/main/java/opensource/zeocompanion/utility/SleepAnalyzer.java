@@ -5,7 +5,7 @@ import opensource.zeocompanion.zeo.ZAH_SleepRecord;
 
 public class SleepAnalyzer {
 
-    public void sumEntireNight(CompanionSleepEpisodesRec cseRec, byte[] base_hypnogram) {
+    public static void sumEntireNight(CompanionSleepEpisodesRec cseRec, byte[] base_hypnogram) {
         // step through base 30-secomd hypnogram and add up all the component sleep stages
         boolean doingTimeToZ = true;
         cseRec.rAmend_Time_to_Z_min = 0.0;

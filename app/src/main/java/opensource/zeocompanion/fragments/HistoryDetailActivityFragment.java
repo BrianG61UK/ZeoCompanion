@@ -15,9 +15,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-
 import com.myzeo.android.api.data.ZeoDataContract;
-import com.obscuredPreferences.ObscuredPrefs;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -285,21 +283,12 @@ public class HistoryDetailActivityFragment extends Fragment {
             double goalDeepPct = 15.0;
             double goalREMpct = 20.0;
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-            String wStr = ObscuredPrefs.decryptString(prefs.getString("profile_goal_hours_per_night", "8"));
-            if (!wStr.isEmpty()) {
-                double d = Double.parseDouble(wStr);
-                if (d > 0.0) { goalTotalSleepMin = d * 60.0; }
-            }
-            wStr = ObscuredPrefs.decryptString(prefs.getString("profile_goal_percent_deep", "15"));
-            if (!wStr.isEmpty()) {
-                double d = Double.parseDouble(wStr);
-                if (d > 0.0 && d <= 100.0) { goalDeepPct = d;  }
-            }
-            wStr  = ObscuredPrefs.decryptString(prefs.getString("profile_goal_percent_REM", "20"));
-            if (!wStr.isEmpty()) {
-                double d = Double.parseDouble(wStr);
-                if (d > 0.0 && d <= 100.0) { goalREMpct = d;  }
-            }
+            double d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_hours_per_night", 8.0);
+            if (d > 0.0) { goalTotalSleepMin = d * 60.0; }
+            d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_percent_deep", 15.0);
+            if (d > 0.0 && d <= 100.0) { goalDeepPct = d; }
+            d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_percent_REM", 20.0);
+            if (d > 0.0 && d <= 100.0) { goalREMpct = d; }
 
             // calculate the time offset the ZeoApp applied to the headband's data
             long clockOffset = 0;

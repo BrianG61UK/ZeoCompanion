@@ -10,7 +10,6 @@ import android.graphics.Typeface;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import com.obscuredPreferences.ObscuredPrefs;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -129,21 +128,12 @@ public class ImageExporter {
         double goalDeepPct = 15.0;
         double goalREMpct = 20.0;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String wStr = ObscuredPrefs.decryptString(prefs.getString("profile_goal_hours_per_night", "8"));
-        if (!wStr.isEmpty()) {
-            double d = Double.parseDouble(wStr);
-            if (d > 0.0) { goalTotalSleepMin = d * 60.0; }
-        }
-        wStr = ObscuredPrefs.decryptString(prefs.getString("profile_goal_percent_deep", "15"));
-        if (!wStr.isEmpty()) {
-            double d = Double.parseDouble(wStr);
-            if (d > 0.0 && d <= 100.0) { goalDeepPct = d;  }
-        }
-        wStr  = ObscuredPrefs.decryptString(prefs.getString("profile_goal_percent_REM", "20"));
-        if (!wStr.isEmpty()) {
-            double d = Double.parseDouble(wStr);
-            if (d > 0.0 && d <= 100.0) { goalREMpct = d;  }
-        }
+        double d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_hours_per_night", 8.0);
+        if (d > 0.0) { goalTotalSleepMin = d * 60.0; }
+        d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_percent_deep", 15.0);
+        if (d > 0.0 && d <= 100.0) { goalDeepPct = d; }
+        d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_percent_REM", 20.0);
+        if (d > 0.0 && d <= 100.0) { goalREMpct = d; }
 
         float x = (float)25.0;
         float y = (float)600.0;

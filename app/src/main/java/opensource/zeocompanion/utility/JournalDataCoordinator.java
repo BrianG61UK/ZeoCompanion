@@ -1709,9 +1709,13 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
             }
 
             // calculate the new ZQ score (see https://www.bulletproofexec.com/zeo-hack/)
-            int newZQ = (int)(((iRec.theCSErecord.rAmend_Time_Total_Z_min / 60.0) + (iRec.theCSErecord.rAmend_Time_REM_min / 60.0 / 2.0) +
-                    (iRec.theCSErecord.rAmend_Time_Deep_min / 60.0 * 1.5) - (iRec.theCSErecord.rAmend_Time_Awake_min / 60.0 / 2.0) -
-                    ((double)iRec.theCSErecord.rAmend_CountAwakenings / 15.0)) * 8.5);
+            int newZQ = (int)((
+                    (iRec.theCSErecord.rAmend_Time_Total_Z_min / 60.0) +
+                    (iRec.theCSErecord.rAmend_Time_REM_min / 60.0 / 2.0) +
+                    (iRec.theCSErecord.rAmend_Time_Deep_min / 60.0 * 1.5) -
+                    (iRec.theCSErecord.rAmend_Time_Awake_min / 60.0 / 2.0) -
+                    ((double)iRec.theCSErecord.rAmend_CountAwakenings / 15.0))
+                    * 8.5);
             iRec.theCSErecord.rAmend_ZQ_Score = iRec.theZAH_SleepRecord.rZQ_Score;
             if (newZQ != iRec.theZAH_SleepRecord.rZQ_Score) {
                 iRec.theCSErecord.rAmend_ZQ_Score = newZQ;

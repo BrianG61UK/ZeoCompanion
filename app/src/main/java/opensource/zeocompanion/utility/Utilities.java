@@ -2,7 +2,11 @@ package opensource.zeocompanion.utility;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
+
+import com.obscuredPreferences.ObscuredPrefs;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import opensource.zeocompanion.R;
@@ -119,5 +123,43 @@ public class Utilities {
                 });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    // get an encrypted numeric preference
+    public static double getPrefsEncryptedDouble(SharedPreferences sPrefs, String preferenceString, double defaultValue) {
+        String ctDV = "";
+        String ptAV = null;
+        // encrypt the default value in case it gets stored
+        try {
+            ctDV = ObscuredPrefs.encryptString(String.valueOf(defaultValue));
+        } catch (Exception e) {
+            return defaultValue;
+        }
+
+        // obtain the encrypted preference
+        String ctAV = sPrefs.getString(preferenceString, ctDV);
+        if (ctAV == null) { return defaultValue; }
+        if (ctAV.isEmpty()) { return defaultValue; }
+
+        // decrypt the preference
+        try {
+            ptAV = ObscuredPrefs.decryptString(ctAV);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+        if (ptAV == null) { return defaultValue; }
+        if (ptAV.isEmpty()) { return defaultValue; }
+
+        // convert the string value to a double value
+        try {
+            double d = Double.parseDouble(ptAV);
+            return d;
+        } catch (Exception e) {
+            // decryption failed; likely the device's ID has changed; all we can do is remove the now invalid preference
+            SharedPreferences.Editor editor = sPrefs.edit();
+            editor.remove(preferenceString);
+            editor.commit();
+        }
+        return defaultValue;
     }
 }

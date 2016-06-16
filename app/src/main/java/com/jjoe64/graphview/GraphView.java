@@ -459,7 +459,7 @@ public class GraphView extends View {
         boolean a = super.onTouchEvent(event);
 
         // is it a click?
-        /*if (mTapDetector.onTouchEvent(event)) {
+        if (mTapDetector.onTouchEvent(event)) {
             for (Series s : mSeries) {
                 s.onTap(event.getX(), event.getY());
             }
@@ -468,7 +468,7 @@ public class GraphView extends View {
                     s.onTap(event.getX(), event.getY());
                 }
             }
-        }*/
+        }
 
         return b || a;
     }

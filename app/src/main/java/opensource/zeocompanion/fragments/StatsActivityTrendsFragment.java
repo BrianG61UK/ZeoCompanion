@@ -14,13 +14,11 @@ import android.view.ViewTreeObserver;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.Viewport;
-import com.obscuredPreferences.ObscuredPrefs;
 import java.util.ArrayList;
 import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.utility.JournalDataCoordinator;
+import opensource.zeocompanion.utility.Utilities;
 import opensource.zeocompanion.views.TrendsGraphView;
 
 // fragment within the StatsActivity that displays configurable statistical trends graph
@@ -37,30 +35,30 @@ public class StatsActivityTrendsFragment extends Fragment {
     CheckBox.OnCheckedChangeListener mCheckboxChangedListener = new CheckBox.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            TrendsGraphView theDailyResults = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
+            TrendsGraphView theTrendsGraph = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
 
             // Check which checkbox was checked
             switch(buttonView.getId()) {
                 case R.id.checkBox_deep:
-                    theDailyResults.toggleDeep(isChecked);
+                    theTrendsGraph.toggleDeep(isChecked);
                     break;
                 case R.id.checkBox_rem:
-                    theDailyResults.toggleREM(isChecked);
+                    theTrendsGraph.toggleREM(isChecked);
                     break;
                 case R.id.checkBox_light:
-                    theDailyResults.toggleLight(isChecked);
+                    theTrendsGraph.toggleLight(isChecked);
                     break;
                 case R.id.checkBox_awake:
-                    theDailyResults.toggleAwake(isChecked);
+                    theTrendsGraph.toggleAwake(isChecked);
                     break;
                 case R.id.checkBox_time2z:
-                    theDailyResults.toggleTimeToZ(isChecked);
+                    theTrendsGraph.toggleTimeToZ(isChecked);
                     break;
                 case R.id.checkBox_total:
-                    theDailyResults.toggleTotalSleep(isChecked);
+                    theTrendsGraph.toggleTotalSleep(isChecked);
                     break;
                 case R.id.checkBox_zq:
-                    theDailyResults.toggleZQ(isChecked);
+                    theTrendsGraph.toggleZQ(isChecked);
                     break;
             }
         }
@@ -71,32 +69,21 @@ public class StatsActivityTrendsFragment extends Fragment {
         @Override
         public void onClick(View view) {
             boolean checked = ((RadioButton)view).isChecked();
-            TrendsGraphView theDailyResults = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
+            TrendsGraphView theTrendsGraph = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
 
             // Check which radio button was clicked
             switch(view.getId()) {
                 case R.id.radioButton_lines:
                     if (checked) {
-                        theDailyResults.toggleBarsAndLines(false);
+                        theTrendsGraph.toggleBarsAndLines(false);
                     }
                     break;
                 case R.id.radioButton_barsAndLines:
                     if (checked) {
-                        theDailyResults.toggleBarsAndLines(true);
+                        theTrendsGraph.toggleBarsAndLines(true);
                     }
                     break;
             }
-        }
-    };
-
-    // setup a listener for scrolling activities in either hypnogram
-    private Viewport.ScrollScaleListener mScrollScaleListener = new Viewport.ScrollScaleListener() {
-        // scrolling is occurring
-        public void onScrolling(GraphView graphView, RectF newViewport) {
-            // nothing needed
-        }
-        public void onScaling(GraphView graphView, RectF newViewport) {
-            // ??? change bar width due to scaling?
         }
     };
 
@@ -133,15 +120,15 @@ public class StatsActivityTrendsFragment extends Fragment {
         rb = (RadioButton)mRootView.findViewById(R.id.radioButton_barsAndLines);
         rb.setOnClickListener(mRadioButtonOnClickListener);
 
-        final TrendsGraphView theDailyResults = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
-        theDailyResults.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        final TrendsGraphView theTrendsGraph = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
+        theTrendsGraph.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 // Ensure you call it only once
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                    theDailyResults.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    theTrendsGraph.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
-                    theDailyResults.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    theTrendsGraph.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
                 mLayoutDone = true;
                 createGraphs();
@@ -180,21 +167,12 @@ public class StatsActivityTrendsFragment extends Fragment {
         double goalDeepPct = 15.0;
         double goalREMpct = 20.0;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String wStr = ObscuredPrefs.decryptString(prefs.getString("profile_goal_hours_per_night", "8"));
-        if (!wStr.isEmpty()) {
-            double d = Double.parseDouble(wStr);
-            if (d > 0.0) { goalTotalSleepMin = d * 60.0; }
-        }
-        wStr = ObscuredPrefs.decryptString(prefs.getString("profile_goal_percent_deep", "15"));
-        if (!wStr.isEmpty()) {
-            double d = Double.parseDouble(wStr);
-            if (d > 0.0 && d <= 100.0) { goalDeepPct = d;  }
-        }
-        wStr  = ObscuredPrefs.decryptString(prefs.getString("profile_goal_percent_REM", "20"));
-        if (!wStr.isEmpty()) {
-            double d = Double.parseDouble(wStr);
-            if (d > 0.0 && d <= 100.0) { goalREMpct = d;  }
-        }
+        double d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_hours_per_night", 8.0);
+        if (d > 0.0) { goalTotalSleepMin = d * 60.0; }
+        d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_percent_deep", 15.0);
+        if (d > 0.0 && d <= 100.0) { goalDeepPct = d; }
+        d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_percent_REM", 20.0);
+        if (d > 0.0 && d <= 100.0) { goalREMpct = d; }
 
         ArrayList<JournalDataCoordinator.IntegratedHistoryRec> theIrecs = new ArrayList<JournalDataCoordinator.IntegratedHistoryRec>();
         ArrayList<TrendsGraphView.Trends_dataSet> theData = new ArrayList<TrendsGraphView.Trends_dataSet>();
@@ -213,35 +191,35 @@ public class StatsActivityTrendsFragment extends Fragment {
         Point screenSize = new Point();
         display.getSize(screenSize);
 
-        TrendsGraphView theDailyResults = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
-        theDailyResults.prepareForStats(screenSize);
+        TrendsGraphView theTrendsGraph = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
+        theTrendsGraph.prepareForStats(screenSize);
         whichIsChecked();
-        theDailyResults.setDataset(theData, goalTotalSleepMin, goalREMpct, goalDeepPct);
+        theTrendsGraph.setDataset(theData, goalTotalSleepMin, goalREMpct, goalDeepPct);
 
-        theDailyResults.setScrollScaleListener(1L, mScrollScaleListener);
+        //theTrendsGraph.setScrollScaleListener(1L, mScrollScaleListener);
     }
 
     // determine which check boxes and radio buttons are already checked
     private void whichIsChecked() {
-        TrendsGraphView theDailyResults = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
+        TrendsGraphView theTrendsGraph = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
         CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep);
-        theDailyResults.mShowDeep = cb.isChecked();
+        theTrendsGraph.mShowDeep = cb.isChecked();
         cb = (CheckBox)mRootView.findViewById(R.id.checkBox_light);
-        theDailyResults.mShowLight = cb.isChecked();
+        theTrendsGraph.mShowLight = cb.isChecked();
         cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem);
-        theDailyResults.mShowREM = cb.isChecked();
+        theTrendsGraph.mShowREM = cb.isChecked();
         cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake);
-        theDailyResults.mShowAwake = cb.isChecked();
+        theTrendsGraph.mShowAwake = cb.isChecked();
         cb = (CheckBox)mRootView.findViewById(R.id.checkBox_time2z);
-        theDailyResults.mShowTimeToZ = cb.isChecked();
+        theTrendsGraph.mShowTimeToZ = cb.isChecked();
         cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total);
-        theDailyResults.mShowTotalSleep = cb.isChecked();
+        theTrendsGraph.mShowTotalSleep = cb.isChecked();
         cb = (CheckBox)mRootView.findViewById(R.id.checkBox_zq);
-        theDailyResults.mShowZQscore = cb.isChecked();
+        theTrendsGraph.mShowZQscore = cb.isChecked();
 
         RadioButton rb = (RadioButton)mRootView.findViewById(R.id.radioButton_barsAndLines);
-        if (rb.isChecked()) { theDailyResults.mShowBarsAndLines = true; };
+        if (rb.isChecked()) { theTrendsGraph.mShowBarsAndLines = true; };
         rb = (RadioButton)mRootView.findViewById(R.id.radioButton_lines);
-        if (rb.isChecked()) { theDailyResults.mShowBarsAndLines = false; };
+        if (rb.isChecked()) { theTrendsGraph.mShowBarsAndLines = false; };
     }
 }

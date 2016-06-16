@@ -24,7 +24,6 @@ public class ObscuredPrefs {
     }
 
     public static String encryptString( String value ) {
-
         try {
             final byte[] bytes = value!=null ? value.getBytes(UTF8) : new byte[0];
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
@@ -35,7 +34,6 @@ public class ObscuredPrefs {
         } catch( Exception e ) {
             throw new RuntimeException(e);
         }
-
     }
 
     public static String decryptString(String value){

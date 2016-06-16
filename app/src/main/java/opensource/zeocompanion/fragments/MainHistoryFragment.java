@@ -27,7 +27,6 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.obscuredPreferences.ObscuredPrefs;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -275,24 +274,13 @@ public class MainHistoryFragment extends MainFragmentWrapper {
     private void loadUserPrefs() {
         // get user's preferences and sleep goals (if any)
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        mShowTextDetails = prefs.getBoolean("main_history_showTextView",true);
-        String str = ObscuredPrefs.decryptString(prefs.getString("profile_goal_hours_per_night", "8"));
-        if(!str.isEmpty()) {
-            double d = Double.parseDouble(str);
-            if (d > 0.0) { mGoalTotalSleepMin = d * 60.0; }
-        }
-
-        str=ObscuredPrefs.decryptString(prefs.getString("profile_goal_percent_deep","15"));
-        if(!str.isEmpty()) {
-            double d = Double.parseDouble(str);
-            if (d > 0.0 && d <= 100.0) { mGoalDeepPct = d; }
-        }
-
-        str=ObscuredPrefs.decryptString(prefs.getString("profile_goal_percent_REM","20"));
-        if(!str.isEmpty()) {
-            double d = Double.parseDouble(str);
-            if (d > 0.0 && d <= 100.0) { mGoalREMpct = d; }
-        }
+        mShowTextDetails = prefs.getBoolean("main_history_showTextView", true);
+        double d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_hours_per_night", 8.0);
+        if (d > 0.0) { mGoalTotalSleepMin = d * 60.0; }
+        d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_percent_deep", 15.0);
+        if (d > 0.0 && d <= 100.0) { mGoalDeepPct = d; }
+        d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_percent_REM", 20.0);
+        if (d > 0.0 && d <= 100.0) { mGoalREMpct = d; }
     }
 
     // ViewHolder class to hold all the child views within a row to speed up processing

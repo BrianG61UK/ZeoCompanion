@@ -345,7 +345,7 @@ public abstract class BaseSeries<E extends DataPointInterface> implements Series
     /**
      * clears the cached data point coordinates
      */
-    protected void resetDataPoints() {
+    public void resetDataPoints() {     // CHANGE NOTICE: garbage collection
         mDataPoints.clear();
     }
 

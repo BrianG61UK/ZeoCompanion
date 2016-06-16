@@ -521,7 +521,7 @@ public abstract class BaseMultiSeries<E extends DataPointInterface> implements M
     /**
      * clears the cached data point coordinates
      */
-    protected void resetDataPoints() {
+    public void resetDataPoints() {     // CHANGE NOTICE: garbage collection
         mDataPoints.clear();
     }
 

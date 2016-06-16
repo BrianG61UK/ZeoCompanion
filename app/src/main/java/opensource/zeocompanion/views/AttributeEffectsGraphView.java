@@ -14,11 +14,9 @@ import android.view.View;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
-import com.jjoe64.graphview.LabelFormatter;
 import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
-import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.series.MultiSeries;
@@ -26,9 +24,7 @@ import com.jjoe64.graphview.series.PointsGraphSeries;
 import com.jjoe64.graphview.series.Series;
 import com.jjoe64.graphview.series.StackedBarGraphSeries;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.database.CompanionAttributeValuesRec;
@@ -38,8 +34,8 @@ public class AttributeEffectsGraphView extends GraphView {
     // member variables
     private Context mContext = null;
     public  ArrayList<String> mAttributes = null;
-    private  ArrayList<AttrEffects_dataSet> mOriginalDataSet = null;
-    private  ArrayList<AttrEffects_dataSet> mShowAttrDataSet = null;
+    private  ArrayList<AttrValsSleepDatasetRec> mOriginalDataSet = null;
+    private  ArrayList<AttrValsSleepDatasetRec> mShowAttrDataSet = null;
     private ArrayList<CompanionAttributeValuesRec> mXaxisValues = null;
     public int mDatasetLen = 0;
     public int mShownDatasetLen = 0;
@@ -78,39 +74,11 @@ public class AttributeEffectsGraphView extends GraphView {
 
     // member constants and other static content
     private static final String _CTAG = "AEG";
-    private static final int MAXFIELDS = 9;
-    //private SimpleDateFormat mDF1 = new SimpleDateFormat("MM/dd/yy");
-
-    // data record
-    public static class AttrEffects_dataSet {
-        public String mAttributeName;
-        public String mValueString;
-        public float mLikertValue;
-        public long mTimestamp = 0;
-        public double mDataArray[] = new double[MAXFIELDS];
-
-        // constructor
-        public AttrEffects_dataSet(String attribute, float likert, String valueString, long timestamp, double timeToZMin, double totalSleepMin, double remMin, double awakeMin, double lightMin, double deepMin, int awakeningsQty, int zq_score) {
-            mAttributeName = attribute;
-            mValueString = valueString;
-            mLikertValue = likert;
-            mTimestamp = timestamp;
-            mDataArray[0] = timeToZMin;
-            mDataArray[1] = totalSleepMin;
-            mDataArray[2] = awakeMin;
-            mDataArray[3] = remMin;
-            mDataArray[4] = lightMin;
-            mDataArray[5] = deepMin;
-            mDataArray[6] = awakeningsQty;
-            mDataArray[7] = zq_score;
-            mDataArray[8] = timeToZMin + totalSleepMin +  awakeMin;
-        }
-    }
 
     // custom legend renderer
-    public class TGV_LegendRenderer extends LegendRenderer {
+    public class AEV_LegendRenderer extends LegendRenderer {
         // constructor
-        public TGV_LegendRenderer(GraphView graphView) {
+        public AEV_LegendRenderer(GraphView graphView) {
             super(graphView);
         }
 
@@ -262,7 +230,6 @@ public class AttributeEffectsGraphView extends GraphView {
         render.setVerticalLabelsColor(Color.WHITE);
         render.setLabelsSpace(5);
         render.setGridStyle(GridLabelRenderer.GridStyle.NONE);
-        render.setLabelFormatter(new DateAsXAxisLabelFormatter(mContext));
 
         Viewport viewport = this.getViewport();
         viewport.setBackgroundColor(Color.LTGRAY);
@@ -275,7 +242,7 @@ public class AttributeEffectsGraphView extends GraphView {
         render.setLabelFormatter(new TGV_DefaultLabelFormatter());
 
         if (mScreenSize.x >= 1024) {
-            setLegendRenderer(new TGV_LegendRenderer(this));
+            setLegendRenderer(new AEV_LegendRenderer(this));
             LegendRenderer lr = getLegendRenderer();
             lr.setVisible(true);
             lr.setBackgroundColor(Color.LTGRAY);
@@ -306,7 +273,6 @@ public class AttributeEffectsGraphView extends GraphView {
         render.setVerticalLabelsColor(Color.WHITE);
         render.setLabelsSpace(5);
         render.setGridStyle(GridLabelRenderer.GridStyle.NONE);
-        render.setLabelFormatter(new DateAsXAxisLabelFormatter(mContext));
 
         Viewport viewport = this.getViewport();
         viewport.setBackgroundColor(Color.LTGRAY);
@@ -322,7 +288,7 @@ public class AttributeEffectsGraphView extends GraphView {
         render.setLabelFormatter(new TGV_DefaultLabelFormatter());
 
         if (mScreenSize.x >= 1024) {
-            setLegendRenderer(new TGV_LegendRenderer(this));
+            setLegendRenderer(new AEV_LegendRenderer(this));
             LegendRenderer lr = getLegendRenderer();
             lr.setVisible(true);
             lr.setBackgroundColor(Color.LTGRAY);
@@ -354,9 +320,18 @@ public class AttributeEffectsGraphView extends GraphView {
         return;
     }
 
+    // release all stored memory datasets (usually because the view is being destroyed)
+    public void releaseDataset() {
+        mOriginalDataSet = null;
+        if (mShowAttrDataSet != null) { mShowAttrDataSet.clear(); }
+        if (mXaxisValues != null) { mXaxisValues.clear(); }
+        if (mAttributes != null) { mAttributes.clear(); }
+        // ??? release any series
+    }
+
     // set the data for the trends graph; note that the passed dataset is in descending date order;
     // however GraphView mandates that X-values be in ascending value order; this will be handled in the buildSeries methods
-    public boolean setDataset(ArrayList<AttrEffects_dataSet> theData, double goalTotalSleep, double goalREMpct, double goalDeepPct) {
+    public boolean setDataset(ArrayList<AttrValsSleepDatasetRec> theData, double goalTotalSleep, double goalREMpct, double goalDeepPct) {
         mGoalTotalSleepMin = goalTotalSleep;
         mGoalREMpct = goalREMpct;
         mGoalDeepPct = goalDeepPct;
@@ -368,12 +343,12 @@ public class AttributeEffectsGraphView extends GraphView {
 
         mAttributes = new ArrayList<String>();
         for (int i = 0; i < mDatasetLen; i++ ) {
-            AttrEffects_dataSet ads = mOriginalDataSet.get(i);
+            AttrValsSleepDatasetRec ads = mOriginalDataSet.get(i);
             boolean found = false;
             for (String existingAttr: mAttributes) {
-                if (ads.mAttributeName.equals(existingAttr)) { found = true; }
+                if (ads.rAttributeShortName.equals(existingAttr)) { found = true; }
             }
-            if (!found) { mAttributes.add(ads.mAttributeName); }
+            if (!found) { mAttributes.add(ads.rAttributeShortName); }
         }
         Log.d(_CTAG+".setDataset","Total Recs Cnt="+mDatasetLen+", Found Attributes Cnt="+mAttributes.size());
 
@@ -417,14 +392,14 @@ public class AttributeEffectsGraphView extends GraphView {
         if (mShowAttribute == null) { mShownDatasetLen = 0; return; }
         if (mShowAttribute.isEmpty()) { mShownDatasetLen = 0; return; }
         if (mShowAttrDataSet != null) { mShowAttrDataSet.clear(); }
-        else { mShowAttrDataSet = new ArrayList<AttrEffects_dataSet>(); }
+        else { mShowAttrDataSet = new ArrayList<AttrValsSleepDatasetRec>(); }
         double lowestFoundLikert = 999999999999.0;
         double highestFoundLikert = 0.0;
         for (int i = 0; i < mDatasetLen; i++) {
-            AttrEffects_dataSet item = mOriginalDataSet.get(i);
-            if (item.mAttributeName.equals(mShowAttribute)) {
-                if (item.mLikertValue > highestFoundLikert) { highestFoundLikert = item.mLikertValue; }
-                if (item.mLikertValue < lowestFoundLikert) { lowestFoundLikert = item.mLikertValue; }
+            AttrValsSleepDatasetRec item = mOriginalDataSet.get(i);
+            if (item.rAttributeShortName.equals(mShowAttribute)) {
+                if (item.rLikertValue > highestFoundLikert) { highestFoundLikert = item.rLikertValue; }
+                if (item.rLikertValue < lowestFoundLikert) { lowestFoundLikert = item.rLikertValue; }
                 mShowAttrDataSet.add(item);
             }
         }
@@ -788,13 +763,13 @@ public class AttributeEffectsGraphView extends GraphView {
         DataPoint[] theDataPoints = new DataPoint[mShownDatasetLen];
         int j = 0;
         for (int i = mShownDatasetLen - 1; i >= 0; i--) {
-            AttrEffects_dataSet item = mShowAttrDataSet.get(i);
+            AttrValsSleepDatasetRec item = mShowAttrDataSet.get(i);
             double y = 0.0;
             switch (dataArrayIndex) {
                 case 1:
                     // total sleep (min); percentage to goal
                     if (mGoalTotalSleepMin == 0.0) { y = 0.0; }
-                    else { y = item.mDataArray[1] / mGoalTotalSleepMin * 100.0; }
+                    else { y = item.rDataArray[1] / mGoalTotalSleepMin * 100.0; }
                     break;
                 case 0:
                 case 2:
@@ -802,18 +777,18 @@ public class AttributeEffectsGraphView extends GraphView {
                 case 4:
                 case 5:
                     // time-to-Z, awake, REM, light, deep (all min); percentage to total duration
-                    if (item.mDataArray[8] == 0.0) { y = 0.0; }
-                    else { y = item.mDataArray[dataArrayIndex] / item.mDataArray[8] * 100.0; }
+                    if (item.rDataArray[8] == 0.0) { y = 0.0; }
+                    else { y = item.rDataArray[dataArrayIndex] / item.rDataArray[8] * 100.0; }
                     break;
                 case 6:
                     // qty awakenings (count)
                     break;
                 case 7:
                     // ZQ score is generally 0 to 100, but could go higher than 100
-                    y = item.mDataArray[dataArrayIndex];
+                    y = item.rDataArray[dataArrayIndex];
                     break;
             }
-            theDataPoints[j] = new DataPoint(i, (double)item.mLikertValue, y);
+            theDataPoints[j] = new DataPoint(i, (double)item.rLikertValue, y);
             j++;
         }
         return theDataPoints;
