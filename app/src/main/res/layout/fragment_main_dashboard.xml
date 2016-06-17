@@ -1,312 +1,339 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
-              tools:context="opensource.zeocompanion.fragments.MainDashboardFragment">
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/textView_trendtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Last 7 Session Trend; tap for expanded graphing"
-            android:textColor="#FFFF00"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"/>
-
-        <opensource.zeocompanion.views.TrendsGraphView
-            android:id="@+id/graph_trends"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_below="@id/textView_trendtitle"
-            android:layout_toLeftOf="@+id/radioGroup_trends"/>
+            android:layout_height="wrap_content">
 
-        <RadioGroup
-            android:id="@+id/radioGroup_trends"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="left"
-            android:layout_marginLeft="5dp"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/textView_trendtitle" >
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:tools="http://schemas.android.com/tools"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  xmlns:app="http://schemas.android.com/apk/res-auto"
+                  android:orientation="vertical"
+                  tools:context="opensource.zeocompanion.fragments.MainDashboardFragment">
 
-            <RadioButton
-                android:id="@+id/radioButton_trends_deep"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/textView_trendtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="Deep% Dur" />
+                android:text="Last 7 Session Trend; tap for expanded graphing"
+                android:textColor="#FFFF00"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"/>
 
-            <RadioButton
-                android:id="@+id/radioButton_trends_light"
+            <opensource.zeocompanion.views.TrendsGraphView
+                android:id="@+id/graph_trends"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_below="@id/textView_trendtitle"
+                android:layout_toLeftOf="@+id/radioGroup_trends"/>
+
+            <RadioGroup
+                android:id="@+id/radioGroup_trends"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="Light% Dur" />
+                android:orientation="vertical"
+                android:gravity="left"
+                android:layout_marginLeft="5dp"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/textView_trendtitle" >
 
-            <RadioButton
-                android:id="@+id/radioButton_trends_rem"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="REM% Dur" />
+                <RadioButton
+                    android:id="@+id/radioButton_trends_deep"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="Deep% Dur" />
 
-            <RadioButton
-                android:id="@+id/radioButton_trends_awake"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="Awake% Dur"  />
+                <RadioButton
+                    android:id="@+id/radioButton_trends_light"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="Light% Dur" />
 
-            <RadioButton
-                android:id="@+id/radioButton_trends_time2z"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="Time2Z% Dur"  />
+                <RadioButton
+                    android:id="@+id/radioButton_trends_rem"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="REM% Dur" />
 
-            <RadioButton
-                android:id="@+id/radioButton_trends_total"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="Total% Goal" />
+                <RadioButton
+                    android:id="@+id/radioButton_trends_awake"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="Awake% Dur"  />
 
-            <RadioButton
-                android:id="@+id/radioButton_trends_zq"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:text="ZQ" />
+                <RadioButton
+                    android:id="@+id/radioButton_trends_time2z"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="Time2Z% Dur"  />
 
-        </RadioGroup>
+                <RadioButton
+                    android:id="@+id/radioButton_trends_total"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="Total% Goal" />
 
-    </RelativeLayout>
+                <RadioButton
+                    android:id="@+id/radioButton_trends_zq"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="ZQ" />
 
-    <RelativeLayout
-        android:id="@+id/relativeLayout_attrsHeatmapTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp">
+            </RadioGroup>
 
-        <TextView
-            android:id="@+id/textView_attrsHeatmapTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Attributes Usefulness HeatMap; tap particular point to see Attribute and Value"
-            android:textColor="#FFFF00"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"/>
+        </RelativeLayout>
 
-        <LinearLayout
-            android:id="@+id/checkboxes_attrsHeatmap"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="left"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/textView_attrsHeatmapTitle"
-            android:layout_marginLeft="5dp" >
-
-            <android.support.v7.widget.AppCompatCheckBox
-                android:id="@+id/checkBox_total"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:layout_marginBottom="7dp"
-                android:checked="true"
-                android:textSize="16sp"
-                android:textColor="#FFFFFF"
-                android:text="Total"
-                app:buttonTint="#FFFFFF" />
-
-            <android.support.v7.widget.AppCompatCheckBox
-                android:id="@+id/checkBox_deep"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:checked="true"
-                android:textSize="16sp"
-                android:textColor="#FFFFFF"
-                android:text="Deep"
-                app:buttonTint="#FFFFFF" />
-
-            <android.support.v7.widget.AppCompatCheckBox
-                android:id="@+id/checkBox_rem"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:checked="true"
-                android:textSize="16sp"
-                android:textColor="#FFFFFF"
-                android:text="REM"
-                app:buttonTint="#FFFFFF" />
-
-            <android.support.v7.widget.AppCompatCheckBox
-                android:id="@+id/checkBox_awake"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:checked="true"
-                android:textSize="16sp"
-                android:textColor="#FFFFFF"
-                android:text="Awake"
-                app:buttonTint="#FFFFFF" />
-
-            <android.support.v7.widget.AppCompatCheckBox
-                android:id="@+id/checkBox_awakenings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:textSize="16sp"
-                android:textColor="#FFFFFF"
-                android:text="Awakenings"
-                app:buttonTint="#FFFFFF" />
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/textView_seekbarTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Good ZQ Cutoff: xxx"
-            android:layout_below="@+id/textView_attrsHeatmapTitle"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"/>
-
-        <SeekBar
-            android:id="@+id/seekbar_attrsHeatmap"
+        <RelativeLayout
+            android:id="@+id/relativeLayout_attrsHeatmapTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textView_attrsHeatmapTitle"
-            android:layout_toRightOf="@+id/textView_seekbarTitle"
-            android:layout_toLeftOf="@+id/checkboxes_attrsHeatmap"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:layout_centerHorizontal="true" />
+            android:layout_marginTop="5dp">
 
-        <opensource.zeocompanion.views.AttributesHeatmapGraphView
-            android:id="@+id/graph_attrsHeatmap"
+            <TextView
+                android:id="@+id/textView_attrsHeatmapTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Attributes Usefulness HeatMap; scalable; tap particular point to see Attribute and Value"
+                android:textColor="#FFFF00"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"/>
+
+            <LinearLayout
+                android:id="@+id/checkboxes_attrsHeatmap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="left"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/textView_attrsHeatmapTitle"
+                android:layout_marginLeft="5dp" >
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkBox_total"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="40dp"
+                    android:layout_marginBottom="7dp"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:text="Total"
+                    app:buttonTint="#FFFFFF" />
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkBox_deep"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:text="Deep"
+                    app:buttonTint="#FFFFFF" />
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkBox_rem"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:text="REM"
+                    app:buttonTint="#FFFFFF" />
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkBox_awake"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:text="Awake"
+                    app:buttonTint="#FFFFFF" />
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkBox_awakenings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:text="Awakenings"
+                    app:buttonTint="#FFFFFF" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView_seekbarTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Good ZQ Cutoff: xxx"
+                android:layout_below="@+id/textView_attrsHeatmapTitle"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"/>
+
+            <SeekBar
+                android:id="@+id/seekbar_attrsHeatmap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView_attrsHeatmapTitle"
+                android:layout_toRightOf="@+id/textView_seekbarTitle"
+                android:layout_toLeftOf="@+id/checkboxes_attrsHeatmap"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_centerHorizontal="true" />
+
+            <opensource.zeocompanion.views.AttributesHeatmapGraphView
+                android:id="@+id/graph_attrsHeatmap"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_below="@id/seekbar_attrsHeatmap"
+                android:layout_toLeftOf="@+id/checkboxes_attrsHeatmap"/>
+
+            <TextView
+                android:id="@+id/textView_seekbar2Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start Date Cutoff: xx/xx/xxxx"
+                android:layout_below="@+id/graph_attrsHeatmap"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"/>
+
+            <SeekBar
+                android:id="@+id/seekbar2_attrsHeatmap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/graph_attrsHeatmap"
+                android:layout_toRightOf="@+id/textView_seekbar2Title"
+                android:layout_toLeftOf="@+id/checkboxes_attrsHeatmap"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_centerHorizontal="true" />
+
+
+        </RelativeLayout>
+
+        <!--<RelativeLayout
+            android:id="@+id/relativeLayout_attrEffectsTitle"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:layout_below="@id/seekbar_attrsHeatmap"
-            android:layout_toLeftOf="@+id/checkboxes_attrsHeatmap"/>
-
-
-    </RelativeLayout>
-
-    <!--<RelativeLayout
-        android:id="@+id/relativeLayout_attrEffectsTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp">
-
-        <TextView
-            android:id="@+id/textView_attrEffectsTitle"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Last 7 Session Attribute Effects; tap for expanded graphing"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"/>
+            android:layout_marginTop="5dp">
 
-        <Spinner
-            android:id="@+id/spinner_attrEffects"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/textView_attrEffectsTitle"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:layout_centerHorizontal="true" />
-
-        <opensource.zeocompanion.views.AttributeEffectsGraphView
-            android:id="@+id/graph_attrEffects"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_below="@id/spinner_attrEffects"
-            android:layout_toLeftOf="@+id/radioGroup_attrEffects"/>
-
-        <RadioGroup
-            android:id="@+id/radioGroup_attrEffects"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="left"
-            android:layout_marginLeft="5dp"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/spinner_attrEffects" >
-
-            <RadioButton
-                android:id="@+id/radioButton_attrEffects_deep"
+            <TextView
+                android:id="@+id/textView_attrEffectsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="Deep% Dur" />
+                android:text="Last 7 Session Attribute Effects; tap for expanded graphing"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"/>
 
-            <RadioButton
-                android:id="@+id/radioButton_attrEffects_light"
+            <Spinner
+                android:id="@+id/spinner_attrEffects"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="Light% Dur" />
+                android:layout_below="@+id/textView_attrEffectsTitle"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_centerHorizontal="true" />
 
-            <RadioButton
-                android:id="@+id/radioButton_attrEffects_rem"
+            <opensource.zeocompanion.views.AttributeEffectsGraphView
+                android:id="@+id/graph_attrEffects"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_below="@id/spinner_attrEffects"
+                android:layout_toLeftOf="@+id/radioGroup_attrEffects"/>
+
+            <RadioGroup
+                android:id="@+id/radioGroup_attrEffects"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="REM% Dur" />
+                android:orientation="vertical"
+                android:gravity="left"
+                android:layout_marginLeft="5dp"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/spinner_attrEffects" >
 
-            <RadioButton
-                android:id="@+id/radioButton_attrEffects_awake"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="Awake% Dur"  />
+                <RadioButton
+                    android:id="@+id/radioButton_attrEffects_deep"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="Deep% Dur" />
 
-            <RadioButton
-                android:id="@+id/radioButton_attrEffects_time2z"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="Time2Z% Dur"  />
+                <RadioButton
+                    android:id="@+id/radioButton_attrEffects_light"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="Light% Dur" />
 
-            <RadioButton
-                android:id="@+id/radioButton_attrEffects_total"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
-                android:textSize="16sp"
-                android:text="Total% Goal" />
+                <RadioButton
+                    android:id="@+id/radioButton_attrEffects_rem"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="REM% Dur" />
 
-            <RadioButton
-                android:id="@+id/radioButton_attrEffects_zq"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:text="ZQ" />
+                <RadioButton
+                    android:id="@+id/radioButton_attrEffects_awake"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="Awake% Dur"  />
 
-        </RadioGroup>
+                <RadioButton
+                    android:id="@+id/radioButton_attrEffects_time2z"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="Time2Z% Dur"  />
 
-    </RelativeLayout>-->
+                <RadioButton
+                    android:id="@+id/radioButton_attrEffects_total"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:textSize="16sp"
+                    android:text="Total% Goal" />
 
-</LinearLayout>
+                <RadioButton
+                    android:id="@+id/radioButton_attrEffects_zq"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="ZQ" />
+
+            </RadioGroup>
+
+        </RelativeLayout>-->
+
+    </LinearLayout>
+
+</ScrollView>

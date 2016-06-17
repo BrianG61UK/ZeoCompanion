@@ -16,9 +16,14 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+
 import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.activities.StatsActivity;
@@ -42,6 +47,7 @@ public class MainDashboardFragment extends MainFragmentWrapper {
 
     // member constants and other static content
     private static final String _CTAG = "M1F";
+    private static final SimpleDateFormat mSDF = new SimpleDateFormat("MM/dd/yyyy");
 
     // common listener for presses on the trends radio buttons
     View.OnClickListener mTrendsRadioButtonOnClickListener = new View.OnClickListener() {
@@ -122,6 +128,42 @@ public class MainDashboardFragment extends MainFragmentWrapper {
                     theAttrsHeatmapGraph.toggleTotalSleep(isChecked);
                     break;
             }
+        }
+    };
+
+    // listeners for the seekbars for the Attributes Heatmap
+    SeekBar.OnSeekBarChangeListener mAttrsHeatmapSeekBar1ChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {}
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) { }
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            AttributesHeatmapGraphView theAttrsHeatmapGraph = (AttributesHeatmapGraphView)mRootView.findViewById(R.id.graph_attrsHeatmap);
+            double pct = (double)progress / 100.0;
+            theAttrsHeatmapGraph.setThresholdZQpct(pct);
+            TextView tv = (TextView)mRootView.findViewById(R.id.textView_seekbarTitle);
+            int zq = (int)((theAttrsHeatmapGraph.mHighestZQ - theAttrsHeatmapGraph.mLowestZQ) * pct + theAttrsHeatmapGraph.mLowestZQ);
+            tv.setText("Good ZQ Cutoff: "+String.valueOf(zq));
+        }
+    };
+    SeekBar.OnSeekBarChangeListener mAttrsHeatmapSeekBar2ChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {}
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) { }
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            AttributesHeatmapGraphView theAttrsHeatmapGraph = (AttributesHeatmapGraphView)mRootView.findViewById(R.id.graph_attrsHeatmap);
+            double pct = (double)progress / 100.0;
+            theAttrsHeatmapGraph.setThresholdDatePct(pct);
+            TextView tv = (TextView)mRootView.findViewById(R.id.textView_seekbar2Title);
+            long cutoffTimestamp = (long)((double)(theAttrsHeatmapGraph.mHighestTimestamp - theAttrsHeatmapGraph.mLowestTimestamp) * pct) + theAttrsHeatmapGraph.mLowestTimestamp - 43200000;   // less 12 hours
+            tv.setText("Start Date Cutoff: "+mSDF.format(new Date(cutoffTimestamp)));
         }
     };
 
@@ -274,6 +316,15 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awakenings);
         cb.setChecked(true);
         cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
+
+        SeekBar sb1 = (SeekBar)mRootView.findViewById(R.id.seekbar_attrsHeatmap);
+        sb1.setMax(100);
+        sb1.setProgress(66);
+        sb1.setOnSeekBarChangeListener(mAttrsHeatmapSeekBar1ChangeListener);
+        SeekBar sb2 = (SeekBar)mRootView.findViewById(R.id.seekbar2_attrsHeatmap);
+        sb2.setMax(100);
+        sb2.setProgress(0);
+        sb2.setOnSeekBarChangeListener(mAttrsHeatmapSeekBar2ChangeListener);
 
         /*rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_deep);
         rb.setChecked(true);
@@ -492,6 +543,13 @@ public class MainDashboardFragment extends MainFragmentWrapper {
             if (!hasAnyData) {
                 TextView tv = (TextView)mRootView.findViewById(R.id.textView_attrsHeatmapTitle);
                 tv.setText("Attributes Usefulness HeatMap; there is no data to display");
+            } else {
+                TextView tv1 = (TextView)mRootView.findViewById(R.id.textView_seekbarTitle);
+                int zq = (int)((theAttrsHeatmapGraph.mHighestZQ - theAttrsHeatmapGraph.mLowestZQ) * theAttrsHeatmapGraph.mGoodThresholdPct + theAttrsHeatmapGraph.mLowestZQ);
+                tv1.setText("Good ZQ Cutoff: "+String.valueOf(zq));
+                TextView tv2 = (TextView)mRootView.findViewById(R.id.textView_seekbar2Title);
+                long cutoffTimestamp = (long)((double)(theAttrsHeatmapGraph.mHighestTimestamp - theAttrsHeatmapGraph.mLowestTimestamp) * theAttrsHeatmapGraph.mTimestampThresholdPct) + theAttrsHeatmapGraph.mLowestTimestamp - 43200000;   // less 12 hours
+                tv2.setText("Start Date Cutoff: "+mSDF.format(new Date(cutoffTimestamp)));
             }
 
             // prepare the attribute-effects graph
@@ -573,6 +631,11 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         theAttrsHeatmapGraph.mIncludeAwake = cb.isChecked();
         cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awakenings);
         theAttrsHeatmapGraph.mIncludeAwakenings = cb.isChecked();
+
+        SeekBar sb1 = (SeekBar)mRootView.findViewById(R.id.seekbar_attrsHeatmap);
+        theAttrsHeatmapGraph.mGoodThresholdPct = (double)sb1.getProgress() / 100.0;
+        SeekBar sb2 = (SeekBar)mRootView.findViewById(R.id.seekbar2_attrsHeatmap);
+        theAttrsHeatmapGraph.mTimestampThresholdPct = (double)sb2.getProgress() / 100.0;
     }
 
     // determine which radio button is already checked
