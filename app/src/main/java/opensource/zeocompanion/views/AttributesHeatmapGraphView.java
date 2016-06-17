@@ -112,7 +112,8 @@ public class AttributesHeatmapGraphView extends GraphView {
                     if (isValueX) {
                         // show the attribute name; index in this case will be sequential with the mAttrRecs
                         int inx = (int)value - 1;
-                        if (inx >= mAttrRecs.size()) return "";
+                        if (mAttrRecs == null) { return ""; }
+                        if (inx >= mAttrRecs.size()) { return ""; }
                         AttrRec atRec = mAttrRecs.get(inx);
                         int end = mNumLetters;
                         if (atRec.rAttributeDisplayName != null) {
@@ -396,8 +397,10 @@ public class AttributesHeatmapGraphView extends GraphView {
         // set the viewport
         viewport.setMinX(0.0);
         viewport.setAxisMinX(0.0);
-        viewport.setMaxX(dinx);
         viewport.setAxisMaxX(dinx);
+        if ((float)getGraphContentWidth() / ZeoCompanionApplication.mScreenDensity >= 850.0f) { viewport.setMaxX(dinx); }
+        else if (dinx <= 10){ viewport.setMaxX(dinx); }
+        else { viewport.setMaxX(10.0); }
         render.setNumHorizontalLabels((int)dinx);
         render.setHorizontalLabelsStartX(1.0);
         render.setHorizontalLabelsEndX(dinx);
