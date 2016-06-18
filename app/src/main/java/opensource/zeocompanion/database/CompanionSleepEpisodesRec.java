@@ -207,7 +207,7 @@ public class CompanionSleepEpisodesRec {
             Log.d(_CTAG + ".saveToDB_db", "FixedAttrStr=" + rAttributes_Fixed_CSV_string);
         }
     }
-    public ContentValues saveToDB_build() {
+    private ContentValues saveToDB_build() {
         if (mEvents_array != null) { packEventCSVstring(); }
         if (mAttribs_Fixed_array != null || mAttribs_Vari_array != null) { packInfoCSVstrings(); }
         ContentValues values = new ContentValues();

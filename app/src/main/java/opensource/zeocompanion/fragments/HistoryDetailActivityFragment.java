@@ -301,22 +301,34 @@ public class HistoryDetailActivityFragment extends Fragment {
             else { theDate.setText(mDf1.format(new Date(ZeoCompanionApplication.mIrec_HDAonly.mTimestamp))); }
 
             // set any header info TextView
+            String msg = "";
+            if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {
+                if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {
+                    int excluded = (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rStatesFlag & CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_EXCLUDE_FROM_GRAPHS);
+                    if (excluded != 0) {
+                        msg = msg + "EXCLUDED";
+                        if (screenSize.x / ZeoCompanionApplication.mScreenDensity >= 1024) { msg = msg + " from graphs"; }
+                    }
+                }
+            }
             if (ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord != null && ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {
                 CompanionSleepEpisodeEventsParsedRec eRec = ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.getEventOldest(CompanionDatabaseContract.SLEEP_EPISODE_STAGE_INBED, CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_ZEO_RECORDING);
                 if (eRec != null) {
                     long delta = ZeoCompanionApplication.mIrec_HDAonly.theZAH_SleepRecord.rStartOfNight - eRec.rTimestamp;
-                    Log.d(_CTAG+".refreshDisplay","delta="+delta);
+                    Log.d(_CTAG+".refreshDisplay","delta=" + delta);
                     if (delta > 15000 || delta < -15000) {
-                        String msg = "HB clock maybe out-of-sync";
+                        if (!msg.isEmpty()) { msg = msg + "; "; }
+                        msg = msg + "HB clock maybe out-of-sync";
                         if (screenSize.x / ZeoCompanionApplication.mScreenDensity >= 1024) {
-                            if (delta > 0) { msg = "Warning: " + msg + " by " + ((delta-5000)/1000) + " sec";  }
-                            else { msg = "Warning: " + msg + " by " + ((delta+5000)/1000) + " sec";  }
+                            if (delta > 0) { msg = msg + " by " + ((delta-5000)/1000) + " sec";  }
+                            else { msg = msg + " by " + ((delta+5000)/1000) + " sec";  }
                         }
-                        theHeaderInfo.setText(msg);
-                        theHeaderInfo.setTextColor(Color.YELLOW);
+
                     }
                 }
             }
+            theHeaderInfo.setText(msg);
+            theHeaderInfo.setTextColor(Color.YELLOW);
 
             // prepare for showing the hypnograms
             int showAsEpoch = 30;

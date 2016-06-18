@@ -17,4 +17,11 @@
         android:icon="@drawable/ic_delete_forever_white_24dp"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/action_exclude_from_graphs"
+        android:orderInCategory="100"
+        android:title="@string/action_exclude_from_graphs"
+        app:showAsAction="never"
+        android:checkable="true" />
+
 </menu>

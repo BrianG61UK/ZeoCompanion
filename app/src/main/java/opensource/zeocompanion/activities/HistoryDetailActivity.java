@@ -1,5 +1,6 @@
 package opensource.zeocompanion.activities;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
@@ -13,6 +14,7 @@ import android.view.MenuItem;
 import opensource.zeocompanion.MainActivity;
 import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
+import opensource.zeocompanion.database.CompanionDatabaseContract;
 import opensource.zeocompanion.database.CompanionSleepEpisodesRec;
 import opensource.zeocompanion.fragments.HistoryDetailActivityFragment;
 import opensource.zeocompanion.utility.JournalDataCoordinator;
@@ -66,6 +68,21 @@ public class HistoryDetailActivity extends AppCompatActivity {
         return true;
     }
 
+    // prepare the menu items in the Action Bar
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item1 = menu.findItem(R.id.action_exclude_from_graphs);
+        item1.setChecked(false);
+        if (ZeoCompanionApplication.mIrec_HDAonly != null) {
+            if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {
+                if ((ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rStatesFlag & CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_EXCLUDE_FROM_GRAPHS) != 0) {
+                    item1.setChecked(true);
+                }
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -77,6 +94,25 @@ public class HistoryDetailActivity extends AppCompatActivity {
                 ZeoCompanionApplication.mIrec_SAonly = ZeoCompanionApplication.mIrec_HDAonly;
                 Intent intent = new Intent(this, SharingActivity.class);
                 startActivity(intent);
+                return true;
+
+            case R.id.action_exclude_from_graphs:
+                if (ZeoCompanionApplication.mIrec_HDAonly != null) {
+                    if (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord != null) {
+                        int excluded = (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rStatesFlag & CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_EXCLUDE_FROM_GRAPHS);
+                        if (excluded == 0) {
+                            ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rStatesFlag = (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rStatesFlag | CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_EXCLUDE_FROM_GRAPHS);
+                        } else {
+                            ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rStatesFlag = (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rStatesFlag & ~CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_EXCLUDE_FROM_GRAPHS);
+                        }
+                    } else {
+                        ZeoCompanionApplication.mCoordinator.createCSEforIrec(ZeoCompanionApplication.mIrec_HDAonly);
+                        ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rStatesFlag = (ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.rStatesFlag | CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_EXCLUDE_FROM_GRAPHS);
+                    }
+                    ZeoCompanionApplication.mIrec_HDAonly.theCSErecord.saveToDB();
+                    HistoryDetailActivityFragment frag = (HistoryDetailActivityFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_history_detail_container);
+                    if (frag != null) { frag.refreshDisplay(); }
+                }
                 return true;
 
             case R.id.action_delete_journal_entry:

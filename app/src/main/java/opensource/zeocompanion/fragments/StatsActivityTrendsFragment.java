@@ -17,6 +17,7 @@ import android.widget.RadioButton;
 import java.util.ArrayList;
 import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
+import opensource.zeocompanion.database.CompanionDatabaseContract;
 import opensource.zeocompanion.utility.JournalDataCoordinator;
 import opensource.zeocompanion.utility.Utilities;
 import opensource.zeocompanion.views.SleepDatasetRec;
@@ -180,11 +181,17 @@ public class StatsActivityTrendsFragment extends Fragment {
         ZeoCompanionApplication.mCoordinator.getAllIntegratedHistoryRecs(theIrecs); // sorted newest to oldest
         for (JournalDataCoordinator.IntegratedHistoryRec iRec: theIrecs) {
             if (iRec.theZAH_SleepRecord != null) {
-                SleepDatasetRec ds = new SleepDatasetRec(iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
-                        iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
-                        iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
-                        iRec.theZAH_SleepRecord.rZQ_Score);
-                theData.add(ds);
+                int excluded = 0;
+                if (iRec.theCSErecord != null) {
+                    excluded = (iRec.theCSErecord.rStatesFlag & CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_EXCLUDE_FROM_GRAPHS);
+                }
+                if (excluded == 0) {
+                    SleepDatasetRec ds = new SleepDatasetRec(iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
+                            iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
+                            iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
+                            iRec.theZAH_SleepRecord.rZQ_Score);
+                    theData.add(ds);
+                }
             }
         }
 

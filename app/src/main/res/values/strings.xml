@@ -23,6 +23,7 @@
     <string name="action_alerts">View Alerts</string>
     <string name="action_user_guide">User Guide</string>
     <string name="action_emailErrorLog">Email error.log</string>
+    <string name="action_exclude_from_graphs">Exclude From Graphs</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_header_direct_email">Email</string>

@@ -521,40 +521,46 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         // parse through the entire integrated database
         for (JournalDataCoordinator.IntegratedHistoryRec iRec: theIrecs) {
             if (iRec.theZAH_SleepRecord != null) {
-                // have an iRec that has Zeo App Sleep Session data;
-                // compose dateset for the time and trends graphs
-                SleepDatasetRec tds = new SleepDatasetRec(iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
-                        iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
-                        iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
-                        iRec.theZAH_SleepRecord.rZQ_Score);
-                mSleepData.add(tds);
+                int excluded = 0;
+                if (iRec.theCSErecord != null) {
+                    excluded = (iRec.theCSErecord.rStatesFlag & CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_EXCLUDE_FROM_GRAPHS);
+                }
+                if (excluded == 0) {
+                    // have an iRec that has Zeo App Sleep Session data;
+                    // compose dateset for the time and trends graphs
+                    SleepDatasetRec tds = new SleepDatasetRec(iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
+                            iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
+                            iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
+                            iRec.theZAH_SleepRecord.rZQ_Score);
+                    mSleepData.add(tds);
 
-                if (journal_enabled && iRec.theCSErecord != null) {
-                    if (iRec.theCSErecord.doAttributesExist()) {
-                        // have an iRec that also has ZeoCompanion sleep data, which contains attributes, and the Sleep Journal is enabled
-                        iRec.theCSErecord.unpackInfoCSVstrings();
-                        // compose dataset for the various attribute-based graphs
-                        for (CompanionSleepEpisodeInfoParsedRec avr: iRec.theCSErecord.mAttribs_Fixed_array) {
-                            if (avr != null) {
-                                if (avr.rSleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) {
-                                    AttrValsSleepDatasetRec ads = new AttrValsSleepDatasetRec(avr.rAttributeExportName, avr.rLikert, avr.rValue,
-                                            iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
-                                            iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
-                                            iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
-                                            iRec.theZAH_SleepRecord.rZQ_Score);
-                                    mAttrValsData.add(ads);
+                    if (journal_enabled && iRec.theCSErecord != null) {
+                        if (iRec.theCSErecord.doAttributesExist()) {
+                            // have an iRec that also has ZeoCompanion sleep data, which contains attributes, and the Sleep Journal is enabled
+                            iRec.theCSErecord.unpackInfoCSVstrings();
+                            // compose dataset for the various attribute-based graphs
+                            for (CompanionSleepEpisodeInfoParsedRec avr: iRec.theCSErecord.mAttribs_Fixed_array) {
+                                if (avr != null) {
+                                    if (avr.rSleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) {
+                                        AttrValsSleepDatasetRec ads = new AttrValsSleepDatasetRec(avr.rAttributeExportName, avr.rLikert, avr.rValue,
+                                                iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
+                                                iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
+                                                iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
+                                                iRec.theZAH_SleepRecord.rZQ_Score);
+                                        mAttrValsData.add(ads);
+                                    }
                                 }
                             }
-                        }
-                        for (CompanionSleepEpisodeInfoParsedRec avr: iRec.theCSErecord.mAttribs_Vari_array) {
-                            if (avr != null) {
-                                if (avr.rSleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) {
-                                    AttrValsSleepDatasetRec ads = new AttrValsSleepDatasetRec(avr.rAttributeExportName, avr.rLikert, avr.rValue,
-                                            iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
-                                            iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
-                                            iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
-                                            iRec.theZAH_SleepRecord.rZQ_Score);
-                                    mAttrValsData.add(ads);
+                            for (CompanionSleepEpisodeInfoParsedRec avr: iRec.theCSErecord.mAttribs_Vari_array) {
+                                if (avr != null) {
+                                    if (avr.rSleepStage == CompanionDatabaseContract.SLEEP_EPISODE_STAGE_BEFORE) {
+                                        AttrValsSleepDatasetRec ads = new AttrValsSleepDatasetRec(avr.rAttributeExportName, avr.rLikert, avr.rValue,
+                                                iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
+                                                iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
+                                                iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
+                                                iRec.theZAH_SleepRecord.rZQ_Score);
+                                        mAttrValsData.add(ads);
+                                    }
                                 }
                             }
                         }

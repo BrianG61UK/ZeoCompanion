@@ -1134,6 +1134,19 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
         }
     }
 
+    // create an empty CSE within an iRec that does not have one; usually this is for setting flags for a Zeo App Sleep Session that is not using the Sleep Journal
+    public void createCSEforIrec(IntegratedHistoryRec iRec) {
+        if (iRec == null) { return; }
+        if (iRec.theCSErecord != null) { return; }
+        iRec.theCSErecord = new CompanionSleepEpisodesRec(System.currentTimeMillis());
+        iRec.mCSEid = iRec.theCSErecord.rID;
+        iRec.mFound |= 0x01;
+        if (iRec.theZAH_SleepRecord != null) {
+            iRec.theCSErecord.rZeoSleepEpisode_ID = iRec.theZAH_SleepRecord.rSleepEpisodeID;
+        }
+        iRec.theCSErecord.saveToDB();
+    }
+
     // get all integrated Sleep Records from both ZeoApp and ZeoCompanion databases; sorted newest to oldest
     public void getAllIntegratedHistoryRecs(ArrayList<IntegratedHistoryRec> theArray) {
         getAllIntegratedHistoryRecs_Internal(theArray, 0, false, false);

@@ -190,6 +190,7 @@ public final class CompanionDatabaseContract {
         public static final int SLEEP_EPISODE_STATESFLAG_JOURNAL_EXPLICITEND = 0x0010;
         public static final int SLEEP_EPISODE_STATESFLAG_ZEO_EXPLICITEND = 0x0020;
         public static final int SLEEP_EPISODE_STATESFLAG_ZEO_DEADREC = 0x0100;
+        public static final int SLEEP_EPISODE_STATESFLAG_EXCLUDE_FROM_GRAPHS = 0x1000;
 
         public static final int SLEEP_EPISODE_NONEVENT_HANDLED = -1;
         public static final int SLEEP_EPISODE_EVENT_GOT_INTO_BED = 10;
