@@ -19,6 +19,7 @@ import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.utility.JournalDataCoordinator;
 import opensource.zeocompanion.utility.Utilities;
+import opensource.zeocompanion.views.SleepDatasetRec;
 import opensource.zeocompanion.views.TrendsGraphView;
 
 // fragment within the StatsActivity that displays configurable statistical trends graph
@@ -175,11 +176,11 @@ public class StatsActivityTrendsFragment extends Fragment {
         if (d > 0.0 && d <= 100.0) { goalREMpct = d; }
 
         ArrayList<JournalDataCoordinator.IntegratedHistoryRec> theIrecs = new ArrayList<JournalDataCoordinator.IntegratedHistoryRec>();
-        ArrayList<TrendsGraphView.Trends_dataSet> theData = new ArrayList<TrendsGraphView.Trends_dataSet>();
+        ArrayList<SleepDatasetRec> theData = new ArrayList<SleepDatasetRec>();
         ZeoCompanionApplication.mCoordinator.getAllIntegratedHistoryRecs(theIrecs); // sorted newest to oldest
         for (JournalDataCoordinator.IntegratedHistoryRec iRec: theIrecs) {
             if (iRec.theZAH_SleepRecord != null) {
-                TrendsGraphView.Trends_dataSet ds = new TrendsGraphView.Trends_dataSet(iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
+                SleepDatasetRec ds = new SleepDatasetRec(iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
                         iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
                         iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
                         iRec.theZAH_SleepRecord.rZQ_Score);
@@ -218,8 +219,8 @@ public class StatsActivityTrendsFragment extends Fragment {
         theTrendsGraph.mShowZQscore = cb.isChecked();
 
         RadioButton rb = (RadioButton)mRootView.findViewById(R.id.radioButton_barsAndLines);
-        if (rb.isChecked()) { theTrendsGraph.mShowBarsAndLines = true; };
+        if (rb.isChecked()) { theTrendsGraph.mShowBarsAndLines = true; }
         rb = (RadioButton)mRootView.findViewById(R.id.radioButton_lines);
-        if (rb.isChecked()) { theTrendsGraph.mShowBarsAndLines = false; };
+        if (rb.isChecked()) { theTrendsGraph.mShowBarsAndLines = false; }
     }
 }

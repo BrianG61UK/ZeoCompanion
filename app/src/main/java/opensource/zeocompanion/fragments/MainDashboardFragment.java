@@ -35,6 +35,8 @@ import opensource.zeocompanion.utility.Utilities;
 import opensource.zeocompanion.views.AttrValsSleepDatasetRec;
 import opensource.zeocompanion.views.AttributeEffectsGraphView;
 import opensource.zeocompanion.views.AttributesHeatmapGraphView;
+import opensource.zeocompanion.views.DaysHoursGraphView;
+import opensource.zeocompanion.views.SleepDatasetRec;
 import opensource.zeocompanion.views.TrendsGraphView;
 
 // fragment within the MainActivity that displays simple non-configurable statistical graphs
@@ -42,7 +44,7 @@ public class MainDashboardFragment extends MainFragmentWrapper {
     // member variables
     private View mRootView = null;
     private boolean mLayoutDone = false;
-    ArrayList<TrendsGraphView.Trends_dataSet> mTrendsData = null;
+    ArrayList<SleepDatasetRec> mSleepData = null;
     ArrayList<AttrValsSleepDatasetRec> mAttrValsData = null;
 
     // member constants and other static content
@@ -112,20 +114,70 @@ public class MainDashboardFragment extends MainFragmentWrapper {
 
             // Check which checkbox was checked
             switch(buttonView.getId()) {
-                case R.id.checkBox_deep:
+                case R.id.checkBox_deep_attrsHeatmap:
                     theAttrsHeatmapGraph.toggleDeep(isChecked);
                     break;
-                case R.id.checkBox_rem:
+                case R.id.checkBox_rem_attrsHeatmap:
                     theAttrsHeatmapGraph.toggleREM(isChecked);
                     break;
-                case R.id.checkBox_awake:
+                case R.id.checkBox_awake_attrsHeatmap:
                     theAttrsHeatmapGraph.toggleAwake(isChecked);
                     break;
-                case R.id.checkBox_awakenings:
+                case R.id.checkBox_awakenings_attrsHeatmap:
                     theAttrsHeatmapGraph.toggleAwakenings(isChecked);
                     break;
-                case R.id.checkBox_total:
+                case R.id.checkBox_total_attrsHeatmap:
                     theAttrsHeatmapGraph.toggleTotalSleep(isChecked);
+                    break;
+            }
+        }
+    };
+
+    // common listener for presses on the days/hours graph checkbox buttons
+    CheckBox.OnCheckedChangeListener mDaysHoursCheckboxChangedListener = new CheckBox.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            DaysHoursGraphView theDaysHoursGraph = (DaysHoursGraphView)mRootView.findViewById(R.id.graph_dayHour);
+
+            // Check which checkbox was checked
+            switch(buttonView.getId()) {
+                case R.id.checkBox_deep_dayHour:
+                    theDaysHoursGraph.toggleDeep(isChecked);
+                    break;
+                case R.id.checkBox_rem_dayHour:
+                    theDaysHoursGraph.toggleREM(isChecked);
+                    break;
+                case R.id.checkBox_awake_dayHour:
+                    theDaysHoursGraph.toggleAwake(isChecked);
+                    break;
+                case R.id.checkBox_awakenings_dayHour:
+                    theDaysHoursGraph.toggleAwakenings(isChecked);
+                    break;
+                case R.id.checkBox_total_dayHour:
+                    theDaysHoursGraph.toggleTotalSleep(isChecked);
+                    break;
+            }
+        }
+    };
+
+    // common listener for presses on the radio buttons for the Days/Hours graph
+    View.OnClickListener mDaysHoursRadioButtonOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            boolean checked = ((RadioButton)view).isChecked();
+            DaysHoursGraphView theDaysHoursGraph = (DaysHoursGraphView)mRootView.findViewById(R.id.graph_dayHour);
+
+            // Check which radio button was clicked
+            switch(view.getId()) {
+                case R.id.radioButton_dayHour_DOW:
+                    if (checked) {
+                        theDaysHoursGraph.toggleDays(true);
+                    }
+                    break;
+                case R.id.radioButton_dayHour_SH:
+                    if (checked) {
+                        theDaysHoursGraph.toggleDays(false);
+                    }
                     break;
             }
         }
@@ -144,7 +196,7 @@ public class MainDashboardFragment extends MainFragmentWrapper {
             AttributesHeatmapGraphView theAttrsHeatmapGraph = (AttributesHeatmapGraphView)mRootView.findViewById(R.id.graph_attrsHeatmap);
             double pct = (double)progress / 100.0;
             theAttrsHeatmapGraph.setThresholdZQpct(pct);
-            TextView tv = (TextView)mRootView.findViewById(R.id.textView_seekbarTitle);
+            TextView tv = (TextView)mRootView.findViewById(R.id.textView_seekbarTitle_attrsHeatmap);
             int zq = (int)((theAttrsHeatmapGraph.mHighestZQ - theAttrsHeatmapGraph.mLowestZQ) * pct + theAttrsHeatmapGraph.mLowestZQ);
             tv.setText("Good ZQ Cutoff: "+String.valueOf(zq));
         }
@@ -161,8 +213,25 @@ public class MainDashboardFragment extends MainFragmentWrapper {
             AttributesHeatmapGraphView theAttrsHeatmapGraph = (AttributesHeatmapGraphView)mRootView.findViewById(R.id.graph_attrsHeatmap);
             double pct = (double)progress / 100.0;
             theAttrsHeatmapGraph.setThresholdDatePct(pct);
-            TextView tv = (TextView)mRootView.findViewById(R.id.textView_seekbar2Title);
+            TextView tv = (TextView)mRootView.findViewById(R.id.textView_seekbar2Title_attrsHeatmap);
             long cutoffTimestamp = (long)((double)(theAttrsHeatmapGraph.mHighestTimestamp - theAttrsHeatmapGraph.mLowestTimestamp) * pct) + theAttrsHeatmapGraph.mLowestTimestamp - 43200000;   // less 12 hours
+            tv.setText("Start Date Cutoff: "+mSDF.format(new Date(cutoffTimestamp)));
+        }
+    };
+    SeekBar.OnSeekBarChangeListener mDaysHoursSeekBar2ChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {}
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) { }
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            DaysHoursGraphView theDaysHoursGraph = (DaysHoursGraphView)mRootView.findViewById(R.id.graph_dayHour);
+            double pct = (double)progress / 100.0;
+            theDaysHoursGraph.setThresholdDatePct(pct);
+            TextView tv = (TextView)mRootView.findViewById(R.id.textView_seekbar2Title_dayHour);
+            long cutoffTimestamp = (long)((double)(theDaysHoursGraph.mHighestTimestamp - theDaysHoursGraph.mLowestTimestamp) * pct) + theDaysHoursGraph.mLowestTimestamp - 43200000;   // less 12 hours
             tv.setText("Start Date Cutoff: "+mSDF.format(new Date(cutoffTimestamp)));
         }
     };
@@ -300,20 +369,20 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         rb = (RadioButton)mRootView.findViewById(R.id.radioButton_trends_zq);
         rb.setOnClickListener(mTrendsRadioButtonOnClickListener);
 
-        // setup all the checkboxes for attributes heatmap
-        CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total);
+        // setup all the checkboxes and sliders for attributes heatmap
+        CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total_attrsHeatmap);
         cb.setChecked(true);
         cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
-        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep_attrsHeatmap);
         cb.setChecked(true);
         cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
-        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem_attrsHeatmap);
         cb.setChecked(true);
         cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
-        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake_attrsHeatmap);
         cb.setChecked(true);
         cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
-        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awakenings);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awakenings_attrsHeatmap);
         cb.setChecked(true);
         cb.setOnCheckedChangeListener(mAttrsHeatmapCheckboxChangedListener);
 
@@ -325,6 +394,35 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         sb2.setMax(100);
         sb2.setProgress(0);
         sb2.setOnSeekBarChangeListener(mAttrsHeatmapSeekBar2ChangeListener);
+
+        // setup all the checkboxes, radio buttons, and sliders for Days/Hours graph
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total_dayHour);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mDaysHoursCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep_dayHour);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mDaysHoursCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem_dayHour);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mDaysHoursCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake_dayHour);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mDaysHoursCheckboxChangedListener);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awakenings_dayHour);
+        cb.setChecked(true);
+        cb.setOnCheckedChangeListener(mDaysHoursCheckboxChangedListener);
+
+        // setup all the radio buttons
+        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_dayHour_DOW);
+        rb.setOnClickListener(mDaysHoursRadioButtonOnClickListener);
+        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_dayHour_SH);
+        rb.setChecked(true);
+        rb.setOnClickListener(mDaysHoursRadioButtonOnClickListener);
+
+        sb2 = (SeekBar)mRootView.findViewById(R.id.seekbar2_dayHour);
+        sb2.setMax(100);
+        sb2.setProgress(0);
+        sb2.setOnSeekBarChangeListener(mDaysHoursSeekBar2ChangeListener);
 
         /*rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_deep);
         rb.setChecked(true);
@@ -371,9 +469,11 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         theTrendsGraph.releaseDataset();
         AttributesHeatmapGraphView theAttrsHeatmapGraph = (AttributesHeatmapGraphView)mRootView.findViewById(R.id.graph_attrsHeatmap);
         theAttrsHeatmapGraph.releaseDataset();
+        DaysHoursGraphView theDaysHoursGraph = (DaysHoursGraphView)mRootView.findViewById(R.id.graph_dayHour);
+        theDaysHoursGraph.releaseDataset();
         //AttributeEffectsGraphView theAttrEffectsGraph = (AttributeEffectsGraphView)mRootView.findViewById(R.id.graph_attrEffects);
         //theAttrEffectsGraph.releaseDataset();
-        if (mTrendsData != null) { mTrendsData.clear(); }
+        if (mSleepData != null) { mSleepData.clear(); }
         if (mAttrValsData != null) { mAttrValsData.clear(); }
         super.onDestroyView();
         //Log.d(_CTAG + ".onDestroyView", "==========FRAG ON-DESTROYVIEW=====");
@@ -410,8 +510,8 @@ public class MainDashboardFragment extends MainFragmentWrapper {
 
         // prepare empty dataset arrays
         ArrayList<JournalDataCoordinator.IntegratedHistoryRec> theIrecs = new ArrayList<JournalDataCoordinator.IntegratedHistoryRec>();
-        if (mTrendsData != null) { mTrendsData.clear(); }
-        else { mTrendsData = new ArrayList<TrendsGraphView.Trends_dataSet>(); }
+        if (mSleepData != null) { mSleepData.clear(); }
+        else { mSleepData = new ArrayList<SleepDatasetRec>(); }
         if (mAttrValsData != null) { mAttrValsData.clear(); }
         else { mAttrValsData = new ArrayList<AttrValsSleepDatasetRec>(); }
 
@@ -422,12 +522,12 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         for (JournalDataCoordinator.IntegratedHistoryRec iRec: theIrecs) {
             if (iRec.theZAH_SleepRecord != null) {
                 // have an iRec that has Zeo App Sleep Session data;
-                // compose dateset for the trends graph
-                TrendsGraphView.Trends_dataSet tds = new TrendsGraphView.Trends_dataSet(iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
+                // compose dateset for the time and trends graphs
+                SleepDatasetRec tds = new SleepDatasetRec(iRec.theZAH_SleepRecord.rStartOfNight, iRec.theZAH_SleepRecord.rTime_to_Z_min,
                         iRec.theZAH_SleepRecord.rTime_Total_Z_min, iRec.theZAH_SleepRecord.rTime_REM_min, iRec.theZAH_SleepRecord.rTime_Awake_min,
                         iRec.theZAH_SleepRecord.rTime_Light_min, iRec.theZAH_SleepRecord.rTime_Deep_min, iRec.theZAH_SleepRecord.rCountAwakenings,
                         iRec.theZAH_SleepRecord.rZQ_Score);
-                mTrendsData.add(tds);
+                mSleepData.add(tds);
 
                 if (journal_enabled && iRec.theCSErecord != null) {
                     if (iRec.theCSErecord.doAttributesExist()) {
@@ -516,7 +616,7 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         TrendsGraphView theTrendsGraph = (TrendsGraphView)mRootView.findViewById(R.id.graph_trends);
         theTrendsGraph.prepareForDashboard(screenSize);
         whichIsCheckedTrends();
-        boolean hasAnyData = theTrendsGraph.setDataset(mTrendsData, goalTotalSleepMin, goalREMpct, goalDeepPct);
+        boolean hasAnyData = theTrendsGraph.setDataset(mSleepData, goalTotalSleepMin, goalREMpct, goalDeepPct);
         if (theTrendsGraph.mDatasetLen == 0) {
             TextView tv = (TextView)mRootView.findViewById(R.id.textView_trendtitle);
             tv.setText("Last 7 Session Trend; there is no data to display");
@@ -526,6 +626,20 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         }
         if (hasAnyData) { theTrendsGraph.setOnClickListener(mTrendsGraphClickListener); }
         else { theTrendsGraph.setOnClickListener(null); }
+
+        // prepare the Days/Hours graph
+        DaysHoursGraphView theDaysHoursGraph = (DaysHoursGraphView)mRootView.findViewById(R.id.graph_dayHour);
+        theDaysHoursGraph.prepareForDashboard(screenSize);
+        whichIsCheckedDaysHours();
+        hasAnyData = theDaysHoursGraph.setDataset(mSleepData);
+        if (!hasAnyData) {
+            TextView tv = (TextView)mRootView.findViewById(R.id.textView_dayHourTitle);
+            tv.setText("Start-Hour or Day-of-Week ZQ Spread Clustering; there is no data to display");
+        } else {
+            TextView tv2 = (TextView)mRootView.findViewById(R.id.textView_seekbar2Title_dayHour);
+            long cutoffTimestamp = (long)((double)(theDaysHoursGraph.mHighestTimestamp - theDaysHoursGraph.mLowestTimestamp) * theDaysHoursGraph.mTimestampThresholdPct) + theDaysHoursGraph.mLowestTimestamp - 43200000;   // less 12 hours
+            tv2.setText("Start Date Cutoff: "+mSDF.format(new Date(cutoffTimestamp)));
+        }
 
         // prepare various attribute-based graphs
         RelativeLayout rl1 = (RelativeLayout)mRootView.findViewById(R.id.relativeLayout_attrsHeatmapTitle);
@@ -544,10 +658,10 @@ public class MainDashboardFragment extends MainFragmentWrapper {
                 TextView tv = (TextView)mRootView.findViewById(R.id.textView_attrsHeatmapTitle);
                 tv.setText("Attributes Usefulness HeatMap; there is no data to display");
             } else {
-                TextView tv1 = (TextView)mRootView.findViewById(R.id.textView_seekbarTitle);
+                TextView tv1 = (TextView)mRootView.findViewById(R.id.textView_seekbarTitle_attrsHeatmap);
                 int zq = (int)((theAttrsHeatmapGraph.mHighestZQ - theAttrsHeatmapGraph.mLowestZQ) * theAttrsHeatmapGraph.mGoodThresholdPct + theAttrsHeatmapGraph.mLowestZQ);
                 tv1.setText("Good ZQ Cutoff: "+String.valueOf(zq));
-                TextView tv2 = (TextView)mRootView.findViewById(R.id.textView_seekbar2Title);
+                TextView tv2 = (TextView)mRootView.findViewById(R.id.textView_seekbar2Title_attrsHeatmap);
                 long cutoffTimestamp = (long)((double)(theAttrsHeatmapGraph.mHighestTimestamp - theAttrsHeatmapGraph.mLowestTimestamp) * theAttrsHeatmapGraph.mTimestampThresholdPct) + theAttrsHeatmapGraph.mLowestTimestamp - 43200000;   // less 12 hours
                 tv2.setText("Start Date Cutoff: "+mSDF.format(new Date(cutoffTimestamp)));
             }
@@ -618,24 +732,46 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         }
     }
 
-    // determine which check boxes and radio buttons are already checked
+    // determine which check boxes and sliders are already set for the Attributes Heatmap
     private void whichIsCheckedAttrsHeatmap() {
         AttributesHeatmapGraphView theAttrsHeatmapGraph = (AttributesHeatmapGraphView)mRootView.findViewById(R.id.graph_attrsHeatmap);
-        CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total);
+        CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total_attrsHeatmap);
         theAttrsHeatmapGraph.mIncludeTotalSleep = cb.isChecked();
-        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep_attrsHeatmap);
         theAttrsHeatmapGraph.mIncludeDeep = cb.isChecked();
-        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem_attrsHeatmap);
         theAttrsHeatmapGraph.mIncludeREM = cb.isChecked();
-        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake_attrsHeatmap);
         theAttrsHeatmapGraph.mIncludeAwake = cb.isChecked();
-        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awakenings);
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awakenings_attrsHeatmap);
         theAttrsHeatmapGraph.mIncludeAwakenings = cb.isChecked();
 
         SeekBar sb1 = (SeekBar)mRootView.findViewById(R.id.seekbar_attrsHeatmap);
         theAttrsHeatmapGraph.mGoodThresholdPct = (double)sb1.getProgress() / 100.0;
         SeekBar sb2 = (SeekBar)mRootView.findViewById(R.id.seekbar2_attrsHeatmap);
         theAttrsHeatmapGraph.mTimestampThresholdPct = (double)sb2.getProgress() / 100.0;
+    }
+
+    // determine which check boxes, radio buttons, and sliders are already set for the Days/Hours graph
+    private void whichIsCheckedDaysHours() {
+        DaysHoursGraphView theDaysHoursGraph = (DaysHoursGraphView)mRootView.findViewById(R.id.graph_dayHour);
+        CheckBox cb = (CheckBox)mRootView.findViewById(R.id.checkBox_total_dayHour);
+        theDaysHoursGraph.mIncludeTotalSleep = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_deep_dayHour);
+        theDaysHoursGraph.mIncludeDeep = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_rem_dayHour);
+        theDaysHoursGraph.mIncludeREM = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awake_dayHour);
+        theDaysHoursGraph.mIncludeAwake = cb.isChecked();
+        cb = (CheckBox)mRootView.findViewById(R.id.checkBox_awakenings_dayHour);
+        theDaysHoursGraph.mIncludeAwakenings = cb.isChecked();
+
+        SeekBar sb2 = (SeekBar)mRootView.findViewById(R.id.seekbar2_dayHour);
+        theDaysHoursGraph.mTimestampThresholdPct = (double)sb2.getProgress() / 100.0;
+
+        RadioButton rb = (RadioButton)mRootView.findViewById(R.id.radioButton_dayHour_DOW);
+        if (rb.isChecked()) { theDaysHoursGraph.mShowDays = true; }
+        else { theDaysHoursGraph.mShowDays = false; }
     }
 
     // determine which radio button is already checked

@@ -3,9 +3,11 @@ package opensource.zeocompanion.views;
 // defines a record in a dataset of integrated sleep session data that splits out each recorded attribute-value;
 // this is a common dataset for the various attribute-based graphs
 public class AttrValsSleepDatasetRec {
+    // constants
     private static final int MAXFIELDS = 9;
     private static final int MAXWORKING = 2;
 
+    // record's fields
     public String rAttributeDisplayName = null; // can always be null if attributes in the definitions database are renamed or deleted
     public String rAttributeShortName = null;
     public String rValueString = null;

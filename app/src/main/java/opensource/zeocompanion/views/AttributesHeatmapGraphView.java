@@ -159,7 +159,7 @@ public class AttributesHeatmapGraphView extends GraphView {
     public void setThresholdZQpct(double thresholdZQpct) { mGoodThresholdPct = thresholdZQpct; refresh(); }
     public void setThresholdDatePct(double thresholdDatePct) { mTimestampThresholdPct = thresholdDatePct; refresh(); }
 
-    // show just one data field plus goal and trend (Dashboard Tab)
+    // setup graph for Dashboard use
     public void prepareForDashboard(Point screenSize) {
         mScreenSize = screenSize;
         GridLabelRenderer render = this.getGridLabelRenderer();
@@ -217,13 +217,14 @@ public class AttributesHeatmapGraphView extends GraphView {
         mOriginalDataSet = theData;
         mDatasetLen = theData.size();
 
+        mLowestTimestamp = 0L;
+        mHighestTimestamp = 0L;
         if (mAttrValueRecs != null) { mAttrValueRecs.clear();  mAttrValueRecs = null; }
         if (mAttrRecs != null) { clearAttrRecs(); mAttrRecs = null; }
         if (mDatasetLen == 0) return false;
+
         mAttrRecs = new ArrayList<AttrRec>();
         mAttrValueRecs = new ArrayList<AttrValueRec>();
-        mLowestTimestamp = 0L;
-        mHighestTimestamp = 0L;
 
         // first parse the original dataset into attribute and value buckets
         int maxRows = 1;
@@ -345,6 +346,7 @@ public class AttributesHeatmapGraphView extends GraphView {
                 if (atRec != null) {
                     if (atRec.rValuesInx != null) { atRec.rValuesInx.clear(); }
                     atRec.rValuesInx = null;
+                    atRec.rValuesQtyActive = 0;
                     atRec.rAttributeDisplayName = null;
                     atRec.rAttributeShortName = null;
                 }
@@ -355,6 +357,8 @@ public class AttributesHeatmapGraphView extends GraphView {
             for (AttrValueRec avRec: mAttrValueRecs) {
                 if (avRec != null) {
                     if (avRec.rOrigRecs != null) { avRec.rOrigRecs.clear(); }
+                    avRec.rOrigRecs = null;
+                    avRec.rOrigRecsQtyActive = 0;
                     avRec.rValueName = null;
                 }
             }

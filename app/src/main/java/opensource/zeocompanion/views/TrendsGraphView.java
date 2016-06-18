@@ -36,7 +36,7 @@ import opensource.zeocompanion.utility.Utilities;
 public class TrendsGraphView extends GraphView {
     // member variables
     private Context mContext = null;
-    private  ArrayList<Trends_dataSet> mOrigDataSet = null;
+    private  ArrayList<SleepDatasetRec> mOrigDataSet = null;
     public int mDatasetLen = 0;
     private int mShowAsMode = 0;
     private Point mScreenSize = null;
@@ -75,26 +75,6 @@ public class TrendsGraphView extends GraphView {
     private static final String _CTAG = "TG";
     private static final int MAXFIELDS = 9;
     private SimpleDateFormat mDF1 = new SimpleDateFormat("MM/dd/yy");
-
-    // data record
-    public static class Trends_dataSet {
-        public long rTimestamp = 0;
-        public double[] rDataArray = new double[MAXFIELDS];
-
-        // constructor
-        public Trends_dataSet(long timestamp, double timeToZMin, double totalSleepMin, double remMin, double awakeMin, double lightMin, double deepMin, int awakeningsQty, int zq_score) {
-            rTimestamp = timestamp;
-            rDataArray[0] = timeToZMin;
-            rDataArray[1] = totalSleepMin;
-            rDataArray[2] = awakeMin;
-            rDataArray[3] = remMin;
-            rDataArray[4] = lightMin;
-            rDataArray[5] = deepMin;
-            rDataArray[6] = awakeningsQty;
-            rDataArray[7] = zq_score;
-            rDataArray[8] = timeToZMin + totalSleepMin +  awakeMin;
-        }
-    }
 
     // custom legend renderer
     public class TGV_LegendRenderer extends LegendRenderer {
@@ -437,7 +417,7 @@ public class TrendsGraphView extends GraphView {
 
     // set the data for the trends graph; note that the passed dataset is in descending date order;
     // however GraphView mandates that X-values be in ascending value order; this will be handled in the buildSeries methods
-    public boolean setDataset(ArrayList<Trends_dataSet> theData, double goalTotalSleep, double goalREMpct, double goalDeepPct) {
+    public boolean setDataset(ArrayList<SleepDatasetRec> theData, double goalTotalSleep, double goalREMpct, double goalDeepPct) {
         mGoalTotalSleepMin = goalTotalSleep;
         mGoalREMpct = goalREMpct;
         mGoalDeepPct = goalDeepPct;
@@ -447,7 +427,7 @@ public class TrendsGraphView extends GraphView {
         if (mShowAsMode == 1 && mDatasetLen > 7) { mDatasetLen = 7; }
 
         if (mDatasetLen > 0) {
-            Trends_dataSet item = mOrigDataSet.get(mDatasetLen - 1);
+            SleepDatasetRec item = mOrigDataSet.get(mDatasetLen - 1);
             mLowestTimestamp = item.rTimestamp;
         }
         refresh();
@@ -470,7 +450,7 @@ public class TrendsGraphView extends GraphView {
         double lowestDate = 0.0;
         double highestDate = 0.0;
         if (mDatasetLen > 0) {
-            Trends_dataSet item = mOrigDataSet.get(0);
+            SleepDatasetRec item = mOrigDataSet.get(0);
             double nextDate = (double)((item.rTimestamp - mLowestTimestamp) / 60000L);
             lowestDate = nextDate;
             highestDate = nextDate;
@@ -819,7 +799,7 @@ public class TrendsGraphView extends GraphView {
         DataPoint[] theDataPoints = new DataPoint[mDatasetLen];
         int j = 0;
         for (int i = mDatasetLen - 1; i >= 0; i--) {
-            Trends_dataSet item = mOrigDataSet.get(i);
+            SleepDatasetRec item = mOrigDataSet.get(i);
             double y = 0.0;
             switch (dataArrayIndex) {
                 case 1:

@@ -128,7 +128,7 @@
                 android:layout_marginLeft="5dp" >
 
                 <android.support.v7.widget.AppCompatCheckBox
-                    android:id="@+id/checkBox_total"
+                    android:id="@+id/checkBox_total_attrsHeatmap"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="40dp"
@@ -140,7 +140,7 @@
                     app:buttonTint="#FFFFFF" />
 
                 <android.support.v7.widget.AppCompatCheckBox
-                    android:id="@+id/checkBox_deep"
+                    android:id="@+id/checkBox_deep_attrsHeatmap"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="7dp"
@@ -151,7 +151,7 @@
                     app:buttonTint="#FFFFFF" />
 
                 <android.support.v7.widget.AppCompatCheckBox
-                    android:id="@+id/checkBox_rem"
+                    android:id="@+id/checkBox_rem_attrsHeatmap"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="7dp"
@@ -162,7 +162,7 @@
                     app:buttonTint="#FFFFFF" />
 
                 <android.support.v7.widget.AppCompatCheckBox
-                    android:id="@+id/checkBox_awake"
+                    android:id="@+id/checkBox_awake_attrsHeatmap"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="7dp"
@@ -173,7 +173,7 @@
                     app:buttonTint="#FFFFFF" />
 
                 <android.support.v7.widget.AppCompatCheckBox
-                    android:id="@+id/checkBox_awakenings"
+                    android:id="@+id/checkBox_awakenings_attrsHeatmap"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
@@ -185,7 +185,7 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/textView_seekbarTitle"
+                android:id="@+id/textView_seekbarTitle_attrsHeatmap"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Good ZQ Cutoff: xxx"
@@ -198,7 +198,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textView_attrsHeatmapTitle"
-                android:layout_toRightOf="@+id/textView_seekbarTitle"
+                android:layout_toRightOf="@+id/textView_seekbarTitle_attrsHeatmap"
                 android:layout_toLeftOf="@+id/checkboxes_attrsHeatmap"
                 android:gravity="center"
                 android:layout_gravity="center"
@@ -212,7 +212,7 @@
                 android:layout_toLeftOf="@+id/checkboxes_attrsHeatmap"/>
 
             <TextView
-                android:id="@+id/textView_seekbar2Title"
+                android:id="@+id/textView_seekbar2Title_attrsHeatmap"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Start Date Cutoff: xx/xx/xxxx"
@@ -225,12 +225,149 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/graph_attrsHeatmap"
-                android:layout_toRightOf="@+id/textView_seekbar2Title"
+                android:layout_toRightOf="@+id/textView_seekbar2Title_attrsHeatmap"
                 android:layout_toLeftOf="@+id/checkboxes_attrsHeatmap"
                 android:gravity="center"
                 android:layout_gravity="center"
                 android:layout_centerHorizontal="true" />
 
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout_dayHourTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp">
+
+            <TextView
+                android:id="@+id/textView_dayHourTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start-Hour or Day-of-Week ZQ Spread Clustering"
+                android:textColor="#FFFF00"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"/>
+
+            <RadioGroup
+                android:id="@+id/radioGroup_dayHour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="left"
+                android:layout_marginLeft="5dp"
+                android:layout_toLeftOf="@+id/checkboxes_dayHour"
+                android:layout_below="@id/textView_dayHourTitle" >
+
+                <RadioButton
+                    android:id="@+id/radioButton_dayHour_SH"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="Start-Hour" />
+
+                <RadioButton
+                    android:id="@+id/radioButton_dayHour_DOW"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="Day-of-Week" />
+
+            </RadioGroup>
+
+            <LinearLayout
+                android:id="@+id/checkboxes_dayHour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="left"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/textView_dayHourTitle"
+                android:layout_marginLeft="5dp" >
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkBox_total_dayHour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="40dp"
+                    android:layout_marginBottom="7dp"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:text="Total"
+                    app:buttonTint="#FFFFFF" />
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkBox_deep_dayHour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:text="Deep"
+                    app:buttonTint="#FFFFFF" />
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkBox_rem_dayHour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:text="REM"
+                    app:buttonTint="#FFFFFF" />
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkBox_awake_dayHour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:text="Awake"
+                    app:buttonTint="#FFFFFF" />
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkBox_awakenings_dayHour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:text="Awakenings"
+                    app:buttonTint="#FFFFFF" />
+
+            </LinearLayout>
+
+            <opensource.zeocompanion.views.DaysHoursGraphView
+                android:id="@+id/graph_dayHour"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_below="@id/radioGroup_dayHour"
+                android:layout_toLeftOf="@+id/checkboxes_dayHour"/>
+
+            <TextView
+                android:id="@+id/textView_seekbar2Title_dayHour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start Date Cutoff: xx/xx/xxxx"
+                android:layout_below="@+id/graph_dayHour"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"/>
+
+            <SeekBar
+                android:id="@+id/seekbar2_dayHour"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/graph_dayHour"
+                android:layout_toRightOf="@+id/textView_seekbar2Title_dayHour"
+                android:layout_toLeftOf="@+id/checkboxes_dayHour"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_centerHorizontal="true" />
 
         </RelativeLayout>
 
