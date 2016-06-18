@@ -274,7 +274,7 @@ public class TrendsGraphView extends GraphView {
         mShowAsMode = 1;
         mScreenSize = screenSize;
         GridLabelRenderer render = this.getGridLabelRenderer();
-        render.setPadding(10);
+        render.setPadding(5);
         render.setHorizontalLabelsVisible(true);
         render.setVerticalLabelsVisible(true);
         render.setHorizontalLabelsColor(Color.WHITE);

@@ -103,7 +103,10 @@ public class DaysHoursGraphView extends GraphView {
                             return dowRec.rDayOfWeekString + "\n ";
                         }
                         int hour = (int)value - 1;
-                        String retStr = String.valueOf(hour)+"\n";
+                        String retStr = null;
+                        if (hour == 0) { retStr = "12\n"; }
+                        else if (hour <= 12) { retStr = String.valueOf(hour)+"\n"; }
+                        else { retStr = String.valueOf(hour - 12)+"\n"; }
                         if (mScreenSize.x < mScreenSize.y) {
                             if (hour == 0) { retStr += "am"; }
                             else if (hour == 12) { retStr += "pm"; }
@@ -120,17 +123,6 @@ public class DaysHoursGraphView extends GraphView {
             }
         }
     }
-
-    // setup a listener for scrolling and scaling activities
-    /*???private Viewport.ScrollScaleListener mScrollScaleListener = new Viewport.ScrollScaleListener() {
-        // scrolling is occurring
-        public void onScrolling(GraphView graphView, RectF newViewport) {
-            // nothing needed
-        }
-        public void onScaling(GraphView graphView, RectF newViewport) {
-            recomputeXlabeling(newViewport);
-        }
-    };*/
 
     // constructors
     public DaysHoursGraphView(Context context) { super(context); mContext = context; setLayerType(View.LAYER_TYPE_SOFTWARE, null); }
@@ -150,7 +142,7 @@ public class DaysHoursGraphView extends GraphView {
     public void prepareForDashboard(Point screenSize) {
         mScreenSize = screenSize;
         GridLabelRenderer render = this.getGridLabelRenderer();
-        render.setPadding(10);
+        render.setPadding(5);
         render.setHorizontalLabelsVisible(true);
         render.setVerticalLabelsVisible(true);
         render.setHorizontalLabelsColor(Color.WHITE);
@@ -169,8 +161,6 @@ public class DaysHoursGraphView extends GraphView {
         viewport.setAxisMaxY(100.0);
         viewport.setXAxisBoundsManual(true);
         render.setLabelFormatter(new DHV_DefaultLabelFormatter());
-        //???viewport.setScalable(true);
-        //viewport.setScrollable(true);
 
         mIncludeTotalSleep = false;
         mIncludeAwake = false;
@@ -281,11 +271,6 @@ public class DaysHoursGraphView extends GraphView {
 
         // prepare and display the graph
         refresh();
-
-        // setup a scroll/scale listener
-        /*???mParentNumber = 1;
-        Viewport viewport = this.getViewport();
-        viewport.setScrollScaleListener(mScrollScaleListener);*/
         return true;
     }
 
@@ -361,8 +346,6 @@ public class DaysHoursGraphView extends GraphView {
             render.setHorizontalLabelsEndX(24.0);
         }
 
-        // ??? computeXlabeling();
-
         // setup the datapoints
         int inx = 0;
         if (mDatasetLen > 0 && qtyActive > 0) {
@@ -392,17 +375,6 @@ public class DaysHoursGraphView extends GraphView {
             }
             mPointsSeries = new PointsGraphSeries<DataPoint>(theDataPoints);
             mPointsSeries.setSize(4.0f * ZeoCompanionApplication.mScreenDensity);
-            /*m???PointsSeries.setCustomShape(new PointsGraphSeries.CustomShape() {
-                @Override
-                public void draw(Canvas canvas, Paint paint, float x, float y, DataPointInterface dataPoint) {
-                    int inx = dataPoint.getIndex();
-                    AttrValueRec avRec = mAttrValueRecs.get(inx);
-                    //Log.d(_CTAG+".custShap.draw","X="+String.format("%.2f",dataPoint.getX())+", Y="+String.format("%.2f",avRec.rY)+", V="+avRec.rValueName+", L="+avRec.rLikert+", I="+String.format("%.2f",avRec.rIntensityAvg)+", I%="+String.format("%.2f",avRec.rIntensityPct)+", Q="+avRec.rOrigRecs.size());
-                    float size = 5.0f + 15.0f * ((float)avRec.rOrigRecsQtyActive / (float)mHighestAttrValueQtyRecs) * ZeoCompanionApplication.mScreenDensity;
-                    paint.setColor(determineColor(avRec));
-                    canvas.drawCircle(x, y, size, paint);
-                }
-            });*/
             addSeries(mPointsSeries);
             double minY = mPointsSeries.getLowestValueY();
             double maxY = mPointsSeries.getHighestValueY();
@@ -433,29 +405,5 @@ public class DaysHoursGraphView extends GraphView {
         // now redraw the entire graph
         onDataChanged(false, false);
     }
-
-    // determine how many letters of the Attribute names can be shown along the X-axis
-    /*???private void computeXlabeling() {
-        Viewport viewport = this.getViewport();
-        recomputeXlabeling(viewport.mCurrentViewport);
-    }
-    private void recomputeXlabeling(RectF newViewport) {
-        GridLabelRenderer render = this.getGridLabelRenderer();
-
-        int qtyShown = (int)(newViewport.right - newViewport.left - 1.0);
-        if (qtyShown == 0) { qtyShown = 1; }
-        int pixelsPerSlot = (getGraphContentWidth() / qtyShown) - 3;
-        if (pixelsPerSlot < 5) pixelsPerSlot = 5;
-
-        Rect textBounds = new Rect();
-        int n = 0;
-        do {
-            n++;
-            String str = StringUtils.repeat("S", n);
-            render.computeTextBounds(str, 0, n, textBounds);
-        } while (textBounds.width() < pixelsPerSlot);
-
-        mNumLetters = n - 1;
-    }*/
 }
 

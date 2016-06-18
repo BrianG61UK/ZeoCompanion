@@ -163,7 +163,7 @@ public class AttributesHeatmapGraphView extends GraphView {
     public void prepareForDashboard(Point screenSize) {
         mScreenSize = screenSize;
         GridLabelRenderer render = this.getGridLabelRenderer();
-        render.setPadding(10);
+        render.setPadding(5);
         render.setHorizontalLabelsVisible(true);
         render.setVerticalLabelsVisible(false);
         render.setHorizontalLabelsColor(Color.WHITE);
