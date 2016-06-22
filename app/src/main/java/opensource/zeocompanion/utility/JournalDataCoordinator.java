@@ -1143,6 +1143,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
         iRec.mFound |= 0x01;
         if (iRec.theZAH_SleepRecord != null) {
             iRec.theCSErecord.rZeoSleepEpisode_ID = iRec.theZAH_SleepRecord.rSleepEpisodeID;
+            iRec.theCSErecord.rStartOfRecord_Timestamp = iRec.theZAH_SleepRecord.rStartOfNight;
         }
         iRec.theCSErecord.saveToDB();
     }

@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +16,6 @@ import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -33,7 +31,6 @@ import opensource.zeocompanion.database.CompanionSleepEpisodeInfoParsedRec;
 import opensource.zeocompanion.utility.JournalDataCoordinator;
 import opensource.zeocompanion.utility.Utilities;
 import opensource.zeocompanion.views.AttrValsSleepDatasetRec;
-import opensource.zeocompanion.views.AttributeEffectsGraphView;
 import opensource.zeocompanion.views.AttributesHeatmapGraphView;
 import opensource.zeocompanion.views.DaysHoursGraphView;
 import opensource.zeocompanion.views.SleepDatasetRec;
@@ -236,61 +233,6 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         }
     };
 
-    // common listener for presses on the attribute effects radio buttons
-    /*View.OnClickListener mAttrEffectsRadioButtonOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            boolean checked = ((RadioButton)view).isChecked();
-            AttributeEffectsGraphView theAttrEffectsGraph = (AttributeEffectsGraphView)mRootView.findViewById(R.id.graph_attrEffects);
-
-            // Check which radio button was clicked
-            switch(view.getId()) {
-                case R.id.radioButton_attrEffects_deep:
-                    if (checked) {
-                        theAttrEffectsGraph.toggleAllOff();
-                        theAttrEffectsGraph.toggleDeep(true);
-                    }
-                    break;
-                case R.id.radioButton_attrEffects_rem:
-                    if (checked) {
-                        theAttrEffectsGraph.toggleAllOff();
-                        theAttrEffectsGraph.toggleREM(true);
-                    }
-                    break;
-                case R.id.radioButton_attrEffects_light:
-                    if (checked) {
-                        theAttrEffectsGraph.toggleAllOff();
-                        theAttrEffectsGraph.toggleLight(true);
-                    }
-                    break;
-                case R.id.radioButton_attrEffects_awake:
-                    if (checked) {
-                        theAttrEffectsGraph.toggleAllOff();
-                        theAttrEffectsGraph.toggleAwake(true);
-                    }
-                    break;
-                case R.id.radioButton_attrEffects_time2z:
-                    if (checked) {
-                        theAttrEffectsGraph.toggleAllOff();
-                        theAttrEffectsGraph.toggleTimeToZ(true);
-                    }
-                    break;
-                case R.id.radioButton_attrEffects_total:
-                    if (checked) {
-                        theAttrEffectsGraph.toggleAllOff();
-                        theAttrEffectsGraph.toggleTotalSleep(true);
-                    }
-                    break;
-                case R.id.radioButton_attrEffects_zq:
-                    if (checked) {
-                        theAttrEffectsGraph.toggleAllOff();
-                        theAttrEffectsGraph.toggleZQ(true);
-                    }
-                    break;
-            }
-        }
-    };*/
-
     private View.OnClickListener mTrendsGraphClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             Intent intent = new Intent(getActivity(), StatsActivity.class);
@@ -298,47 +240,6 @@ public class MainDashboardFragment extends MainFragmentWrapper {
             startActivity(intent);
         }
     };
-
-    /*private View.OnClickListener mAttrEffectsGraphClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            Intent intent = new Intent(getActivity(), StatsActivity.class);
-            intent.putExtra("startTab", 1);
-            startActivity(intent);
-        }
-    };*/
-
-    // setup a spinner listener;
-    // this class's methods block non-user initiated onItemSelected callbacks; the Spinner MUST be touched first
-    /*private class SpinnerInteractionListener implements AdapterView.OnItemSelectedListener, View.OnTouchListener {
-        private boolean userSelect = false;
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            //Log.d(_CTAG+".onTouch", "Touch on view "+v);
-            userSelect = true;
-            return false;
-        }
-
-        @Override
-        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-            // a spinner item was selected; note this will also get called when setting the default value
-            //Log.d(_CTAG+".onItemSelected", "View="+parentView+", userSelect="+userSelect);
-            if (userSelect) {
-                userSelect = false;
-
-                // a spinner item was selected due only to user touch
-                AttributeEffectsGraphView theAttrEffectsGraph = (AttributeEffectsGraphView)mRootView.findViewById(R.id.graph_attrEffects);
-                String str = theAttrEffectsGraph.mAttributes.get(position);
-                theAttrEffectsGraph.toggleAttribute(str);
-            }
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parentView) {
-            // not needed for our implementation but must be present
-        }
-    }
-    private SpinnerInteractionListener mListener = new SpinnerInteractionListener();*/
 
     // constructor
     public MainDashboardFragment() {}
@@ -412,7 +313,6 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         cb.setChecked(true);
         cb.setOnCheckedChangeListener(mDaysHoursCheckboxChangedListener);
 
-        // setup all the radio buttons
         rb = (RadioButton)mRootView.findViewById(R.id.radioButton_dayHour_DOW);
         rb.setOnClickListener(mDaysHoursRadioButtonOnClickListener);
         rb = (RadioButton)mRootView.findViewById(R.id.radioButton_dayHour_SH);
@@ -423,22 +323,6 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         sb2.setMax(100);
         sb2.setProgress(0);
         sb2.setOnSeekBarChangeListener(mDaysHoursSeekBar2ChangeListener);
-
-        /*rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_deep);
-        rb.setChecked(true);
-        rb.setOnClickListener(mAttrEffectsRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_rem);
-        rb.setOnClickListener(mAttrEffectsRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_light);
-        rb.setOnClickListener(mAttrEffectsRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_awake);
-        rb.setOnClickListener(mAttrEffectsRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_time2z);
-        rb.setOnClickListener(mAttrEffectsRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_total);
-        rb.setOnClickListener(mAttrEffectsRadioButtonOnClickListener);
-        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_zq);
-        rb.setOnClickListener(mAttrEffectsRadioButtonOnClickListener);*/
 
         // select the entire dataset needed for all graphs
         selectNeededData();
@@ -471,8 +355,6 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         theAttrsHeatmapGraph.releaseDataset();
         DaysHoursGraphView theDaysHoursGraph = (DaysHoursGraphView)mRootView.findViewById(R.id.graph_dayHour);
         theDaysHoursGraph.releaseDataset();
-        //AttributeEffectsGraphView theAttrEffectsGraph = (AttributeEffectsGraphView)mRootView.findViewById(R.id.graph_attrEffects);
-        //theAttrEffectsGraph.releaseDataset();
         if (mSleepData != null) { mSleepData.clear(); }
         if (mAttrValsData != null) { mAttrValsData.clear(); }
         super.onDestroyView();
@@ -671,29 +553,6 @@ public class MainDashboardFragment extends MainFragmentWrapper {
                 long cutoffTimestamp = (long)((double)(theAttrsHeatmapGraph.mHighestTimestamp - theAttrsHeatmapGraph.mLowestTimestamp) * theAttrsHeatmapGraph.mTimestampThresholdPct) + theAttrsHeatmapGraph.mLowestTimestamp - 43200000;   // less 12 hours
                 tv2.setText("Start Date Cutoff: "+mSDF.format(new Date(cutoffTimestamp)));
             }
-
-            // prepare the attribute-effects graph
-            /*AttributeEffectsGraphView theAttrEffectsGraph = (AttributeEffectsGraphView)mRootView.findViewById(R.id.graph_attrEffects);
-            theAttrEffectsGraph.prepareForDashboard(screenSize);
-            whichIsCheckedAttrEffects();
-            hasAnyData = theAttrEffectsGraph.setDataset(mAttrValsData, goalTotalSleepMin, goalREMpct, goalDeepPct);
-            if (theAttrEffectsGraph.mShownDatasetLen == 0) {
-                TextView tv = (TextView)mRootView.findViewById(R.id.textView_attrEffectsTitle);
-                tv.setText("Last 7 Session Attribute Effects; there is no data to display");
-            } else if (theAttrEffectsGraph.mShownDatasetLen == 1) {
-                TextView tv = (TextView)mRootView.findViewById(R.id.textView_attrEffectsTitle);
-                tv.setText("Last 7 Session Attribute Effects; only one sleep session; graph will not be useful");
-            }
-            theAttrEffectsGraph.setOnClickListener(mAttrEffectsGraphClickListener);
-
-            // setup the attribute-effects spinner with the found attributes
-            Spinner theSpinner = (Spinner)mRootView.findViewById(R.id.spinner_attrEffects);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, theAttrEffectsGraph.mAttributes);
-            adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-            theSpinner.setAdapter(adapter);
-            whichIsSelectedAttrEffects();
-            theSpinner.setOnTouchListener(mListener);
-            theSpinner.setOnItemSelectedListener(mListener);*/
         } else {
             // sleep journal is disabled, so show no attribute-based graphs
             rl1.setVisibility(View.GONE);
@@ -778,50 +637,5 @@ public class MainDashboardFragment extends MainFragmentWrapper {
         RadioButton rb = (RadioButton)mRootView.findViewById(R.id.radioButton_dayHour_DOW);
         if (rb.isChecked()) { theDaysHoursGraph.mShowDays = true; }
         else { theDaysHoursGraph.mShowDays = false; }
-    }
-
-    // determine which radio button is already checked
-    private void whichIsCheckedAttrEffects() {
-        /*AttributeEffectsGraphView theAttrEffectsGraph = (AttributeEffectsGraphView)mRootView.findViewById(R.id.graph_attrEffects);
-        theAttrEffectsGraph.toggleAllOff();
-        RadioButton rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_deep);
-        if (rb.isChecked()) { theAttrEffectsGraph.mShowDeep = true; }
-        else {
-            rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_rem);
-            if (rb.isChecked()) { theAttrEffectsGraph.mShowREM = true; }
-            else {
-                rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_light);
-                if (rb.isChecked()) { theAttrEffectsGraph.mShowLight = true; }
-                else {
-                    rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_awake);
-                    if (rb.isChecked()) { theAttrEffectsGraph.mShowAwake = true; }
-                    else {
-                        rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_time2z);
-                        if (rb.isChecked()) { theAttrEffectsGraph.mShowTimeToZ = true; }
-                        else {
-                            rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_total);
-                            if (rb.isChecked()) { theAttrEffectsGraph.mShowTotalSleep = true; }
-                            else {
-                                rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_zq);
-                                if (rb.isChecked()) { theAttrEffectsGraph.mShowZQscore = true; }
-                                else {
-                                    rb = (RadioButton)mRootView.findViewById(R.id.radioButton_attrEffects_deep);
-                                    rb.setChecked(true);
-                                    theAttrEffectsGraph.mShowDeep = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }*/
-    }
-
-    // determine which radio button is already checked
-    private void whichIsSelectedAttrEffects() {
-        /*AttributeEffectsGraphView theAttrEffectsGraph = (AttributeEffectsGraphView)mRootView.findViewById(R.id.graph_attrEffects);
-        Spinner theSpinner = (Spinner)mRootView.findViewById(R.id.spinner_attrEffects);
-        int position = theSpinner.getSelectedItemPosition();
-        theAttrEffectsGraph.toggleAttribute(theAttrEffectsGraph.mAttributes.get(position));*/
     }
 }
