@@ -240,7 +240,7 @@ public class ZeoCompanionApplication extends Application {
         // startup all the global application handlers; the order of these startups is important
         mDatabaseHandler = new CompanionDatabase(this);     // database handler must be first and must be initialized
         String msg = mDatabaseHandler.initialize();
-        //if (!msg.isEmpty()) { Utilities.showAlertDialog(this, "Error", msg, "Okay"); }      TODO V1.1 error reporting but only Toast is available at this stage
+        //if (!msg.isEmpty()) { Utilities.showAlertDialog(this, "Error", msg, "Okay"); }      TODO need end-user error reporting but only Toast is available at this stage
         mZeoAppHandler = new ZeoAppHandler(this);
         mCoordinator = new JournalDataCoordinator(this);    // ZeoAppHandler must be instantiated first
         mEmailOutbox = new DirectEmailerOutbox(this);       // JournalDataCoordinator must be instantiated first

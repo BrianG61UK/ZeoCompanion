@@ -178,7 +178,7 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
                             case -1:
                                 // our prior CSE is still active; this can be a normal state if user has pressed DONE SLEEPING yet still has the headband on;
                                 // or if Zeo App is at ENDING
-                                // ??? however must address situation when terminated ZSE gets re-activated when headband out-of-range then in-range while recording
+                                // TODO should address situation when terminated ZSE gets re-activated when headband out-of-range then in-range while recording
                                 if (ZeoCompanionApplication.mZeoAppHandler.mZeoApp_State == ZeoAppHandler.ZAH_ZEOAPP_STATE_ENDING ||
                                         (mDaypoint_CSEs[0].rStatesFlag & CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_STATESFLAG_JOURNAL_EXPLICITEND) != 0) {
                                     // this is the correct state; do nothing

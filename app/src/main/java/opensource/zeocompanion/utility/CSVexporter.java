@@ -325,9 +325,6 @@ public class CSVexporter {
         }
         str = str + EXTENDED_SLEEP_RECORD_COLUMN_NAMES[i];
 
-        // Sleep Cycle Results columns
-        // TODO V1.1 Sleep Cycle Results columns
-
         // Amended Sleep Record columns
         if (mIncludeAmended) {
             for (String name: AMENDED_COLUMN_NAMES_SUFFIX) {

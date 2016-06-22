@@ -301,7 +301,7 @@ public class CompanionDatabase extends SQLiteOpenHelper {
         // database version specific logic
         switch (mVersion) {
             case 1:
-                // upgrade apparently has failed; this is suriviable by just using the old table name   // TODO V1.1 keep or eliminate this
+                // upgrade apparently has failed; this is suriviable by just using the old table name   // TODO should eliminate this
                 Log.e(_CTAG + ".initialize", "ERROR: database remains at version 1; remains usable");
                 CompanionSleepEpisodes_TABLE_NAME = CompanionDatabaseContract.CompanionSleepEpisodes.VER1_TABLE_NAME_INTERNAL;
                 break;

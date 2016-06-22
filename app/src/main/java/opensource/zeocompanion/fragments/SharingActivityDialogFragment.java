@@ -251,7 +251,7 @@ public class SharingActivityDialogFragment extends DialogFragment {
     }
 
     private File createCSVFile(int shareWhat, Date fromWhen) {
-        // TODO V1.1 Perform the Export process in a separate thread?
+        // TODO Perform the Export process in a separate thread?
         CSVexporter theExporter = new CSVexporter(getContext());
         CSVexporter.ReturnResults exportResults = null;
         if (ZeoCompanionApplication.mIrec_SAonly != null) { exportResults = theExporter.createFileOneRec(ZeoCompanionApplication.mIrec_SAonly, shareWhat); }

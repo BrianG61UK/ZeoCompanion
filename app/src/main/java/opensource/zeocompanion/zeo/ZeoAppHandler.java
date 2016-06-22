@@ -298,7 +298,7 @@ public class ZeoAppHandler {
         }
 
         // now check for gaps in sleep record during a live recording
-        // TODO V1.1 Look for suddenly missing recording
+        // TODO Look for suddenly missing recording
         return 0;
     }
 
@@ -436,7 +436,7 @@ public class ZeoAppHandler {
                 mZeoAppMonitorHandler.post(new ProbeRunnable(mCurrProbeRunnableIndex));
             }
         } else if (action.equals("com.myzeo.android.headband.action.HEADBAND_BATTERY_DEAD")) {
-            // ??? maybe do a flashing Red LED for the Zeo line
+            // ignore
         /*} else if (action.equals("com.myzeo.android.headband.action.HEADBAND_BUTTON_PRESS")) {
             // ignore
         } else if (action.equals("com.myzeo.android.headband.action.HEADBAND_DISCONNECTED")) {
@@ -574,7 +574,7 @@ public class ZeoAppHandler {
                                 mTimestampLastPollKnownSleepRecordID = ts;
                                 if (mZeoHeadband_battery_lastProbed == 0) { mZeoHeadband_battery_lastProbed = zRec.rVoltageBattery;  }
                                 // now check for gaps in sleep record during recording
-                                // TODO V1.1 Look for suddenly missing recording
+                                // TODO Look for suddenly missing recording
                                 break;
                             }
                         } while (cursor2.moveToNext());
@@ -742,7 +742,6 @@ public class ZeoAppHandler {
                             sumDurMin = sumDurMin + durMin;
                             qtyDurMin++;
                         }
-                        // TODO V1.1 Compute typical end-of-night per day-of-week
                     }
                 } while (cursor.moveToNext());
                 cursor.close();
