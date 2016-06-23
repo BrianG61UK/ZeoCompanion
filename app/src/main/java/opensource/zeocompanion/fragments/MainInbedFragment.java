@@ -41,7 +41,7 @@ public class MainInbedFragment extends MainFragmentWrapper {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            Log.d(_CTAG+".onTouch", "Touch on view "+v);
+            //Log.d(_CTAG+".onTouch", "Touch on view "+v);
             userSelect = true;
             return false;
         }
@@ -156,7 +156,6 @@ public class MainInbedFragment extends MainFragmentWrapper {
         EvtSpinner theSpinner = (EvtSpinner)mRootView.findViewById(R.id.spinner_doing);
         theSpinner.setOnTouchListener(null);
         theSpinner.setOnItemSelectedListener(null);
-        mListener = null;
     }
 
     // called by the MainActivity to a specific Fragment when it becomes actually shown
