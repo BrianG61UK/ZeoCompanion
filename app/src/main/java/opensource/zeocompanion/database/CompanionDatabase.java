@@ -882,6 +882,7 @@ public class CompanionDatabase extends SQLiteOpenHelper {
     // Thread context: main thread
     // return the quantity of zeo sleep records present; remember the table may not exist so need to detect that;
     // this gets called during App initialization, and the ZeoAppHandle will not have been instanciated
+    // return -2=no replicated data, -1=database error
     public int getQtyZeoSleepEpisodeRecs() {
         SQLiteDatabase db = getReadableDatabase();
         return getQtyZeoSleepEpisodeRecs_internal(db);
@@ -942,8 +943,11 @@ public class CompanionDatabase extends SQLiteOpenHelper {
             newRec = new ZAH_SleepRecord(cursor);
             cursor.close();
         } catch (SQLException e) {
-            ZeoCompanionApplication.mZeoAppHandler.disableReplication();
-            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getSpecifiedZeoSleepRec", e, _CTAG + "ID="+id);   // automatically posts a Log.e
+            String msg = e.getMessage();
+            if (!msg.contains("no such table")) {   // a "no such table" exception is expected here if no replication has been performed
+                ZeoCompanionApplication.mZeoAppHandler.disableReplication();
+                ZeoCompanionApplication.postToErrorLog(_CTAG + ".getSpecifiedZeoSleepRec", e, _CTAG + "ID="+id);   // automatically posts a Log.e
+            }
             if (cursor != null) { cursor.close(); newRec = null; }
         }
         return newRec;
@@ -953,25 +957,7 @@ public class CompanionDatabase extends SQLiteOpenHelper {
     // get all the Zeo Sleep records; remember the table may not exist so need to detect that
     public Cursor getAllZeoSleepRecs() {
         if (mInvalidDB) { return null; }
-        SQLiteDatabase db = getReadableDatabase();
-        String sortOrder = CompanionDatabaseContract.ZeoSleepRecords.COLUMN_START_OF_NIGHT + " DESC";
-        Cursor cursor = null;
-        try {
-            cursor = db.query(
-                    CompanionDatabaseContract.ZeoSleepRecords.TABLE_NAME,   // table name
-                    CompanionDatabaseContract.ZeoSleepRecords.PROJECTION_AVAILABLE,   // columns to get
-                    null,   // columns for optional WHERE clause
-                    null,   // values for optional WHERE clause
-                    null,   // optional row groups
-                    null,   // filter by row groups
-                    sortOrder );    // sort order
-        } catch (SQLException e) {
-            ZeoCompanionApplication.mZeoAppHandler.disableReplication();
-            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getAllZeoSleepRecs", e);  // automatically posts a Log.e
-            if (cursor != null) { cursor.close(); }
-            return null;
-        }
-        return cursor;
+        return getAllZeoSleepRecsAfterDate(0L);
     }
 
     // Thread context: main thread
@@ -980,8 +966,12 @@ public class CompanionDatabase extends SQLiteOpenHelper {
         if (mInvalidDB) { return null; }
         SQLiteDatabase db = getReadableDatabase();
         String sortOrder = CompanionDatabaseContract.ZeoSleepRecords.COLUMN_START_OF_NIGHT + " DESC";
-        String where = CompanionDatabaseContract.ZeoSleepRecords.COLUMN_START_OF_NIGHT + ">=?";
-        String[] values = new String[] { String.valueOf(fromTimestamp) };
+        String where = null;
+        String[] values = null;
+        if (fromTimestamp > 0L) {
+            where = CompanionDatabaseContract.ZeoSleepRecords.COLUMN_START_OF_NIGHT + ">=?";
+            values = new String[] { String.valueOf(fromTimestamp) };
+        }
         Cursor cursor = null;
         try {
             cursor = db.query(
@@ -993,8 +983,11 @@ public class CompanionDatabase extends SQLiteOpenHelper {
                     null,   // filter by row groups
                     sortOrder);    // sort order
         } catch (SQLException e) {
-            ZeoCompanionApplication.mZeoAppHandler.disableReplication();
-            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getAllZeoSleepRecsAfterDate", e,  "Timestamp="+fromTimestamp); // automatically posts a Log.e
+            String msg = e.getMessage();
+            if (!msg.contains("no such table")) {   // a "no such table" exception is expected here if no replication has been performed
+                ZeoCompanionApplication.mZeoAppHandler.disableReplication();
+                ZeoCompanionApplication.postToErrorLog(_CTAG + ".getAllZeoSleepRecsAfterDate", e,  "From Timestamp="+fromTimestamp); // automatically posts a Log.e
+            }
             if (cursor != null) { cursor.close(); cursor = null;}
         }
         return cursor;

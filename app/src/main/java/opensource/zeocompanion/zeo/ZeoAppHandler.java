@@ -185,7 +185,7 @@ public class ZeoAppHandler {
         double d = Utilities.getPrefsEncryptedDouble(prefs, "profile_goal_hours_per_night", 8.0);
         if (d > 0.0) { mTypicalSleepDurationMin = (long)(d * 60.0) - 15L; }
         Long observedSleepDurationMin = getObservedTypicalSleepDurationMin();   // note: the JDC is not yet initialized
-        if (observedSleepDurationMin != null) { mTypicalSleepDurationMin = observedSleepDurationMin; }
+        if (observedSleepDurationMin != 0L) { mTypicalSleepDurationMin = observedSleepDurationMin; }
 
         // probe once the Zeo App's current state and listen for relevant preferences changes
         probeAppState();
@@ -603,6 +603,7 @@ public class ZeoAppHandler {
     /////////////////////////////////////////////////////////////////////////
 
     // get the most active headband record (used when the Headband Commander attempts to connect to the headband)
+    // this must come from the Zeo App; not from any replicated data
     public ZAH_HeadbandRecord getActiveHeadbandRecord() {
         final Cursor cursor = mContext.getContentResolver().query(mHeadbandsContentURI, ZAH_HeadbandRecord.ZAH_HEADBANDREC_COLS, null, null, null);
         if (cursor == null) { return null; }
@@ -631,11 +632,15 @@ public class ZeoAppHandler {
         return rec;
     }
 
-    // retrieve the specified sleep record by ID from the Zeo App's database, and provide a string of its END_REASON code
+    // retrieve the specified sleep record by ID from the Zeo App's database, and provide a string of its END_REASON code;
+    // this method searches first in the Zeo App database, then searches any replicated Zeo App data in the ZeoCompanion database
     public String getStateStringOfID(long id) {
         String where = ZeoDataContract.SleepRecord.SLEEP_EPISODE_ID + "=?";
         String values[] = { String.valueOf(id) };
         Cursor cursor = null;
+        Exception excp = null;
+
+        // first try the Zeo App itself
         try {
             cursor = mContext.getContentResolver().query(
                     mSleepRecordsContentURI,    // data manager, database and table name
@@ -643,23 +648,40 @@ public class ZeoAppHandler {
                     where,          // columns for optional WHERE clause
                     values,        // values for optional WHERE clause
                     null); // sort order
-            if (cursor == null) { return "None"; }
-            if (!cursor.moveToFirst()) { cursor.close(); return "None"; }
-            ZAH_SleepRecord zRec = new ZAH_SleepRecord(cursor);
-            return zRec.getStatusString();
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    // record was found in Zeo App's database
+                    ZAH_SleepRecord zRec = new ZAH_SleepRecord(cursor);
+                    cursor.close();
+                    return zRec.getStatusString();
+                }
+                cursor.close();
+            }
         } catch (Exception e) {
-            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getStateStringOfID", e, "ID="+id);   // automatically posts a Log.e
+            // defer the exception handling
+            excp = e;
             if (cursor != null) { cursor.close(); }
+        }
+
+        // next try replicated data (if any)
+        ZAH_SleepRecord zRec = ZeoCompanionApplication.mDatabaseHandler.getSpecifiedZeoSleepRec(id);
+        if (zRec != null) { return zRec.getStatusString(); }
+
+        // not found anywhere; was there a deferred exception?
+        if (excp != null) {
+            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getStateStringOfID", excp, "ID="+id);   // automatically posts a Log.e
         }
         return "None";
     }
 
-    // get one specific Zeo Sleep record within the Zeo App's database
+    // get one specific Zeo Sleep record within the Zeo App's database;
+    // this method searches first in the Zeo App database, then searches any replicated Zeo App data in the ZeoCompanion database
     public ZAH_SleepRecord getSpecifiedSleepRecOfID(long id) {
-        //return ZeoCompanionApplication.mDatabaseHandler.getSpecifiedZeoSleepRec(id);  // can return null
         String where = ZeoDataContract.SleepRecord.SLEEP_EPISODE_ID + "=?";
         String values[] = { String.valueOf(id) };
         Cursor cursor = null;
+        Exception excp = null;
+
         try {
             cursor =  mContext.getContentResolver().query(
                     mSleepRecordsContentURI,    // data manager, database and table name
@@ -667,60 +689,71 @@ public class ZeoAppHandler {
                     where,       // columns for optional WHERE clause
                     values,       // values for optional WHERE clause
                     null); // sort order
-            if (cursor == null) { return null; }
-            if (!cursor.moveToFirst()) { cursor.close(); return null; }
-            ZAH_SleepRecord newRec = new ZAH_SleepRecord(cursor);
-            cursor.close();
-            return newRec;
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    // record was found in Zeo App's database
+                    ZAH_SleepRecord zRec = new ZAH_SleepRecord(cursor);
+                    cursor.close();
+                    return zRec;
+                }
+            }
         } catch (Exception e) {
-            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getSpecifiedSleepRec", e, "ID="+id);   // automatically posts a Log.e
+            // defer the exception handling
+            excp = e;
             if (cursor != null) { cursor.close(); cursor = null; }
+        }
+
+        // next try replicated data (if any)
+        ZAH_SleepRecord zRec = ZeoCompanionApplication.mDatabaseHandler.getSpecifiedZeoSleepRec(id);
+        if (zRec != null) { return zRec; }
+
+        // not found anywhere; was there a deferred exception?
+        if (excp != null) {
+            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getSpecifiedSleepRec", excp, "ID="+id);   // automatically posts a Log.e
         }
         return null;
     }
 
     // get all the Zeo Sleep records within the Zeo App's database
     public Cursor getAllSleepRecs() {
-        //return ZeoCompanionApplication.mDatabaseHandler.getAllZeoSleepRecs(); // can return null
-        String sortOrder = ZeoDataContract.SleepRecord.START_OF_NIGHT + " DESC";
-        Cursor cursor = null;
-        try {
-            cursor =  mContext.getContentResolver().query(
-                    mSleepRecordsContentURI,    // data manager, database and table name
-                    ZAH_SleepRecord.ZAH_SLEEPREC_EXTENDED_COLS,          // columns to get
-                    null,       // columns for optional WHERE clause
-                    null,       // values for optional WHERE clause
-                    sortOrder); // sort order
-        } catch (Exception e) {
-            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getAllZeoSleepRecs", e);   // automatically posts a Log.e
-            if (cursor != null) { cursor.close(); cursor = null; }
-        }
-        return cursor;
+        return getAllSleepRecsAfterDate(0L);
     }
 
-    // get only those Zeo Sleep records after the specified date from the Zeo App's database
+    // get only those Zeo Sleep records after the specified date from the Zeo App's database;
+    // note this method DOES NOT draw from any replicate data in the ZeoCompanion database;
+    // that merge must be handled at a higher level
     public Cursor getAllSleepRecsAfterDate(long fromTimestamp) {
-        //return ZeoCompanionApplication.mDatabaseHandler.getAllZeoSleepRecsAfterDate(fromTimestamp);   // can return null
         String sortOrder = ZeoDataContract.SleepRecord.START_OF_NIGHT + " DESC";
+        String where = null;
+        String[] values = null;
+        if (fromTimestamp > 0L) {
+            where = ZeoDataContract.SleepRecord.START_OF_NIGHT + ">=?";
+            values = new String[] { String.valueOf(fromTimestamp) };
+        }
         Cursor cursor = null;
         try {
             cursor = mContext.getContentResolver().query(
                     mSleepRecordsContentURI,    // data manager, database and table name
                     ZAH_SleepRecord.ZAH_SLEEPREC_EXTENDED_COLS,          // columns to get
-                    ZeoDataContract.SleepRecord.START_OF_NIGHT+">=?",       // columns for optional WHERE clause
-                    new String[] { String.valueOf(fromTimestamp) },         // values for optional WHERE clause
+                    where,       // columns for optional WHERE clause
+                    values,         // values for optional WHERE clause
                     sortOrder); // sort order
         } catch (Exception e) {
-            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getAllSleepRecsAfterDate", e, "For timestamp="+fromTimestamp);   // automatically posts a Log.e
+            ZeoCompanionApplication.postToErrorLog(_CTAG + ".getAllSleepRecsAfterDate", e, "From timestamp="+fromTimestamp);   // automatically posts a Log.e
             if (cursor != null) { cursor.close(); cursor = null; }
         }
         return cursor;
     }
 
+    // evaluate the Zeo App Sleep Rrecods to find the end-users average sleep duration
     public Long getObservedTypicalSleepDurationMin() {
         String sortOrder = ZeoDataContract.SleepRecord.START_OF_NIGHT + " DESC";
         String[] cols = { ZeoDataContract.SleepRecord.START_OF_NIGHT + "," + ZeoDataContract.SleepRecord.END_OF_NIGHT + "," + ZeoDataContract.SleepRecord.TOTAL_Z };
         Cursor cursor = null;
+        long sumDurMin = 0L;
+        int qtyDurMin = 0;
+
+        // first try the Zeo App itself
         try {
             cursor = mContext.getContentResolver().query(
                     mSleepRecordsContentURI,    // data manager, database and table name
@@ -730,8 +763,6 @@ public class ZeoAppHandler {
                     sortOrder);    // sort order
             if (cursor == null) { return null; }
             if (cursor.moveToFirst()) {
-                long sumDurMin = 0L;
-                int qtyDurMin = 0;
                 do {
                     long totZ = cursor.getLong(cursor.getColumnIndex(ZeoDataContract.SleepRecord.TOTAL_Z));
                     if (totZ > 0) {
@@ -744,16 +775,35 @@ public class ZeoAppHandler {
                         }
                     }
                 } while (cursor.moveToNext());
-                cursor.close();
-                if (qtyDurMin == 0) { return null; }
-                Long avgDur = sumDurMin / qtyDurMin;
-                return avgDur;
             }
         } catch (SQLException e) {
             ZeoCompanionApplication.postToErrorLog(_CTAG + ".getObservedTypicalSleepDurationMin", e);   // automatically posts a Log.e
         }
-        if (cursor != null) { cursor.close(); }
-        return null;
+        if (cursor != null) { cursor.close(); cursor = null; }
+
+        // now try the replicated data; if both exist the average will come out the same
+        cursor = ZeoCompanionApplication.mDatabaseHandler.getAllZeoSleepRecs();
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    long totZ = cursor.getLong(cursor.getColumnIndex(ZeoDataContract.SleepRecord.TOTAL_Z));
+                    if (totZ > 0) {
+                        long son = cursor.getLong(cursor.getColumnIndex(ZeoDataContract.SleepRecord.START_OF_NIGHT));
+                        long eon = cursor.getLong(cursor.getColumnIndex(ZeoDataContract.SleepRecord.END_OF_NIGHT));
+                        if (son > 0L && eon > 0L) {
+                            long durMin = (eon - son) / 60000L;
+                            sumDurMin = sumDurMin + durMin;
+                            qtyDurMin++;
+                        }
+                    }
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+
+        if (qtyDurMin == 0) { return 0L; }
+        Long avgDur = sumDurMin / qtyDurMin;
+        return avgDur;
     }
 
     //////////////////////////////////////////////////////////////////////

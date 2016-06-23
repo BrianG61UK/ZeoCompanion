@@ -1204,82 +1204,109 @@ public class JournalDataCoordinator implements ZeoAppHandler.ZAH_Listener {
             }
         }
 
-        // next merge in all the desired Zeo Sleep Records
-        Cursor cursor2 = null;
-        if (afterTimestamp > 0) { cursor2 = ZeoCompanionApplication.mZeoAppHandler.getAllSleepRecsAfterDate(afterTimestamp); }
-        else { cursor2 = ZeoCompanionApplication.mZeoAppHandler.getAllSleepRecs(); }
-        if (cursor2 != null) {
-            if (cursor2.moveToFirst()) {
-                do {
-                    ZAH_SleepRecord zRec1 = new ZAH_SleepRecord(cursor2);
-                    if (zeoOnly) {
-                        // Zeo records only; no integrating needed
-                        if (includeZeoDead || zRec1.rTime_Total_Z_min > 0.0) {
-                            IntegratedHistoryRec iRec2 = new IntegratedHistoryRec();
-                            iRec2.theCSErecord = null;
-                            iRec2.theZAH_SleepRecord = zRec1;
-                            iRec2.mTimestamp = zRec1.rStartOfNight;
-                            iRec2.mZSEid = zRec1.rSleepEpisodeID;
-                            iRec2.mFound = 0x02;
-                            theArray.add(iRec2);
-                            zeoCnt++;
-                        }
-                    } else {
-                        // integration is necessary
-                        boolean found = false;
-                        for (IntegratedHistoryRec existingIrec: theArray) {
-                            if (existingIrec.mZSEid == zRec1.rSleepEpisodeID) {
-                                // found the matching CSE record
-                                if (includeZeoDead || zRec1.rTime_Total_Z_min > 0.0 || zRec1.rEndReason == ZeoDataContract.SleepRecord.END_REASON_ACTIVE) {
-                                    // is a normal active or finished Zeo record or we want dead ZEO records; integrate it with its matching CSE
-                                    existingIrec.theZAH_SleepRecord = zRec1;
-                                    if (zRec1.rStartOfNight < existingIrec.mTimestamp) { existingIrec.mTimestamp = zRec1.rStartOfNight; }
-                                    existingIrec.mZSEid = zRec1.rSleepEpisodeID;
-                                    existingIrec.mFound = (existingIrec.mFound | 0x02);
-                                    found = true;
-                                } else {
-                                    // this is a hidden Zeo record usually because it is incomplete or had no actual sleep
-                                    if (existingIrec.theCSErecord != null) {
-                                        // it has a matching CSE
-                                        if (existingIrec.theCSErecord.isZeoOnly()) {
-                                            // the CSE record has Zeo-only content and the Zeo record would normally be hidden, so eliminate the entire integrated record
-                                            //Log.d(_CTAG+".getIrecs","Removing CSE#"+existingIrec.mCSEid+" with ZSE#"+existingIrec.mZSEid);
-                                            theArray.remove(existingIrec);
-                                            journalCnt--;
-                                        } else {
-                                            // the CSE record has content other than Zeo-only content, so do not hide the integrated combination
+        // next merge in all the desired Zeo Sleep Records; two passes to draw from both the Zeo App's database and any replication in the ZeoCompanion database
+        for (int pass = 0; pass <= 1; pass++) {
+            Cursor cursor2 = null;
+            if (pass == 1) { cursor2 = ZeoCompanionApplication.mDatabaseHandler.getAllZeoSleepRecsAfterDate(afterTimestamp); }
+            else { cursor2 = ZeoCompanionApplication.mZeoAppHandler.getAllSleepRecsAfterDate(afterTimestamp); }
+
+            if (cursor2 != null) {
+                if (cursor2.moveToFirst()) {
+                    do {
+                        ZAH_SleepRecord zRec1 = new ZAH_SleepRecord(cursor2);
+                        if (zeoOnly) {
+                            // Zeo records only; no integrating needed
+                            if (includeZeoDead || zRec1.rTime_Total_Z_min > 0.0) {
+                                boolean found = false;
+                                if (pass == 1) {
+                                    for (IntegratedHistoryRec existingIrec: theArray) {
+                                        if (existingIrec.mZSEid == zRec1.rSleepEpisodeID) {
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!found) {
+                                    IntegratedHistoryRec iRec2 = new IntegratedHistoryRec();
+                                    iRec2.theCSErecord = null;
+                                    iRec2.theZAH_SleepRecord = zRec1;
+                                    iRec2.mTimestamp = zRec1.rStartOfNight;
+                                    iRec2.mZSEid = zRec1.rSleepEpisodeID;
+                                    iRec2.mFound = 0x02;
+                                    theArray.add(iRec2);
+                                    zeoCnt++;
+                                }
+                            }
+                        } else {
+                            // integration is necessary
+                            boolean found = false;
+                            for (IntegratedHistoryRec existingIrec: theArray) {
+                                if (existingIrec.mZSEid == zRec1.rSleepEpisodeID) {
+                                    // found the matching CSE record
+                                    if (pass == 0 || (existingIrec.mFound & 0x02) == 0) {
+                                        if (includeZeoDead || zRec1.rTime_Total_Z_min > 0.0 || zRec1.rEndReason == ZeoDataContract.SleepRecord.END_REASON_ACTIVE) {
+                                            // is a normal active or finished Zeo record or we want dead ZEO records; integrate it with its matching CSE
                                             existingIrec.theZAH_SleepRecord = zRec1;
                                             if (zRec1.rStartOfNight < existingIrec.mTimestamp) { existingIrec.mTimestamp = zRec1.rStartOfNight; }
                                             existingIrec.mZSEid = zRec1.rSleepEpisodeID;
                                             existingIrec.mFound = (existingIrec.mFound | 0x02);
                                             found = true;
+                                        } else {
+                                            // this is a hidden Zeo record usually because it is incomplete or had no actual sleep
+                                            if (existingIrec.theCSErecord != null) {
+                                                // it has a matching CSE
+                                                if (existingIrec.theCSErecord.isZeoOnly()) {
+                                                    // the CSE record has Zeo-only content and the Zeo record would normally be hidden, so eliminate the entire integrated record
+                                                    //Log.d(_CTAG+".getIrecs","Removing CSE#"+existingIrec.mCSEid+" with ZSE#"+existingIrec.mZSEid);
+                                                    theArray.remove(existingIrec);
+                                                    journalCnt--;
+                                                } else {
+                                                    // the CSE record has content other than Zeo-only content, so do not hide the integrated combination
+                                                    existingIrec.theZAH_SleepRecord = zRec1;
+                                                    if (zRec1.rStartOfNight < existingIrec.mTimestamp) { existingIrec.mTimestamp = zRec1.rStartOfNight; }
+                                                    existingIrec.mZSEid = zRec1.rSleepEpisodeID;
+                                                    existingIrec.mFound = (existingIrec.mFound | 0x02);
+                                                    found = true;
+                                                }
+                                            } else {
+                                                // not sure how this would happen; preexisting integrated rec without any CSE content and a dead Zeo record
+                                                theArray.remove(existingIrec);
+                                                //Log.d(_CTAG+".getIrecs","Removing CSE#"+existingIrec.mCSEid+" with ZSE#"+existingIrec.mZSEid);
+                                            }
                                         }
-                                    } else {
-                                        // not sure how this would happen; preexisting integrated rec without any CSE content and a dead Zeo record
-                                        theArray.remove(existingIrec);
-                                        //Log.d(_CTAG+".getIrecs","Removing CSE#"+existingIrec.mCSEid+" with ZSE#"+existingIrec.mZSEid);
+                                    }
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                // no matching CSE was found, so include it as-is
+                                if (includeZeoDead || zRec1.rTime_Total_Z_min > 0.0) {
+                                    found = false;
+                                    if (pass == 1) {
+                                        for (IntegratedHistoryRec existingIrec: theArray) {
+                                            if (existingIrec.mZSEid == zRec1.rSleepEpisodeID) {
+                                                found = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (!found) {
+                                        IntegratedHistoryRec iRec2 = new IntegratedHistoryRec();
+                                        iRec2.theCSErecord = null;
+                                        iRec2.theZAH_SleepRecord = zRec1;
+                                        iRec2.mTimestamp = zRec1.rStartOfNight;
+                                        iRec2.mZSEid = zRec1.rSleepEpisodeID;
+                                        iRec2.mFound = 0x02;
+                                        theArray.add(iRec2);
+                                        zeoCnt++;
                                     }
                                 }
-                                break;
                             }
                         }
-                        if (!found) {
-                            // no matching CSE was found, so include it as-is
-                            if (includeZeoDead || zRec1.rTime_Total_Z_min > 0.0) {
-                                IntegratedHistoryRec iRec2 = new IntegratedHistoryRec();
-                                iRec2.theCSErecord = null;
-                                iRec2.theZAH_SleepRecord = zRec1;
-                                iRec2.mTimestamp = zRec1.rStartOfNight;
-                                iRec2.mZSEid = zRec1.rSleepEpisodeID;
-                                iRec2.mFound = 0x02;
-                                theArray.add(iRec2);
-                                zeoCnt++;
-                            }
-                        }
-                    }
-                } while (cursor2.moveToNext());
+                    } while (cursor2.moveToNext());
+                }
+                cursor2.close();
             }
-            cursor2.close();
         }
 
         if (journalCnt > 0 && zeoCnt > 0) {
