@@ -11,11 +11,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
 import opensource.zeocompanion.R;
 import opensource.zeocompanion.ZeoCompanionApplication;
 import opensource.zeocompanion.database.CompanionAlertRec;

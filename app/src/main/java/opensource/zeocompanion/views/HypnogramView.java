@@ -549,29 +549,33 @@ public class HypnogramView extends GraphView {
                     mEventSeries.setCustomShape(new PointsGraphSeries.CustomShape() {
                         @Override
                         public void draw(Canvas canvas, Paint paint, float x, float y, DataPointInterface dataPoint) {
-                            CompanionSleepEpisodeEventsParsedRec eRec = mTheEvents.get(mPointsGraphIndexMap[dataPoint.getIndex()]);
                             String letter = "";
-                            switch (eRec.rEventNo) {
-                                case CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_GOING_TO_SLEEP:
-                                    paint.setColor(Color.rgb(0, 0, 204));
-                                    letter = "T";
-                                    break;
-                                case CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_STILL_AWAKE:
-                                    paint.setColor(Color.RED);
-                                    letter = "S";
-                                    break;
-                                case CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_WOKEUP:
-                                    paint.setColor(Color.RED);
-                                    letter = "W";
-                                    break;
-                                case CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_WOKEUP_DID_SOMETHING:
-                                    paint.setColor(Color.RED);
-                                    letter = "D";
-                                    break;
-                                case CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_WOKEUP_RETRY_TO_SLEEP:
-                                    paint.setColor(Color.rgb(0, 0, 204));
-                                    letter = "R";
-                                    break;
+                            int inx = mPointsGraphIndexMap[dataPoint.getIndex()];
+                            if (inx < mTheEvents.size()) {
+                                CompanionSleepEpisodeEventsParsedRec eRec = mTheEvents.get(inx);
+
+                                switch (eRec.rEventNo) {
+                                    case CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_GOING_TO_SLEEP:
+                                        paint.setColor(Color.rgb(0, 0, 204));
+                                        letter = "T";
+                                        break;
+                                    case CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_STILL_AWAKE:
+                                        paint.setColor(Color.RED);
+                                        letter = "S";
+                                        break;
+                                    case CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_WOKEUP:
+                                        paint.setColor(Color.RED);
+                                        letter = "W";
+                                        break;
+                                    case CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_WOKEUP_DID_SOMETHING:
+                                        paint.setColor(Color.RED);
+                                        letter = "D";
+                                        break;
+                                    case CompanionDatabaseContract.CompanionSleepEpisodes.SLEEP_EPISODE_EVENT_WOKEUP_RETRY_TO_SLEEP:
+                                        paint.setColor(Color.rgb(0, 0, 204));
+                                        letter = "R";
+                                        break;
+                                }
                             }
                             if (!letter.isEmpty()) {
                                 paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
