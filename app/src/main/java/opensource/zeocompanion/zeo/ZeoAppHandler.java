@@ -26,6 +26,8 @@ import opensource.zeocompanion.utility.Utilities;
 // primary Handler for interacting with the Zeo App
 public class ZeoAppHandler {
     // member variables
+    public String mZeoApp_Prior_5min_Stages = "";
+    public String mZeoApp_Latest_5min_Stages = "";
     public int mZeoApp_Prior_State = ZAH_ZEOAPP_STATE_UNKNOWN;
     public int mZeoApp_State = ZAH_ZEOAPP_STATE_UNKNOWN;
     public long mZeoApp_State_timestamp = 0L;
@@ -285,6 +287,25 @@ public class ZeoAppHandler {
         return "Unknown";
     }
 
+    // return a string interpretation of the sleep stage
+    public String getStageString(int sleepStage) {
+        switch (sleepStage) {
+            case ZAH_SleepRecord.ZAH_HYPNOGRAM_UNDEFINED:
+                return "Undefined";
+            case ZAH_SleepRecord.ZAH_HYPNOGRAM_WAKE:
+                return "Awake";
+            case ZAH_SleepRecord.ZAH_HYPNOGRAM_REM:
+                return "REM";
+            case ZAH_SleepRecord.ZAH_HYPNOGRAM_LIGHT:
+                return "Light";
+            case ZAH_SleepRecord.ZAH_HYPNOGRAM_DEEP:
+                return "Deep";
+            case ZAH_SleepRecord.ZAH_HYPNOGRAM_LIGHT_TO_DEEP:
+                return "Light-Deep";
+        }
+        return "Unknown";
+    }
+
     // look for conditions that would trigger a flashing red LED for the Zeo App;
     // called by the Journal Status Bar
     public int checkforZeoAppAlarm() {
@@ -300,6 +321,19 @@ public class ZeoAppHandler {
         // now check for gaps in sleep record during a live recording
         // TODO Look for suddenly missing recording
         return 0;
+    }
+
+    // send out an Android-wide broadcast when state changes or when sleep stage changes
+    public void sendSystemWideBroadcast() {
+        Intent intent = new Intent();
+        intent.setAction("opensource.zeocompanion.broadcast.zeo_app.state_stage_change");
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        intent.putExtra("Latest_State", getStateString());
+        if (mZeoApp_State == ZAH_ZEOAPP_STATE_RECORDING) {
+            intent.putExtra("Latest_5min_Stages", mZeoApp_Latest_5min_Stages);
+        }
+        mContext.sendBroadcast(intent);
+        Log.d(_CTAG+".sendSysWideBcast","SEND System-wide Broadcast: "+getStateString()+": "+mZeoApp_Latest_5min_Stages);
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -501,13 +535,16 @@ public class ZeoAppHandler {
                 mContinueZeoAppProbing_broadcast = 0;
             }
 
-            // change to the new state
+            // change to the new state and send a system-wide broadcast of this fact
             mZeoApp_State = newState;
             mZeoApp_State_timestamp = System.currentTimeMillis();
             if (mZeoApp_State <= ZAH_ZEOAPP_STATE_IDLE) {
                 // its gone idle, so clear out the *active* sleep episode info
                 mZeoApp_active_SleepEpisode_ID = 0;
             }
+            mZeoApp_Prior_5min_Stages = "";
+            mZeoApp_Latest_5min_Stages = "";
+            sendSystemWideBroadcast();
         }
 
         // at this point, mZeoApp_State is now the proper current state;
@@ -567,6 +604,7 @@ public class ZeoAppHandler {
                                             }
                                         }
                                     }
+                                    getLast5Min(zRec);
                                     break;
                                 }
                             } else {
@@ -575,6 +613,7 @@ public class ZeoAppHandler {
                                 if (mZeoHeadband_battery_lastProbed == 0) { mZeoHeadband_battery_lastProbed = zRec.rVoltageBattery;  }
                                 // now check for gaps in sleep record during recording
                                 // TODO Look for suddenly missing recording
+                                getLast5Min(zRec);
                                 break;
                             }
                         } while (cursor2.moveToNext());
@@ -596,6 +635,32 @@ public class ZeoAppHandler {
             Log.d(_CTAG+".probeAppState", str);
         }
         return theReturn;
+    }
+
+    // get the last 5 minutes of sleep stages from the sleep record and broadcast changes
+    private void getLast5Min(ZAH_SleepRecord zRec) {
+        // extract the last 5 minutes of sleep stages (will be 10 entries as each entry is 30 seconds)
+        mZeoApp_Prior_5min_Stages = mZeoApp_Latest_5min_Stages;
+        mZeoApp_Latest_5min_Stages = "";
+        int s = 0;
+        int e = 0;
+        int l = zRec.rBase_Hypnogram.length;
+
+        if (l < 10) {
+            s = 0;
+            e = l;
+        } else {
+            s = l - 10;
+            e = l;
+        }
+        for (int i = s; i < e; i++) {
+            mZeoApp_Latest_5min_Stages = mZeoApp_Latest_5min_Stages + Byte.toString(zRec.rBase_Hypnogram[i]);
+        }
+
+        // has the sleep stages changed?
+        if (!mZeoApp_Prior_5min_Stages.equals(mZeoApp_Latest_5min_Stages)) {
+            sendSystemWideBroadcast();
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////
