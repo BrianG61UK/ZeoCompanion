@@ -4,9 +4,7 @@ android {
     signingConfigs {
         config {
             keyAlias 'MainPI-1'
-            keyPassword 'junDEr$4SNitz9'
             storeFile file('G:/Development/Mobile/Android/Keystores/main.jks')
-            storePassword 'niGGleY3$piTz!'
         }
     }
     compileSdkVersion 23
