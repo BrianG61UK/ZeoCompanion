@@ -654,6 +654,10 @@ public class ZeoCompanionApplication extends Application {
             wrt.write("AppVerName " + BuildConfig.VERSION_NAME + " AppVerCode " + BuildConfig.VERSION_CODE);
             if (mDatabaseHandler != null) { wrt.write(" with DBver " +mDatabaseHandler.mVersion); }
             wrt.write("\n");
+            if (mZeoAppHandler != null) {
+                if (mZeoAppHandler.mZeoApp_versionName == null) { wrt.write("Zeo App not installed\n"); }
+                else { wrt.write("Zeo App version "+mZeoAppHandler.mZeoApp_versionName+" build "+mZeoAppHandler.mZeoApp_versionCode+"\n"); }
+            }
             wrt.write("Android Version " + android.os.Build.VERSION.RELEASE + " API " + android.os.Build.VERSION.SDK_INT + "\n");
             wrt.write("Platform Manf " + Build.MANUFACTURER + " Model " + Build.MODEL + "\n");
             WindowManager windowManager = (WindowManager)mApp.getSystemService(Context.WINDOW_SERVICE);
@@ -723,6 +727,10 @@ public class ZeoCompanionApplication extends Application {
             wrt.write("Appver " + BuildConfig.VERSION_NAME);
             if (mDatabaseHandler != null) { wrt.write(" with DBver " +mDatabaseHandler.mVersion); }
             wrt.write("\n");
+            if (mZeoAppHandler != null) {
+                if (mZeoAppHandler.mZeoApp_versionName == null) { wrt.write("Zeo App not installed\n"); }
+                else { wrt.write("Zeo App version "+mZeoAppHandler.mZeoApp_versionName+" build "+mZeoAppHandler.mZeoApp_versionCode+"\n"); }
+            }
             wrt.write("Android Version " + android.os.Build.VERSION.RELEASE + " API " + android.os.Build.VERSION.SDK_INT + "\n");
             wrt.write("Platform Manf " + Build.MANUFACTURER + " Model " + Build.MODEL + "\n");
             if (method != null) {

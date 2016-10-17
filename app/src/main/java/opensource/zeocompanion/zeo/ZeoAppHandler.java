@@ -3,6 +3,7 @@ package opensource.zeocompanion.zeo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -14,6 +15,8 @@ import android.provider.BaseColumns;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.List;
+
 import com.myzeo.android.api.data.ZeoDataContract;
 import com.myzeo.android.api.data.ZeoDataContract.Headband;
 import com.myzeo.android.api.data.ZeoDataContract.SleepRecord;
@@ -35,6 +38,8 @@ public class ZeoAppHandler {
     public int mZeoHeadband_battery_lastProbed = 0;
     public int mZeoHeadband_battery_maxWhileRecording = 0;
     public int mZeoHeadband_battery_minWhileRecording = 0;
+    public String mZeoApp_versionName = null;
+    public int mZeoApp_versionCode = 0;
     private Context mContext = null;
     private boolean mContinueZeoAppProbing_foreground = false;
     private int mContinueZeoAppProbing_broadcast = 0;
@@ -57,10 +62,11 @@ public class ZeoAppHandler {
 
     public static final int ZAH_ERROR_NONE = 0;
     public static final int ZAH_ERROR_NOT_INSTALLED = 1;
-    public static final int ZAH_ERROR_NO_PERMISSION = 2;
-    public static final int ZAH_ERROR_NO_DB = 3;
-    public static final int ZAH_ERROR_NO_HB_REC = 4;
-    public static final int ZAH_ERROR_NO_DATA = 5;
+    public static final int ZAH_ERROR_WRONG_VERSION = 2;
+    public static final int ZAH_ERROR_NO_PERMISSION = 3;
+    public static final int ZAH_ERROR_NO_DB = 4;
+    public static final int ZAH_ERROR_NO_HB_REC = 5;
+    public static final int ZAH_ERROR_NO_DATA = 6;
 
     public static final int ZAH_ZEOAPP_STATE_UNKNOWN = -1;
     public static final int ZAH_ZEOAPP_STATE_IDLE = 0;
@@ -160,6 +166,20 @@ public class ZeoAppHandler {
                 Headband.BLUETOOTH_ADDRESS,
                 Headband.BLUETOOTH_FRIENDLY_NAME,
         };
+
+        // expect to find the ZeoApp at version 1.2.7 build 207
+        boolean found = false;
+        List<PackageInfo> packages = mContext.getPackageManager().getInstalledPackages(0);
+        for (PackageInfo packageInfo : packages) {
+            if (packageInfo.packageName.equals("com.myzeo.android")) {
+                found = true;
+                mZeoApp_versionName = packageInfo.versionName;
+                mZeoApp_versionCode = packageInfo.versionCode;
+                Log.i(_CTAG+".verifyAPI", "Zeo App Installed: version="+packageInfo.versionName+", build="+packageInfo.versionCode);
+            }
+        }
+        if (!found) { return ZAH_ERROR_NOT_INSTALLED; }
+        //???if (mZeoApp_versionCode != 207) { return ZAH_ERROR_WRONG_VERSION; }
 
         // does App still have permission to access the Zeo App's API?
         int permissionCheck = ContextCompat.checkSelfPermission(mContext, "com.myzeo.permission.READ_SLEEP_RECORDS");
@@ -278,6 +298,8 @@ public class ZeoAppHandler {
                 return "ZeoCompanion App not granted permission to access Zeo App";
             case ZAH_ERROR_NOT_INSTALLED:
                 return "Zeo App is not installed";
+            case ZAH_ERROR_WRONG_VERSION:
+                return "Zeo App must be version 1.2.7 build 207 but is not";
         }
         return "Zeo API Unknown error";
     }
