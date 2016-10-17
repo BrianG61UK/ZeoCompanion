@@ -154,7 +154,7 @@ public class ZeoAppHandler {
     }
 
     // verify the Zeo's API is active and the Zeo has been used;
-    // this is performed everytime our App is brought to the foreground
+    // this is performed every time our App is brought to the foreground
     public int verifyAPI() {
         String[] cols_hb = {
                 Headband.BLUETOOTH_ADDRESS,
@@ -166,7 +166,13 @@ public class ZeoAppHandler {
         if (permissionCheck == PackageManager.PERMISSION_DENIED) { return ZAH_ERROR_NO_PERMISSION; }
 
         // check Zeo App headband records
-        final Cursor cursor1 = mContext.getContentResolver().query(mHeadbandsContentURI, cols_hb, null, null, null);
+        Cursor cursor1 = null;
+        try {
+            cursor1 = mContext.getContentResolver().query(mHeadbandsContentURI, cols_hb, null, null, null);
+        } catch (Exception e1) {
+            ZeoCompanionApplication.postToErrorLog(_CTAG+".verifyAPI", e1, "Query URI: "+mHeadbandsContentURI);
+            return ZAH_ERROR_NO_DB;
+        }
         if (cursor1 == null) { Log.e(_CTAG+".verifyAPI","The ZeoApp Headband Table is inaccessible"); return ZAH_ERROR_NO_DB; }
         if (!cursor1.moveToFirst()) { cursor1.close(); Log.e(_CTAG + ".verifyAPI", "The ZeoApp Headband Table is empty");  return ZAH_ERROR_NO_HB_REC; }
         cursor1.close();
@@ -176,7 +182,13 @@ public class ZeoAppHandler {
                 SleepRecord.SLEEP_EPISODE_ID,
                 SleepRecord.SOURCE,
         };
-        final Cursor cursor2 = mContext.getContentResolver().query(mSleepRecordsContentURI, cols_sleepRec, null, null, null);
+        Cursor cursor2 = null;
+        try {
+            cursor2 = mContext.getContentResolver().query(mSleepRecordsContentURI, cols_sleepRec, null, null, null);
+        } catch (Exception e2) {
+            ZeoCompanionApplication.postToErrorLog(_CTAG+".verifyAPI", e2, "Query URI: "+mSleepRecordsContentURI);
+            return ZAH_ERROR_NO_DB;
+        }
         if (cursor2 == null) { Log.e(_CTAG+".verifyAPI","The ZeoApp SleepRecord Table is inaccessible"); return ZAH_ERROR_NO_DB; }
         if (!cursor2.moveToFirst()) { cursor2.close(); return ZAH_ERROR_NO_DATA; }
         cursor2.close();
