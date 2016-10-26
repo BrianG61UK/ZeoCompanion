@@ -461,6 +461,20 @@ public class MainHistoryFragment extends MainFragmentWrapper {
 
         // clear all the bitmaps so they have to be regenerated
         public void clearAllBitmaps() {
+            // eliminate all showing bitmaps first from all the ListView's row views
+            for (int i = 0; i < mListView.getCount(); i++) {
+                View rowView = mListView.getChildAt(i);
+                if (rowView != null) {
+                    ZAHSR_Adapter_ViewHolder viewHolder = (ZAHSR_Adapter_ViewHolder)rowView.getTag();
+                    if (viewHolder != null) {
+                        if (viewHolder.theHypno != null) {
+                            viewHolder.theHypno.setImageBitmap(null);
+                        }
+                    }
+                }
+            }
+
+            // then recycle the now removed bitmaps
             for (JournalDataCoordinator.IntegratedHistoryRec iRec: mArrayList) {
                 if (iRec.theHypnogramBitmap != null) {
                     iRec.theHypnogramBitmap.recycle();
